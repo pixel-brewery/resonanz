@@ -11,3 +11,16 @@ Thumbs.db
 /recordings/
 /transcripts/
 /sessions/
+
+# Abhängigkeiten, Builds und Prüfartefakte
+node_modules/
+.codex-work/
+.nx/
+.angular/
+.yarn/install-state.gz
+dist/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo

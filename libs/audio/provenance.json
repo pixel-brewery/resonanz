@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/RueDeRennes/flamox",
+  "commit": "b4a9eb8099d968c87c0d6aa20f3dfc037ee86127",
+  "licenseDeclaredBySourceManifest": "MIT",
+  "files": [
+    {
+      "source": "libs/frontend/core/src/audio/devices/AudioInputDeviceService.spec.ts",
+      "destination": "libs/audio/src/audio/devices/AudioInputDeviceService.spec.ts",
+      "sha256": "a9399ed2dc46fb0d5404e0f6d15f047d1f5f09af3fc431ea404a4f34fc6657be",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/AudioInputDeviceService.ts",
+      "destination": "libs/audio/src/audio/devices/AudioInputDeviceService.ts",
+      "sha256": "5ca5f90c9d1670a172f5987853bc94a2d32d495e77e42f7344aa985478996207",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/errors/AudioInputDeviceError.ts",
+      "destination": "libs/audio/src/audio/devices/errors/AudioInputDeviceError.ts",
+      "sha256": "922840e5a1efff547819acbfaf5835d96f1796a9f4acff39a9ea339e05621453",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/errors/AudioInputDeviceErrorCode.ts",
+      "destination": "libs/audio/src/audio/devices/errors/AudioInputDeviceErrorCode.ts",
+      "sha256": "6d7e40e084f471bd940c12f6b47ea08322b343c7b3445dba5be60eeefa20f1e6",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/models/AudioInputPermissionState.ts",
+      "destination": "libs/audio/src/audio/devices/models/AudioInputPermissionState.ts",
+      "sha256": "559490431a852d7c0b99d9c7ae7d888a9f0f3b63b4deeb4039e618cc6be37a90",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/models/AudioInputSignalQuality.ts",
+      "destination": "libs/audio/src/audio/devices/models/AudioInputSignalQuality.ts",
+      "sha256": "ab5dba5fcfa097955cf3f44c6c67c541b1dda0d57fd36bea075bae8fb08dd71b",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/models/AudioInputTestState.ts",
+      "destination": "libs/audio/src/audio/devices/models/AudioInputTestState.ts",
+      "sha256": "9f5ed4fa1759a157ee1bd55f2318cd3d7e981cd947fe04ee48177be6b9777977",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/devices/models/IAudioInputDevice.ts",
+      "destination": "libs/audio/src/audio/devices/models/IAudioInputDevice.ts",
+      "sha256": "ed78af54a13e87ebfbc797a986c71d8ecd57517bade8afb18424711f83bf9b6a",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/AudioChunkChecksumService.spec.ts",
+      "destination": "libs/audio/src/audio/outbox/AudioChunkChecksumService.spec.ts",
+      "sha256": "7126720697182efbbe1504580eb0ecd1de63a35020727c8825832e10310b7673",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/AudioChunkChecksumService.ts",
+      "destination": "libs/audio/src/audio/outbox/AudioChunkChecksumService.ts",
+      "sha256": "a96afbfb901104c263f72ce016f13566cd8b43f3bda9e3be4be98c1f1fffd167",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/DurableAudioChunkOutbox.spec.ts",
+      "destination": "libs/audio/src/audio/outbox/DurableAudioChunkOutbox.spec.ts",
+      "sha256": "ab3b696d11b897bd79db80b341ec33f851e9cf4afbadc6327e1946131221c477",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/DurableAudioChunkOutbox.ts",
+      "destination": "libs/audio/src/audio/outbox/DurableAudioChunkOutbox.ts",
+      "sha256": "44b68e572faacc6c39f79e1d76a3dfe9f357afba8b665ab735addbecd69bc340",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/errors/DurableAudioStorageCapacityError.ts",
+      "destination": "libs/audio/src/audio/outbox/errors/DurableAudioStorageCapacityError.ts",
+      "sha256": "5a26a84187b9353f6ad8c60c765ba664541af5ae8e9581d3ad72d22734f121f4",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/index.ts",
+      "destination": "libs/audio/src/audio/outbox/index.ts",
+      "sha256": "da31e8bd1ba0e0c2d1384baaf6656be88407e59bc2a5ef7b72bd15a5ace66d7c",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/models/IDurableAudioChunk.ts",
+      "destination": "libs/audio/src/audio/outbox/models/IDurableAudioChunk.ts",
+      "sha256": "39591ae872018f177b58623c43fd832fcf3dc17c6f01d2092cefb5a2fc142588",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/models/IDurableAudioStorageReadiness.ts",
+      "destination": "libs/audio/src/audio/outbox/models/IDurableAudioStorageReadiness.ts",
+      "sha256": "a8c730b1edd91004583b23f7027193150c57ece054765edd51e312cf57938f65",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/outbox/models/IStoreDurableAudioChunkInput.ts",
+      "destination": "libs/audio/src/audio/outbox/models/IStoreDurableAudioChunkInput.ts",
+      "sha256": "7d8bb41dd424d2fa40d47b2d0202429f276cc97e3df19a65b07d4448de7c09fb",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/AudioPlayer.spec.ts",
+      "destination": "libs/audio/src/audio/player/AudioPlayer.spec.ts",
+      "sha256": "8062c62fbbade27f4d369a4b6acf9c93ceb42c1f007f5e6a988860f01994fdd2",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/AudioPlayer.ts",
+      "destination": "libs/audio/src/audio/player/AudioPlayer.ts",
+      "sha256": "3eae14839d268322e511981cce3f6b3226ff09e176441c544ad0dbd10bbfe611",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/IAudioPlayOptions.ts",
+      "destination": "libs/audio/src/audio/player/IAudioPlayOptions.ts",
+      "sha256": "91450c715f734af153becb05d24355e3bfa28365031ae674fa733c53f583d670",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/IAudioSource.ts",
+      "destination": "libs/audio/src/audio/player/IAudioSource.ts",
+      "sha256": "3e5fadb7a26d17c30c6ffcf3cbc35bd2d39e54202ef518e683649446811b31eb",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/play.ts",
+      "destination": "libs/audio/src/audio/player/play.ts",
+      "sha256": "5ec18b473c6f8b4537b2d99c8f4e1d5659327d4b8a7bac3c31c6cee8f02a3e81",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/player/provider/provideAudioPlayer.ts",
+      "destination": "libs/audio/src/audio/player/provider/provideAudioPlayer.ts",
+      "sha256": "cbdb2e83fc3692605d1691e7cd5f92fa9e0cc466e8987aa44e3b7e484a736f2b",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioCapture.spec.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioCapture.spec.ts",
+      "sha256": "0d7a761ece68bc03e0e35b240d8d68146f8cfa3e8e58b2fdbc16ada7c6633621",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioCapture.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioCapture.ts",
+      "sha256": "b7d44219f9823b7b0031c0484ada350d540142b39c8584d281acf6af7f9e7a6e",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioFormatPolicy.spec.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioFormatPolicy.spec.ts",
+      "sha256": "718e23ab1567831f39c0b88d5525664c98cf5605492cccc7e2647052baa7522d",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioFormatPolicy.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioFormatPolicy.ts",
+      "sha256": "23a7be1f65dac279e6896bc5dc3bc36137309e9a460e97c0edaa158ac4b22e97",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioStreamPlayer.spec.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioStreamPlayer.spec.ts",
+      "sha256": "751456c5c855ebb7f71e10761afbb227167b355ee009f176fbb508d4a4399204",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/PcmAudioStreamPlayer.ts",
+      "destination": "libs/audio/src/audio/realtime/PcmAudioStreamPlayer.ts",
+      "sha256": "62fdd554080b14409c0c6225597cb6cfc545437556b835ef32e1b67514d4ae0b",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/errors/RealtimeAudioError.ts",
+      "destination": "libs/audio/src/audio/realtime/errors/RealtimeAudioError.ts",
+      "sha256": "e050010a4ccc699acf039b6eaa30a38812b1604af6ab097a668dbed0c95f2675",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/errors/RealtimeAudioErrorCode.ts",
+      "destination": "libs/audio/src/audio/realtime/errors/RealtimeAudioErrorCode.ts",
+      "sha256": "c56c0480f59c793b0103a656cbdaafe938010013e81e22ac1680c7be2230a140",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/index.ts",
+      "destination": "libs/audio/src/audio/realtime/index.ts",
+      "sha256": "6b8dc6be51dc40348076ba1e7cc3cb7edf8a38565789d403854006b928bdbf55",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/IPcmAudioCaptureStartOptions.ts",
+      "destination": "libs/audio/src/audio/realtime/models/IPcmAudioCaptureStartOptions.ts",
+      "sha256": "be5bd12653427add55c82e2238f82d3e52ad3e362586d44b6dcadfd5a10e2777",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/IPcmAudioFormat.ts",
+      "destination": "libs/audio/src/audio/realtime/models/IPcmAudioFormat.ts",
+      "sha256": "363622d265bb2efd84d2efdc9d59883ea11fe75cd7faac9e4b25b54e751fdbc7",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/IPcmAudioFrame.ts",
+      "destination": "libs/audio/src/audio/realtime/models/IPcmAudioFrame.ts",
+      "sha256": "a0fc5bce45d6832788936a6c8f6cb2c2a88553461289a47bf802d7181dcceef5",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/IPcmAudioStreamPlayerStartOptions.ts",
+      "destination": "libs/audio/src/audio/realtime/models/IPcmAudioStreamPlayerStartOptions.ts",
+      "sha256": "59505cf2c2e7f1281998eadf40f9107c7a3d988834074be6cd93d97814613357",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/PcmAudioCaptureState.ts",
+      "destination": "libs/audio/src/audio/realtime/models/PcmAudioCaptureState.ts",
+      "sha256": "08ebd11e771a2a4ab207a2c1aba7e9ed1315d4bba03a5a39c2ad08f9acd0e374",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/models/PcmAudioStreamPlayerState.ts",
+      "destination": "libs/audio/src/audio/realtime/models/PcmAudioStreamPlayerState.ts",
+      "sha256": "e7916a08545d6a409aa5edc45bdade9da84f66e2bea8fb420385c61ffeafefbe",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/provider/providePcmAudioStreaming.ts",
+      "destination": "libs/audio/src/audio/realtime/provider/providePcmAudioStreaming.ts",
+      "sha256": "0c0b1033d3e3e239764b622a8eb7244a8054a552fe891634929ed9d32fcde78c",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/worklets/InlineRealtimeAudioWorkletModuleLoader.spec.ts",
+      "destination": "libs/audio/src/audio/realtime/worklets/InlineRealtimeAudioWorkletModuleLoader.spec.ts",
+      "sha256": "893c49e31f197898f93e873cd039ec84ba5f9955f305c5824cd7f35bf50d2486",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/worklets/InlineRealtimeAudioWorkletModuleLoader.ts",
+      "destination": "libs/audio/src/audio/realtime/worklets/InlineRealtimeAudioWorkletModuleLoader.ts",
+      "sha256": "8d3d09a3805969ea1436fad95daaeb3de48d140e3f227550a5f68707dcc1c11c",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/worklets/PcmAudioWorkletDefinition.spec.ts",
+      "destination": "libs/audio/src/audio/realtime/worklets/PcmAudioWorkletDefinition.spec.ts",
+      "sha256": "bae92ac229a0eb8f2d116abe0b0dc32ab3417989c0cc84c993399f75e34e5ba0",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/worklets/PcmAudioWorkletDefinition.ts",
+      "destination": "libs/audio/src/audio/realtime/worklets/PcmAudioWorkletDefinition.ts",
+      "sha256": "8ff25ef1a3dc752a323a55150820f678d1d410fc0e77cbcf5461513aed78c9b5",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/realtime/worklets/RealtimeAudioWorkletModuleLoader.ts",
+      "destination": "libs/audio/src/audio/realtime/worklets/RealtimeAudioWorkletModuleLoader.ts",
+      "sha256": "ba7a9c0cfa25c6fc8424ad6fcdb47dc3b5b07449010187253b6f7f169733010a",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/AudioRecorder.spec.ts",
+      "destination": "libs/audio/src/audio/recorder/AudioRecorder.spec.ts",
+      "sha256": "0363d74111ef4575a1f23c9189c983b4c826c3f25a1db0ca07c41b84fe5e874d",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/AudioRecorder.ts",
+      "destination": "libs/audio/src/audio/recorder/AudioRecorder.ts",
+      "sha256": "d829d9ccc2924f38bb82e42ee2ce60f58e4520384222f3376b997fe37c35e5d2",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/errors/AudioRecorderError.ts",
+      "destination": "libs/audio/src/audio/recorder/errors/AudioRecorderError.ts",
+      "sha256": "6f64f6f30e7a21497a9be94026c2983b43bae5dd86e111066dbeacca3ca6300e",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/errors/AudioRecorderErrorCode.ts",
+      "destination": "libs/audio/src/audio/recorder/errors/AudioRecorderErrorCode.ts",
+      "sha256": "0594f7f90bbbe4846845f4e53c1ba1b86d073921fc962d010e318564605759ba",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/models/AudioRecorderState.ts",
+      "destination": "libs/audio/src/audio/recorder/models/AudioRecorderState.ts",
+      "sha256": "f3db1d8aa7c352d12477f70a264fd573456a6951cccc2333cfa41ea79ad69143",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/models/AudioRecordingRetention.ts",
+      "destination": "libs/audio/src/audio/recorder/models/AudioRecordingRetention.ts",
+      "sha256": "9d850b921959e39d3f34a2b03190181de499274afb0bb858d285e1a9667b0ff0",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/models/IAudioRecorderChunk.ts",
+      "destination": "libs/audio/src/audio/recorder/models/IAudioRecorderChunk.ts",
+      "sha256": "3b8d1be1175d3e142b33d8cf368586ddc311b05360c4081d58864e91561f6d2e",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/models/IAudioRecorderStartOptions.ts",
+      "destination": "libs/audio/src/audio/recorder/models/IAudioRecorderStartOptions.ts",
+      "sha256": "9490a0e6f5cef706eb1ad2c40b997e83a72b324a5562285f088bae690deda957",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/models/IAudioRecordingResult.ts",
+      "destination": "libs/audio/src/audio/recorder/models/IAudioRecordingResult.ts",
+      "sha256": "584145900b4bc9b63038ccc9b25bb74d3c500998976e46aae982dec250b29936",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/HttpVoiceTranscriber.spec.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/HttpVoiceTranscriber.spec.ts",
+      "sha256": "d2083e25ef96dfd7eb8530c6a0de96bb4ea89f31b333bf2c5ab02bac53e2858d",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/HttpVoiceTranscriber.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/HttpVoiceTranscriber.ts",
+      "sha256": "c095af2ea925637abe7ae3929b429e9e9fae638e3661344435909c9630c4b4b6",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/LocalVoiceTranscriber.spec.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/LocalVoiceTranscriber.spec.ts",
+      "sha256": "292adf6d75f5c7b861d00bff55ba5a05e9b24eb25b23b3d61103032c2a50241e",
+      "kind": "test"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/LocalVoiceTranscriber.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/LocalVoiceTranscriber.ts",
+      "sha256": "b972bbfbca4e136b13cce1dacea8764dc930134c674cecf432944421a24acfdc",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/interfaces/IHttpTranscriberOptions.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/interfaces/IHttpTranscriberOptions.ts",
+      "sha256": "a8b5abf60017573a3a9b0b6cf48bbfb5334b4e141af4028975cc4acd9fb1d963",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/interfaces/ILocalVoiceTranscriberOptions.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/interfaces/ILocalVoiceTranscriberOptions.ts",
+      "sha256": "f4a12e673e2e01072f56005364876c535ed0331d43f9b5e442889ef2b4e95b17",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/interfaces/ITranscriptionInput.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/interfaces/ITranscriptionInput.ts",
+      "sha256": "f411f42689c883f473d3dd4af45a090ac6e8696a34089b7f2fcc32bd57b00065",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/recorder/transcribers/interfaces/IVoiceTranscriber.ts",
+      "destination": "libs/audio/src/audio/recorder/transcribers/interfaces/IVoiceTranscriber.ts",
+      "sha256": "ba2020c4d50a3e3425c55a90d95b67053b1ac29a6f724dfa4896799afc1c254b",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/speech/TextToSpeechService.ts",
+      "destination": "libs/audio/src/audio/speech/TextToSpeechService.ts",
+      "sha256": "4afc7cf8fc109e44173947ebb5c846ea0ee9ca081b2ca839eae5f89f48de762b",
+      "kind": "production"
+    },
+    {
+      "source": "libs/frontend/core/src/audio/speech/index.ts",
+      "destination": "libs/audio/src/audio/speech/index.ts",
+      "sha256": "e9c62503e1a2d4db225ddb10b5865614d3d51a1a0a02d57dbe02d1b4ceafd74d",
+      "kind": "production"
+    }
+  ],
+  "excluded": [
+    "audio root and device barrels are host-owned to avoid exporting omitted services",
+    "devices/AudioInputDevicePreferenceService.ts: product settings and user-preference dependencies",
+    "devices/models/IAudioInputDevicePreference.ts: only used by the omitted preference service",
+    "recorder/provider/*: depends on generic feature composition outside the copied audio subtree",
+    "provider registration specs: trivial forwarding coverage is not needed in the consumer"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": { "types": ["node"], "noEmit": true },
+  "include": [
+    "apps/desktop/src/**/*.ts",
+    "apps/orchestrator/src/**/*.ts",
+    "libs/contracts/src/**/*.ts",
+    "libs/sessions/src/**/*.ts",
+    "libs/assistant/src/**/*.ts"
+  ],
+  "exclude": ["**/*.spec.ts"]
+}

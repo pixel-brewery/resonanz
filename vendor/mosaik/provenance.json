@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "description": "Unmodified published Mosaik distributions repacked deterministically from their original Yarn cache archives.",
+  "packages": [
+    {
+      "name": "@pixel-brewery/mosaik-elements",
+      "version": "0.1.183",
+      "file": "mosaik-elements-0.1.183.tgz",
+      "sha256": "e10a6cd066368884e28b8e4911de6f4fbba213a418178f10feb28decd8dfda00",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-mosaik-elements-npm-0.1.183-2c337577d7-10c0.zip",
+      "sourceCacheSha256": "1233149155d7cbb5889ea00e942cbcee9e13ec9f8f9a79eea078923506ff56c0",
+      "files": 72
+    },
+    {
+      "name": "@pixel-brewery/mosaik-elements-angular",
+      "version": "0.1.183",
+      "file": "mosaik-elements-angular-0.1.183.tgz",
+      "sha256": "5c8ba2accb4e06d49538ff2c72118dd9dfa1508afaee57e64278d19b11521394",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-mosaik-elements-angular-npm-0.1.183-005633a9b7-10c0.zip",
+      "sourceCacheSha256": "16c2d7d6e80f6db048242b3064c0c3db1fc21a5b301d7741c2bfe72cd0dbc15f",
+      "files": 800
+    },
+    {
+      "name": "@pixel-brewery/mosaik-elements-foundation",
+      "version": "0.1.183",
+      "file": "mosaik-elements-foundation-0.1.183.tgz",
+      "sha256": "56c491a6da0ca80e5c46931f3f59ae613d1462c7ddb3770bc9fcbf79160a2acc",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-mosaik-elements-foundation-npm-0.1.183-e7f3589dc4-10c0.zip",
+      "sourceCacheSha256": "35f2c93140b95ec2d3a953bcf0ea9b4cf7031223d1817081b56327b2ea0c3fd0",
+      "files": 14998
+    },
+    {
+      "name": "@pixel-brewery/mosaik-icons",
+      "version": "0.1.183",
+      "file": "mosaik-icons-0.1.183.tgz",
+      "sha256": "f4b8ec0795f5a42e7d296ea59b71e7d2f4989fbdd7d7945872d635dd2302de55",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-mosaik-icons-npm-0.1.183-4c7f4e37f3-10c0.zip",
+      "sourceCacheSha256": "b4a5a7423b1da1ad92385878098958bb37fd14d8ed595086792255d5a0c70670",
+      "files": 1149
+    },
+    {
+      "name": "@pixel-brewery/mosaik-themes",
+      "version": "0.1.183",
+      "file": "mosaik-themes-0.1.183.tgz",
+      "sha256": "e2fbeae276c88fc39d20fc7faea8d1b1d1865a23e41e267b46b430be63d8772e",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-mosaik-themes-npm-0.1.183-c669e27788-10c0.zip",
+      "sourceCacheSha256": "af016a3acb8515917bc8faad63193b02dbd4c3b269dd4c13a418b09376c3703c",
+      "files": 36
+    },
+    {
+      "name": "@pixel-brewery/markdowner-core",
+      "version": "0.1.183",
+      "file": "markdowner-core-0.1.183.tgz",
+      "sha256": "c5051161e3d16d5846974555906c20b97a0dadbb2128e27328a0b279fa114496",
+      "sourceRegistry": "https://npm.pkg.github.com",
+      "sourceCacheArchive": "@pixel-brewery-markdowner-core-npm-0.1.183-7c81251768-10c0.zip",
+      "sourceCacheSha256": "12a08ae030bfee4be6654912174ad744d05609bf51b54b58fb901bc8e9c1d592",
+      "files": 60
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+node_modules
+.codex-work
+dist
+out
+.nx
+vendor
+libs/audio/src/audio
+apps/renderer/public/audio/pcm-audio.worklet.js
+yarn.lock
+resources/icons/png
+
+.angular

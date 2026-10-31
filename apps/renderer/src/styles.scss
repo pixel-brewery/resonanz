@@ -1,0 +1,37 @@
+@use '@pixel-brewery/mosaik-themes/scss' as themes;
+@include themes.soho-style();
+
+@each $weight in 300, 400, 500, 600, 700 {
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: $weight;
+    font-display: swap;
+    src: url('../../../resources/fonts/inter-latin-#{$weight}-normal.woff2') format('woff2');
+  }
+}
+:root {
+  color-scheme: light;
+  font-family: var(--mosaik-font-family, 'Inter', system-ui, sans-serif);
+  color: var(--mosaik-scheme-foreground);
+  background: var(--mosaik-scheme-background);
+}
+html,
+body,
+resonanz-shell {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  background: var(--mosaik-scheme-background);
+}
+* {
+  box-sizing: border-box;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}

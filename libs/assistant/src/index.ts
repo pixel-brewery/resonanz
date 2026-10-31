@@ -1,0 +1,17 @@
+export { AssistantService } from './services/AssistantService.js';
+export { resolveAssistantExecutable } from './resolveAssistantExecutable.js';
+export type { AssistantProvider } from './models/AssistantProvider.js';
+export type { AssistantRunEvent } from './models/AssistantRunEvent.js';
+export type { IAssistantConfiguration } from './interfaces/IAssistantConfiguration.js';
+export type { IAssistantInstallation } from './interfaces/IAssistantInstallation.js';
+export type { IAssistantModel } from './interfaces/IAssistantModel.js';
+export type { IAssistantAuthMethod } from './interfaces/IAssistantAuthMethod.js';
+export type { IAssistantStatus } from './interfaces/IAssistantStatus.js';
+export type { IAssistantRunRequest } from './interfaces/IAssistantRunRequest.js';
+export type { IAssistantResult } from './interfaces/IAssistantResult.js';
+export type { IAssistantAuthField } from './interfaces/IAssistantAuthField.js';
+export type { IAssistantLoginInteraction } from './interfaces/IAssistantLoginInteraction.js';
+export type { IAssistantLoginEvent } from './interfaces/IAssistantLoginEvent.js';
+export type { IAssistantLoginResponse } from './interfaces/IAssistantLoginResponse.js';
+export type { IAssistantServiceOptions } from './interfaces/IAssistantServiceOptions.js';
+export type { IAssistantServiceDependencies } from './interfaces/IAssistantServiceDependencies.js';

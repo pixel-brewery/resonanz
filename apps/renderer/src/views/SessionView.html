@@ -1,0 +1,446 @@
+<div class="mx-auto flex w-full max-w-[1440px] flex-col gap-3 p-4" test-id="session-view">
+  @if (presenter.loading()) {
+  <mosaik-text text="Session wird geladen …" role="status" />
+  } @else if (presenter.session(); as session) {
+  <header class="flex flex-wrap items-start justify-between gap-2">
+    <div class="flex min-w-0 flex-1 items-start gap-1">
+      <mosaik-button routerLink="/" icon="back" appearance="plain" aria-label="Zur Bibliothek" />
+      <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <mosaik-text
+          test-id="session-title"
+          [text]="session.title"
+          role="heading"
+          aria-level="1"
+          mosaikTypography="headline5"
+          [wrap]="true"
+        />
+        <div class="flex flex-wrap items-center gap-1">
+          <mosaik-text
+            [text]="session.createdAt | date:'dd. MMMM yyyy, HH:mm'"
+            mosaikTypography="caption"
+            variant="neutral"
+          />
+          <mosaik-text
+            [text]="session.durationMs | duration"
+            mosaikTypography="caption"
+            variant="neutral"
+          />
+          @if (session.kind === 'conversation') {
+          <mosaik-text text="Live-Gespräch" mosaikTypography="caption" variant="neutral" /> } @for
+          (tag of session.tags; track tag) {
+          <mosaik-badge [label]="tag" appearance="soft" size="small" /> }
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-0.5">
+      <mosaik-button
+        test-id="toggle-favorite"
+        icon="star"
+        [appearance]="session.starred ? 'soft' : 'plain'"
+        [attr.aria-label]="session.starred ? 'Favorit entfernen' : 'Als Favorit markieren'"
+        (click)="presenter.toggleStar()"
+      />
+      <mosaik-button
+        test-id="edit-session"
+        label="Organisieren"
+        icon="folder"
+        appearance="plain"
+        (click)="presenter.beginMetadataEdit()"
+      />
+      <mosaik-button
+        test-id="export-markdown"
+        label="Notizen exportieren"
+        icon="download"
+        appearance="plain"
+        [disabled]="presenter.mutating()"
+        (click)="presenter.export('markdown')"
+      />
+      <mosaik-button
+        test-id="delete-session"
+        icon="trash"
+        appearance="plain"
+        aria-label="Session löschen"
+        [disabled]="presenter.capturing() || presenter.mutating()"
+        (click)="presenter.confirmDeletion.set(true)"
+      />
+    </div>
+  </header>
+  @if (presenter.editingMetadata()) {
+  <mosaik-card appearance="outline" test-id="session-metadata-editor">
+    <div slot="content" class="grid grid-cols-1 gap-2 p-2 lg:grid-cols-2">
+      <mosaik-textbox
+        test-id="session-title-input"
+        label="Titel"
+        [formField]="presenter.metadataForm.title"
+      />
+      <mosaik-select
+        test-id="session-collection-select"
+        label="Sammlung"
+        [formField]="presenter.metadataForm.collectionId"
+      >
+        <mosaik-select-item value="" label="Ohne Sammlung" />
+        @for (collection of presenter.library.collections(); track collection.id) {
+        <mosaik-select-item [value]="collection.id" [label]="collection.name" /> }
+      </mosaik-select>
+      <mosaik-textbox
+        test-id="session-tags"
+        label="Tags, durch Komma getrennt"
+        [formField]="presenter.metadataForm.tags"
+      />
+      <div class="flex items-end gap-1">
+        <mosaik-button
+          test-id="save-session-metadata"
+          label="Speichern"
+          [disabled]="presenter.metadataForm().invalid() || presenter.mutating()"
+          (click)="presenter.saveMetadata()"
+        />
+        <mosaik-button
+          label="Abbrechen"
+          appearance="plain"
+          (click)="presenter.editingMetadata.set(false)"
+        />
+      </div>
+    </div>
+  </mosaik-card>
+  } @if (presenter.confirmDeletion()) {
+  <mosaik-card appearance="soft" variant="warning">
+    <div slot="content" class="flex flex-wrap items-center gap-2 p-2">
+      <mosaik-text
+        class="min-w-0 flex-1"
+        text="Session mit Aufnahme, Transkript und Antworten löschen?"
+        [wrap]="true"
+      />
+      <mosaik-button
+        test-id="confirm-delete-session"
+        label="Löschen"
+        variant="danger"
+        [disabled]="presenter.mutating()"
+        (click)="presenter.delete()"
+      />
+      <mosaik-button
+        label="Abbrechen"
+        appearance="plain"
+        (click)="presenter.confirmDeletion.set(false)"
+      />
+    </div>
+  </mosaik-card>
+  } @if (session.error) { <mosaik-text [text]="session.error" variant="warning" [wrap]="true" /> }
+  @if (session.audioAvailable) {
+  <mosaik-card appearance="soft" test-id="recording-player">
+    <div slot="content" class="flex flex-wrap items-center gap-2 p-2">
+      <mosaik-button
+        test-id="play-recording"
+        [label]="presenter.player.isPlaying() ? 'Pause' : 'Anhören'"
+        [icon]="presenter.player.isPlaying() ? 'pause' : 'play'"
+        appearance="solid"
+        [disabled]="presenter.capturing()"
+        (click)="presenter.togglePlayback()"
+      />
+      <mosaik-button
+        icon="stop"
+        appearance="plain"
+        aria-label="Wiedergabe beenden"
+        [disabled]="!presenter.player.isPlaying() && !presenter.player.isPaused()"
+        (click)="presenter.player.stop()"
+      />
+      <mosaik-text
+        test-id="playback-position"
+        [text]="presenter.player.currentTime() * 1000 | duration"
+        mosaikTypography="caption"
+      />
+      <mosaik-text text="/" mosaikTypography="caption" variant="neutral" />
+      <mosaik-text
+        class="flex-1"
+        [text]="session.durationMs | duration"
+        mosaikTypography="caption"
+        variant="neutral"
+      />
+      <mosaik-button
+        label="Audio exportieren"
+        icon="download"
+        appearance="plain"
+        [disabled]="presenter.capturing() || presenter.mutating()"
+        (click)="presenter.export('audio')"
+      />
+    </div>
+  </mosaik-card>
+  } @if (presenter.liveHere()) {
+  <mosaik-card appearance="soft" variant="primary" test-id="live-conversation-state">
+    <div slot="content" class="flex flex-wrap items-center gap-2 p-2" role="status">
+      @if (presenter.capture.state() === 'paused') {
+      <mosaik-text class="flex-1" text="Die Unterhaltung ist pausiert." />
+      } @else if (presenter.capture.live().microphoneMuted) {
+      <mosaik-text class="flex-1" text="Das Mikrofon ist stummgeschaltet." />
+      } @else { @switch (presenter.capture.live().stage) { @case ('listening') {
+      <mosaik-text class="flex-1" text="Resonanz hört zu." /> } @case ('thinking') {
+      <mosaik-text class="flex-1" text="Dein Assistent denkt nach …" /> } @case ('speaking') {
+      <mosaik-text
+        class="flex-1"
+        text="Resonanz spricht. Du kannst jederzeit unterbrechen."
+        [wrap]="true"
+      />
+      } @default { <mosaik-text class="flex-1" text="Sprachverbindung wird vorbereitet …" /> } } }
+    </div>
+  </mosaik-card>
+  }
+  <div class="grid grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,1fr)]">
+    <div class="flex min-w-0 flex-col gap-3">
+      <mosaik-card appearance="outline" test-id="transcript-panel">
+        <div slot="content" class="flex min-w-0 flex-col gap-2 p-3">
+          <div class="flex flex-wrap items-center justify-between gap-1">
+            <mosaik-text text="Transkript" mosaikTypography="subtitle1" />
+            <div class="flex gap-0.5">
+              <mosaik-button
+                test-id="transcribe-session"
+                label="Transkribieren"
+                icon="refresh"
+                appearance="plain"
+                [disabled]="!session.audioAvailable || presenter.capturing() || presenter.mutating()"
+                (click)="presenter.transcribe()"
+              />
+              <mosaik-button
+                test-id="edit-transcript"
+                label="Bearbeiten"
+                appearance="plain"
+                [disabled]="presenter.capturing() || presenter.mutating()"
+                (click)="presenter.beginTranscriptEdit()"
+              />
+            </div>
+          </div>
+          @if (presenter.editingTranscript()) {
+          <div class="flex flex-col gap-2" test-id="transcript-editor">
+            @for (segment of presenter.transcriptDraft().segments; track segment.id; let index =
+            $index) { @if (presenter.transcriptForm.segments[index]; as segmentForm) {
+            <mosaik-textbox
+              [label]="segment.speaker === 'assistant' ? 'Assistent' : 'Gesprochen'"
+              [multiline]="true"
+              [multilineRows]="3"
+              [maxlength]="40000"
+              [formField]="segmentForm.text"
+            />
+            } }
+            <div class="flex gap-1">
+              <mosaik-button
+                test-id="save-transcript"
+                label="Speichern"
+                [disabled]="presenter.mutating()"
+                (click)="presenter.saveTranscript()"
+              />
+              <mosaik-button
+                label="Abbrechen"
+                appearance="plain"
+                (click)="presenter.editingTranscript.set(false)"
+              />
+            </div>
+          </div>
+          } @else if (session.transcript.length) {
+          <div
+            class="flex max-h-[520px] flex-col gap-2 overflow-y-auto"
+            test-id="transcript-segments"
+          >
+            @for (segment of session.transcript; track segment.id) {
+            <div class="flex flex-col gap-0.5">
+              <div class="flex items-center gap-1">
+                <mosaik-text
+                  [text]="segment.startMs | duration"
+                  mosaikTypography="caption"
+                  variant="neutral"
+                />
+                @if (segment.speaker === 'assistant') {
+                <mosaik-text text="Assistent" mosaikTypography="caption" variant="primary" /> }
+                @else {
+                <mosaik-text text="Gesprochen" mosaikTypography="caption" variant="neutral" /> }
+              </div>
+              <mosaik-text [text]="segment.text" [wrap]="true" />
+            </div>
+            }
+          </div>
+          } @else {
+          <mosaik-text
+            text="Nach der Aufnahme erscheint hier dein Transkript. Du kannst auch vorhandenen Text über „Bearbeiten“ ergänzen."
+            variant="neutral"
+            [wrap]="true"
+          />
+          }
+        </div>
+      </mosaik-card>
+      <mosaik-card appearance="outline" test-id="summary-panel">
+        <div slot="content" class="flex min-w-0 flex-col gap-2 p-3">
+          <div class="flex flex-wrap items-center justify-between gap-1">
+            <mosaik-text text="Zusammenfassung" mosaikTypography="subtitle1" />
+            <mosaik-button
+              test-id="analyze-session"
+              label="Analysieren"
+              icon="sparkle"
+              appearance="soft"
+              [disabled]="!presenter.hasTranscript() || presenter.running() || presenter.editingTranscript()"
+              (click)="presenter.analyze()"
+            />
+          </div>
+          @if (presenter.runKind() === 'analysis' && presenter.pendingRunId()) {
+          <mosaik-text
+            [text]="presenter.stream() || 'Dein Assistent analysiert die Session …'"
+            mosaikTextFormatter="markdown"
+            [wrap]="true"
+            role="status"
+          />
+          } @else if (session.summary) {
+          <mosaik-text
+            test-id="session-summary"
+            [text]="session.summary"
+            mosaikTextFormatter="markdown"
+            [wrap]="true"
+          />
+          <mosaik-button
+            label="Vorlesen"
+            icon="speaker"
+            appearance="plain"
+            [disabled]="!presenter.speech.isSupported() || presenter.capture.active()"
+            (click)="presenter.speak(session.summary)"
+          />
+          } @else {
+          <mosaik-text
+            text="Lass Entscheidungen, Aufgaben und offene Fragen aus dem Gespräch herausarbeiten."
+            variant="neutral"
+            [wrap]="true"
+          />
+          }
+        </div>
+      </mosaik-card>
+    </div>
+    <mosaik-card appearance="outline" test-id="session-questions">
+      <div slot="content" class="flex min-w-0 flex-col gap-2 p-3">
+        <div class="flex items-center justify-between gap-1">
+          <mosaik-text text="Fragen zur Session" mosaikTypography="subtitle1" />
+          <mosaik-button
+            routerLink="/settings"
+            icon="settings"
+            appearance="plain"
+            aria-label="Assistent einrichten"
+          />
+        </div>
+        <mosaik-text
+          text="Dein lokaler KI-Assistent antwortet mit dem Transkript als Kontext."
+          mosaikTypography="body2"
+          variant="neutral"
+          [wrap]="true"
+        />
+        <div
+          class="flex max-h-[560px] flex-col gap-2 overflow-y-auto"
+          test-id="question-messages"
+          aria-live="polite"
+        >
+          @for (message of session.messages; track message.id) {
+          <mosaik-card
+            appearance="soft"
+            [variant]="message.role === 'user' ? 'primary' : 'neutral'"
+          >
+            <div slot="content" class="flex min-w-0 flex-col gap-1 p-2">
+              <mosaik-text
+                [text]="message.role === 'user' ? 'Du' : 'Assistent'"
+                mosaikTypography="caption"
+              />
+              @if (message.state === 'streaming' && message.runId === presenter.pendingRunId()) {
+              <mosaik-text
+                [text]="presenter.stream() || message.text || 'Antwort wird erstellt …'"
+                mosaikTextFormatter="markdown"
+                [wrap]="true"
+              />
+              } @else {
+              <mosaik-text [text]="message.text" mosaikTextFormatter="markdown" [wrap]="true" />
+              } @if (message.role === 'assistant' && message.state === 'complete') {
+              <mosaik-button
+                label="Vorlesen"
+                icon="speaker"
+                appearance="plain"
+                size="small"
+                [disabled]="!presenter.speech.isSupported() || presenter.capture.active()"
+                (click)="presenter.speak(message.text)"
+              />
+              } @if (message.state === 'cancelled') {
+              <mosaik-text text="Abgebrochen" mosaikTypography="caption" variant="neutral" /> } @if
+              (message.state === 'error') {
+              <mosaik-text
+                text="Antwort fehlgeschlagen"
+                mosaikTypography="caption"
+                variant="warning"
+              />
+              }
+            </div>
+          </mosaik-card>
+          }
+        </div>
+        @if (!presenter.hasTranscript()) {
+        <mosaik-text
+          text="Für Fragen wird zuerst ein Transkript benötigt."
+          variant="neutral"
+          mosaikTypography="caption"
+        />
+        }
+        <mosaik-textbox
+          test-id="session-question"
+          label="Deine Frage"
+          placeholder="Welche Aufgaben wurden vereinbart?"
+          [multiline]="true"
+          [multilineRows]="2"
+          [formField]="presenter.questionForm.text"
+        />
+        <div class="flex items-center gap-1">
+          <mosaik-button
+            test-id="ask-session"
+            label="Fragen"
+            icon="send"
+            appearance="solid"
+            variant="primary"
+            [disabled]="!presenter.hasTranscript() || presenter.questionForm().invalid() || presenter.running()"
+            (click)="presenter.ask()"
+          />
+          @if (presenter.pendingRunId()) {
+          <mosaik-button
+            test-id="cancel-answer"
+            label="Abbrechen"
+            appearance="plain"
+            (click)="presenter.cancelRun()"
+          />
+          }
+        </div>
+        @if (presenter.speech.isSpeaking()) {
+        <mosaik-divider />
+        <div class="flex flex-wrap gap-1" test-id="speech-controls">
+          @if (presenter.speech.isPaused()) {
+          <mosaik-button
+            label="Vorlesen fortsetzen"
+            icon="play"
+            appearance="plain"
+            (click)="presenter.speech.resume()"
+          />
+          } @else {
+          <mosaik-button
+            label="Vorlesen pausieren"
+            icon="pause"
+            appearance="plain"
+            (click)="presenter.speech.pause()"
+          />
+          }
+          <mosaik-button
+            label="Vorlesen beenden"
+            icon="stop"
+            appearance="plain"
+            (click)="presenter.stopSpeaking()"
+          />
+        </div>
+        }
+        <mosaik-button
+          label="Sessiondaten exportieren"
+          appearance="plain"
+          [disabled]="presenter.mutating()"
+          (click)="presenter.export('json')"
+        />
+      </div>
+    </mosaik-card>
+  </div>
+  } @else {
+  <mosaik-text text="Die Session konnte nicht geladen werden." />
+  <mosaik-button label="Erneut versuchen" icon="refresh" (click)="presenter.refresh()" />
+  }
+</div>
