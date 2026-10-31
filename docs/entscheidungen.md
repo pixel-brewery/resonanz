@@ -7,7 +7,7 @@ und noch ausstehende Laufzeitnachweise sind unterschiedliche Kategorien.
 
 | Thema               | Entscheidung                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| Name und Repository | Resonanz; `pixel-brewery/resonanz`                                                                     |
+| Name und Repository | Resonanz; `pixel-brewery/resonanz`, öffentlich auf GitHub                                              |
 | Anwendung           | Desktop-Anwendung mit Menüleisten-/Systemtray-Zugriff                                                  |
 | Zielplattformen     | macOS und Windows; beide benötigen eigene native Abnahme                                               |
 | Kernablauf          | Aufnahme, KI-Transkription, KI-Analyse und spätere Fragen zur Session                                  |
@@ -18,6 +18,10 @@ und noch ausstehende Laufzeitnachweise sind unterschiedliche Kategorien.
 | Desktop-Referenz    | Symphony-Prozessgrenzen und native Lebenszyklusmuster                                                  |
 | Organisation        | Gemeinsam verwaltete Aufzeichnungen und Unterhaltungen mit Sessionkontext                              |
 | Gestaltung          | Eigene App-/Tray-Bildmarke und Repository-Präsentation nach den bestehenden Projekten                  |
+
+Eigene Quellen stehen unter der [MIT-Lizenz](../LICENSE). Die Quellcodefreigabe
+ist erfolgt; Installer, Signierung und Updates folgen dem
+[Auslieferungsleitfaden](project/veroeffentlichung.md).
 
 ## Gewählte Prototypumsetzung
 
@@ -32,7 +36,7 @@ und noch ausstehende Laufzeitnachweise sind unterschiedliche Kategorien.
 | Audiozugang       | Vorhandene Kontoanmeldung des lokalen Assistenten; kein zusätzlicher API-Key oder Sprachdienst.                                                                          |
 | Authentifizierung | Native Browser-/Geräteanmeldung im eigenen Profil; keine API-Key-Einrichtung im Produkt.                                                                                 |
 | Aufnahmestart     | Bewusste Startaktion statt automatischer Aufnahme beim bloßen App-Start                                                                                                  |
-| Audioquelle       | Gewähltes Mikrofon; bei Live-Unterhaltung zusätzlicher tatsächlicher Gegenstellenstream                                                                                  |
+| Audioquelle       | Gewähltes Mikrofon; bei Live das Systemstandardmikrofon und tatsächlich abgespielte native Antwortclips                                                                  |
 | Transkription     | Systemeigene Spracherkennung; fehlende Sprache oder Freigabe sichtbar melden, kein Cloud-Fallback.                                                                       |
 | Paketinstallation | Gepinnte lokale Mosaik- und Synapse-Distributionsarchive mit Hashmanifesten; keine Abhängigkeit von persönlichen Checkoutpfaden oder einem zusätzlichen Registry-Token   |
 | App-Symbol        | Editierbare Resonanz-Bildmarke mit nativen PNG-/ICO-/ICNS- und monochromen Trayvarianten                                                                                 |
@@ -44,22 +48,22 @@ Prozess-/Vertragsgrenzen bleiben davon unabhängig.
 
 ## Tatsächlicher Nachweis
 
-Die [Abnahme](project/abnahme.md) führt die aktuellen Nachweise und deren
-ausgeführte Befehle zentral: Herkunfts-/Typ-/Verhaltensprüfungen und beide Builds,
-Prüfung des macOS-arm64-App-Bundles sowie der erfolgreiche Bedienlauf des
-tatsächlich paketierten Executables mit synthetischem Mikrofon. Er umfasst auch
-Organisation, native Dateioperationen, verschlüsselte Schlüsselablage mit
-ungültigem Prüfschlüssel und Persistenz über einen vollständigen App-Neustart.
+Die [Abnahme](project/abnahme.md) führt Herkunfts-, Typ- und Verhaltenstests,
+Builds, native Pakete und die Bedienläufe zentral. macOS und Windows bestanden
+die getrennte CI. Unter macOS wurden zusätzlich deutsche Datei- und physische
+Mikrofonerkennung, echte Codex-Anmeldung und -Inferenz, native Sprachausgabe,
+Unterbrechung, Mute und Pause/Fortsetzen geprüft. Das Gesprächsarchiv enthielt
+positive Energie auf beiden Stereokanälen.
 
-Physisches Mikrofon, automatische Transkription, echte Provider-Unterhaltung,
-persönliche native Assistenteninferenz, hörbares Vorlesen, Traybedienung und
-Windows bleiben eigenständige offene Prüfungen. Die konfigurierte Paket- oder
-Modellauswahl und der implementierte Quellcode gelten nicht allein als
-Funktionsnachweis. Die vorbereitete macOS-/Windows-CI ist noch nicht ausgeführt.
+Windows bestand zusätzlich tatsächliche System.Speech-Kompilierung, WAV-Synthese
+und en-US-Dateierkennung. Ein physisches Windows-Mikrofon mit deutschem Sprachpaket
+und ein Claude-Konto bleiben getrennte Prüfungen. Ein installierter CLI-Pfad oder
+eine ausgewählte Einstellung wird weiterhin nicht als erfolgreiche Inferenz
+gewertet.
 
 ## Offene Entscheidungen nach dem Prototyp
 
-- Öffentliche Sichtbarkeit, Lizenz der Resonanz-eigenen Quellen und Veröffentlichungsmodell.
+- Öffentliche Installerreleases, unterstützte Architekturen und Auslieferungsmodell.
 - Vertrauenswürdige Signierung/Notarisierung, Updatefeed und Auslieferungskanäle.
 - Allgemeines Systemaudio beziehungsweise Mitschnitt anderer Anwendungen.
 - Weitere Betriebssysteme und zusätzliche lokale Transkriptionsengines.

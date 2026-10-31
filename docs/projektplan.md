@@ -88,7 +88,7 @@ Bestandteile desselben Auftrags.
 
 ## Noch offene Folgeentscheidungen
 
-Öffentliche Veröffentlichung, vertrauenswürdig signierte/notarisierte Installer,
+Öffentliche Installerreleases, vertrauenswürdig signierte/notarisierte Pakete,
 automatische Updates, zusätzliche Betriebssysteme, allgemeines Systemaudio,
 Sprechertrennung normaler Mehrpersonengespräche, sessionübergreifende Suche und
 automatische Aufteilung sehr langer Aufnahmen werden nach dem ersten Prototyp

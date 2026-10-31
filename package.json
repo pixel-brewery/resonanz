@@ -5,6 +5,15 @@
   "private": true,
   "description": "Gespräche aufnehmen, live mit KI sprechen und Wissen aus Sessions wiederfinden.",
   "author": "Pixel Brewery",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pixel-brewery/resonanz.git"
+  },
+  "homepage": "https://github.com/pixel-brewery/resonanz#readme",
+  "bugs": {
+    "url": "https://github.com/pixel-brewery/resonanz/issues"
+  },
   "type": "module",
   "main": "dist/apps/desktop/main.mjs",
   "packageManager": "yarn@4.10.3",

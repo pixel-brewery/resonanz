@@ -1,5 +1,10 @@
 # An Resonanz mitarbeiten
 
+Beiträge, Fehlerberichte und Ideen sind willkommen. Verwende die
+[Issue-Vorlagen](https://github.com/pixel-brewery/resonanz/issues/new/choose) und
+beachte den [Verhaltenskodex](CODE_OF_CONDUCT.md). Sicherheitslücken haben einen
+[eigenen privaten Meldeweg](SECURITY.md).
+
 ## Arbeitsumgebung
 
 Verwende den festgelegten lokalen Git-Checkout außerhalb synchronisierter
@@ -95,3 +100,11 @@ Prüfungen sowie verbleibende Laufzeit-/Plattformgrenzen. Dokumentation muss
 implementiertes Verhalten, verbindlichen Zielumfang und offene Abnahme trennen.
 Native Paketierung bedeutet keine öffentliche Veröffentlichung und keine
 automatische Freigabe eines Releases.
+
+## Öffentlicher Quellcode und Lizenz
+
+Eigene Beiträge folgen der [MIT-Lizenz](LICENSE). Übernommene Quellen und
+Paketarchive behalten ihre vollständigen Hinweise. Der Root-Workspace bleibt
+`private: true`, damit eine GitHub-Quellcodefreigabe keine npm-Publikation auslöst.
+Installer und automatische Updates folgen einem eigenen
+[Auslieferungsablauf](docs/project/veroeffentlichung.md).

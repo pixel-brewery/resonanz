@@ -1,7 +1,7 @@
 # Third-party notices
 
 This document preserves the supplied notices for the source and package material
-reused by Resonanz. It does not select a license for Resonanz's original source.
+reused by Resonanz. Resonanz's original source is MIT licensed; see [LICENSE](LICENSE).
 Unmodified distribution archives keep their own complete `LICENSE` files, except
 where an upstream archive did not supply one as noted below. Other installed
 third-party dependencies retain their respective package notices.

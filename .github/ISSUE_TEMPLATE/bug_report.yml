@@ -1,0 +1,60 @@
+name: Fehler melden
+description: Ein reproduzierbares Problem in Resonanz beschreiben.
+title: '[Fehler]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Verwende bitte künstliche Gesprächsinhalte. Zugangsdaten, Anmeldelinks und persönliche Aufnahmen gehören nicht in öffentliche Berichte. Sicherheitslücken bitte über den privaten Meldeweg unter Security melden.
+  - type: input
+    id: version
+    attributes:
+      label: Version oder Commit
+      placeholder: z. B. 0.1.0 oder ein Commit
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Betriebssystem
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Windows (x64)
+        - Windows (ARM64)
+        - Anderes System
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Betroffener Bereich
+      options:
+        - Aufnahme oder Wiedergabe
+        - Transkription
+        - Live-Unterhaltung
+        - Codex-Anbindung
+        - Claude-Code-Anbindung
+        - Bibliothek, Organisation oder Import/Export
+        - Start oder Paketierung
+        - Anderer Bereich
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Schritte zum Nachstellen
+      description: Was wurde gestartet und was ist passiert? Welche Sprachpakete oder CLI-Versionen sind beteiligt?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Bereinigte Belege
+      description: Optionaler Screenshot oder ein gekürzter Log ohne private Inhalte. Bitte die Reichweite von Tests angeben.

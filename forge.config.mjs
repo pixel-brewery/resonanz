@@ -25,6 +25,7 @@ export default {
         'resources/icons/png/app/resonanz-512.png',
         'resources/icons/png/tray/resonanz-tray.png',
         'THIRD_PARTY_NOTICES.md',
+        'LICENSE',
         'resources/speech/windows-speech.ps1',
         'node_modules/electron-native-speech/dist/index.js',
         'node_modules/electron-native-speech-backend-macos/dist/index.js',
@@ -95,6 +96,7 @@ export default {
     extraResource: [
       icons,
       resolve(root, 'THIRD_PARTY_NOTICES.md'),
+      resolve(root, 'LICENSE'),
       resolve(root, 'resources/speech'),
       ...(process.platform === 'darwin'
         ? [resolve(root, 'node_modules/electron-native-speech-backend-macos/bin/SpeechHelper.app')]

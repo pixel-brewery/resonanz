@@ -23,6 +23,7 @@ wiederverwendet.
 - [Aufzeichnungen verwalten](project/aufzeichnungen.md)
 - [Live mit KI sprechen](project/live-unterhaltung.md)
 - [KI verbinden und einrichten](project/ki-und-einrichtung.md)
+- [Öffentlicher Quellcode und Desktop-Pakete](project/veroeffentlichung.md)
 
 ## Technische Einstiege
 
@@ -32,11 +33,13 @@ wiederverwendet.
 
 ## Stand richtig einordnen
 
-Die Angular-/Mosaik-Oberfläche und die native Kommunikation wurden auch im
-erzeugten macOS-Paket bedient. Aufnahme mit synthetischem Mikrofonsignal,
-Wiedergabe, Organisation, Import/Export und Persistenz nach Neustart sind geprüft.
-Ein physisches Mikrofon, persönliche Live-/Assistenteninferenz und native
-Windows-Ausführung benötigen eigene Nachweise.
+Die Angular-/Mosaik-Oberfläche wurde im Build und im nativen Paket unter macOS
+und Windows bedient. Aufnahme mit synthetischem Mikrofonsignal, Wiedergabe,
+Organisation, Import/Export und Persistenz nach Neustart sind geprüft. Unter macOS
+kamen deutsche Datei- und Mikrofonerkennung, echte Codex-Inferenz und ein
+gesprochener Dialog hinzu. Windows bestand native WAV-Synthese und en-US-
+Dateierkennung; ein physisches Windows-Mikrofon mit deutschem Sprachpaket und ein
+Claude-Konto bleiben getrennte Prüfungen.
 
 Die [Abnahmematrix](project/abnahme.md) behält den vollständigen Projektauftrag bei.
 Neue Ergebnisse müssen dort am passenden Nutzerweg ergänzt werden; ein einzelner

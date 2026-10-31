@@ -186,6 +186,7 @@ for (const sourcePath of filesWithin(join(root, 'resources/icons')))
     sourcePath,
   );
 compareResource(join(resourceRoot, 'THIRD_PARTY_NOTICES.md'), join(root, 'THIRD_PARTY_NOTICES.md'));
+compareResource(join(resourceRoot, 'LICENSE'), join(root, 'LICENSE'));
 compareResource(
   join(resourceRoot, 'speech/windows-speech.ps1'),
   join(root, 'resources/speech/windows-speech.ps1'),
