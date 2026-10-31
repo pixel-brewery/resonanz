@@ -76,6 +76,12 @@ führt Herkunft, Formatierung, Typen, Tests, Builds, Paketprüfung und den
 kontrollierten App-Bedienlauf getrennt unter macOS und Windows aus. Ein grüner
 Matrixlauf ersetzt keine physische Mikrofon-/Sprachprüfung unter Windows.
 
+Der direkte Windows-Sprachprüfer kompiliert außerdem die im Paket enthaltene
+System.Speech-Brücke und erzeugt eine echte Sprach-WAV. Wenn eine passende
+en-US-/de-DE-Erkennungssprache installiert ist, transkribiert das native Modell
+diese künstliche Datei. Verfügbare Sprachen und fehlende Erkennungsprüfung werden
+im gesonderten Bericht `out/windows-speech-verification.json` festgehalten.
+
 ## Umfang und Grenzen
 
 | Bereich                  | Nachgewiesen                                                                                                                                                              | Verbleibende Prüfung                                             |

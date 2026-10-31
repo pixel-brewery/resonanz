@@ -51,6 +51,10 @@ jobs:
       - name: Verify provenance, types, behavior and builds
         run: yarn verify
 
+      - name: Exercise the installed Windows speech runtime
+        if: runner.os == 'Windows'
+        run: node tools/verify-windows-speech.mjs
+
       - name: Exercise the built app with synthetic audio
         run: yarn test:e2e
 
@@ -76,6 +80,7 @@ jobs:
             .codex-work/packaged-smoke-*/failure.json
             .codex-work/packaged-smoke-*/failure.png
             .codex-work/out/package-verification.json
+            .codex-work/out/windows-speech-verification.json
           if-no-files-found: ignore
           include-hidden-files: true
           retention-days: 7

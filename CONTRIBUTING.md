@@ -64,6 +64,13 @@ Tatsächliche Ergebnisse und Laufzeitprüfungen stehen in der
 separat geprüft; normale accountfreie Tests starten keine persönliche Anmeldung
 oder bezahlte Inferenz. Eine macOS-Prüfung ersetzt keinen Windows-Lauf.
 
+Unter Windows prüft `node tools/verify-windows-speech.mjs` die mitgelieferte
+System.Speech-Brücke unmittelbar: native Kompilierung, verfügbare Stimmen und
+eine tatsächlich erzeugte WAV-Datei. Mit einem installierten passenden
+en-US-/de-DE-Erkennungspaket folgt die native Dateitranskription. Fehlt dieses
+Paket, hält der Bericht die fehlende Prüfung ausdrücklich fest. Der Lauf verwendet
+künstlichen Sprachtext und kein physisches Mikrofon oder Assistentenkonto.
+
 Benötigte Testdaten und temporäre Profile bleiben test-eigen. Keine Nutzerprofile,
 Aufzeichnungen oder fremden Prozesse für einen Test zurücksetzen oder löschen.
 Neue Verhaltenstests liegen neben dem tatsächlichen Produktionsbesitzer;

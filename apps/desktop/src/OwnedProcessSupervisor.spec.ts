@@ -2,9 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { spawn, fork, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { ownedProcessMessageSchema } from '@resonanz/contracts';
@@ -43,12 +42,14 @@ function killOwnedGroup(pid: number | undefined): void {
 describe.skipIf(process.platform === 'win32')('OwnedProcessSupervisor', () => {
   it('observes a silent detached tree, proves it survives owner crash, then reaps it without touching an unrelated sentinel', async () => {
     // arrange
-    const directory = await mkdtemp(join(tmpdir(), 'resonanz-owned-process-'));
+    await mkdir('.codex-work', { recursive: true });
+    const directory = await mkdtemp(resolve('.codex-work/resonanz-owned-process-'));
     const entry = join(directory, 'fixture.mjs');
     const pidFile = join(directory, 'owned.json');
     let owner: ChildProcess | undefined;
     let sentinel: ChildProcess | undefined;
     let ownedRoot: number | undefined;
+    let treeReaped = false;
     try {
       await build({
         entryPoints: [
@@ -115,6 +116,7 @@ describe.skipIf(process.platform === 'win32')('OwnedProcessSupervisor', () => {
       await supervisor.cleanup();
       // assert
       await waitUntil(() => !alive(ownedRoot!) && !alive(descendants!.leaf));
+      treeReaped = true;
       expect(alive(sentinel.pid!)).toBe(true);
     } finally {
       if (!ownedRoot) {
@@ -124,8 +126,10 @@ describe.skipIf(process.platform === 'win32')('OwnedProcessSupervisor', () => {
           /* A fixture that never spawned has no owned group. */
         }
       }
-      killOwnedGroup(ownedRoot);
-      killOwnedGroup(sentinel?.pid);
+      // Never signal a historical process group after its absence was proved.
+      // The unrelated sentinel has no descendants and keeps its own child handle.
+      if (!treeReaped) killOwnedGroup(ownedRoot);
+      sentinel?.kill('SIGKILL');
       owner?.kill('SIGKILL');
       if (owner?.connected) owner.disconnect();
       await waitUntil(
