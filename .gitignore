@@ -1,0 +1,13 @@
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Lokale Konfiguration und Zugangsdaten
+.env
+.env.*
+!.env.example
+
+# Lokale Aufnahmen und Sessiondaten
+/recordings/
+/transcripts/
+/sessions/
