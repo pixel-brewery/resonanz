@@ -1,0 +1,5 @@
+{
+  "name": "orchestrator",
+  "projectType": "application",
+  "sourceRoot": "apps/orchestrator/src"
+}

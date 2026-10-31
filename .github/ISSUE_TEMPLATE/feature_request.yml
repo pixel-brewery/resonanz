@@ -1,0 +1,23 @@
+name: Funktion vorschlagen
+description: Einen konkreten Nutzerweg verbessern oder ergänzen.
+title: '[Idee]: '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Was möchtest du erreichen?
+      description: Beschreibe die Aufgabe und den aktuellen Ablauf.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Wie soll Resonanz dabei helfen?
+      description: Ein konkretes Beispiel ist hilfreicher als eine reine Liste von Steuerelementen.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Kontext und Alternativen
+      description: Optional. Bitte nur künstliche Gesprächsinhalte verwenden.

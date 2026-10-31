@@ -1,0 +1,89 @@
+{
+  "name": "renderer",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "resonanz",
+  "sourceRoot": "apps/renderer/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/resources/icons/resonanz-mark.svg",
+        "{workspaceRoot}/resources/icons/resonanz.ico"
+      ],
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/renderer",
+        "browser": "apps/renderer/src/main.ts",
+        "tsConfig": "apps/renderer/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/renderer/public"
+          },
+          {
+            "glob": "resonanz-mark.svg",
+            "input": "resources/icons",
+            "output": "assets"
+          },
+          {
+            "glob": "resonanz.ico",
+            "input": "resources/icons",
+            "output": "."
+          }
+        ],
+        "styles": ["apps/renderer/src/tailwind.css", "apps/renderer/src/styles.scss"],
+        "index": "apps/renderer/src/index.html",
+        "baseHref": "./index.html"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "4mb",
+              "maximumError": "5mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all",
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          }
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "renderer:build:production"
+        },
+        "development": {
+          "buildTarget": "renderer:build:development"
+        }
+      }
+    }
+  }
+}

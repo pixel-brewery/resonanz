@@ -1,0 +1,222 @@
+<div class="mx-auto flex w-full max-w-[1320px] flex-1 flex-col gap-3 p-4" test-id="library-view">
+  <header class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex min-w-0 flex-col gap-0.5">
+      @if (presenter.collection(); as collection) {
+      <mosaik-text
+        role="heading"
+        aria-level="1"
+        [text]="collection.name"
+        mosaikTypography="headline5"
+      />
+      } @else if (presenter.scope() === 'favorites') {
+      <mosaik-text role="heading" aria-level="1" text="Favoriten" mosaikTypography="headline5" />
+      } @else if (presenter.scope() === 'conversations') {
+      <mosaik-text
+        role="heading"
+        aria-level="1"
+        text="Live-Gespräche"
+        mosaikTypography="headline5"
+      />
+      } @else {
+      <mosaik-text
+        role="heading"
+        aria-level="1"
+        text="Aufzeichnungen"
+        mosaikTypography="headline5"
+      />
+      }
+      <mosaik-text
+        text="Gespräche festhalten. Gedanken wiederfinden."
+        mosaikTypography="body2"
+        variant="neutral"
+      />
+    </div>
+    <div class="flex items-center gap-1">
+      @if (presenter.collection()) {
+      <mosaik-button
+        test-id="rename-collection"
+        label="Umbenennen"
+        appearance="plain"
+        (click)="presenter.beginRename()"
+      />
+      <mosaik-button
+        test-id="delete-collection"
+        label="Sammlung entfernen"
+        appearance="plain"
+        (click)="presenter.confirmCollectionDeletion.set(true)"
+      />
+      }
+      <mosaik-button
+        test-id="import-session"
+        label="Importieren"
+        icon="import"
+        appearance="outline"
+        (click)="presenter.shell.importSession()"
+      />
+    </div>
+  </header>
+  @if (presenter.editingCollection()) {
+  <div class="flex items-center gap-1" test-id="collection-rename-editor">
+    <mosaik-textbox
+      test-id="rename-collection-input"
+      label="Sammlung"
+      [formField]="presenter.collectionForm.name"
+    />
+    <mosaik-button
+      test-id="save-collection-name"
+      label="Speichern"
+      [disabled]="presenter.collectionForm().invalid() || presenter.mutating()"
+      (click)="presenter.renameCollection()"
+    />
+    <mosaik-button
+      label="Abbrechen"
+      appearance="plain"
+      (click)="presenter.editingCollection.set(false)"
+    />
+  </div>
+  } @if (presenter.confirmCollectionDeletion()) {
+  <mosaik-card appearance="soft" variant="warning">
+    <div slot="content" class="flex flex-wrap items-center gap-2 p-2">
+      <mosaik-text
+        class="flex-1"
+        text="Sammlung entfernen? Die Aufzeichnungen bleiben erhalten."
+        [wrap]="true"
+      />
+      <mosaik-button
+        test-id="confirm-delete-collection"
+        label="Entfernen"
+        variant="danger"
+        [disabled]="presenter.mutating()"
+        (click)="presenter.deleteCollection()"
+      />
+      <mosaik-button
+        label="Abbrechen"
+        appearance="plain"
+        (click)="presenter.confirmCollectionDeletion.set(false)"
+      />
+    </div>
+  </mosaik-card>
+  }
+  <mosaik-searchbox
+    class="w-full max-w-[520px]"
+    test-id="session-search"
+    placeholder="Titel und Tags durchsuchen"
+    aria-label="Aufzeichnungen durchsuchen"
+    [formField]="presenter.filterForm.query"
+  />
+  @if (presenter.library.loading()) {
+  <mosaik-text text="Aufzeichnungen werden geladen …" role="status" variant="neutral" />
+  } @else if (presenter.library.sessions().length === 0) {
+  <div
+    class="flex min-h-[380px] flex-1 flex-col items-center justify-center gap-3 py-5"
+    test-id="empty-library"
+  >
+    <img src="assets/resonanz-mark.svg" width="100" height="100" alt="" />
+    <div class="flex max-w-[560px] flex-col items-center gap-1">
+      <mosaik-text
+        text="Dein nächstes Gespräch beginnt hier."
+        mosaikTypography="headline5"
+        alignment="center"
+        [wrap]="true"
+      />
+      <mosaik-text
+        text="Nimm auf, was wichtig ist. Sprich live mit deiner KI und stelle später Fragen zu deinen Sessions."
+        alignment="center"
+        variant="neutral"
+        [wrap]="true"
+      />
+    </div>
+    <div class="flex flex-wrap justify-center gap-1.5">
+      <mosaik-button
+        test-id="empty-start-recording"
+        label="Aufnahme starten"
+        icon="mic"
+        appearance="solid"
+        variant="primary"
+        [disabled]="presenter.capture.active() || presenter.capture.busy()"
+        (click)="presenter.capture.startRecording()"
+      />
+      <mosaik-button
+        label="Live-Unterhaltung starten"
+        icon="live"
+        appearance="outline"
+        [disabled]="presenter.capture.active() || presenter.capture.busy()"
+        (click)="presenter.capture.startLive()"
+      />
+    </div>
+  </div>
+  } @else if (presenter.sessions().length === 0) {
+  <div class="flex flex-col gap-1 py-5" test-id="no-search-results">
+    <mosaik-text
+      text="Hier gibt es noch keine passenden Aufzeichnungen."
+      mosaikTypography="subtitle1"
+    />
+    <mosaik-text
+      text="Passe die Suche an oder ordne eine Session dieser Sammlung zu."
+      variant="neutral"
+    />
+  </div>
+  } @else {
+  <div class="flex flex-col gap-1.5" test-id="session-list">
+    @for (session of presenter.sessions(); track session.id) {
+    <mosaik-card appearance="outline" [attr.test-id]="'session-row-' + session.id">
+      <div slot="content" class="flex items-center gap-2 px-2 py-1.5">
+        <mosaik-icon
+          [icon]="session.kind === 'conversation' ? 'live' : 'mic'"
+          size="large"
+          variant="primary"
+        />
+        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+          <mosaik-button
+            class="min-w-0"
+            [routerLink]="['/session', session.id]"
+            [label]="session.title"
+            appearance="plain"
+            fit="width"
+            horizontalContentAlignment="left"
+          />
+          <div class="flex flex-wrap items-center gap-1 px-1">
+            <mosaik-text
+              [text]="session.createdAt | date:'dd. MMM yyyy, HH:mm'"
+              mosaikTypography="caption"
+              variant="neutral"
+            />
+            <mosaik-text
+              [text]="session.durationMs | duration"
+              mosaikTypography="caption"
+              variant="neutral"
+            />
+            @if (session.status === 'recording') {
+            <mosaik-badge label="Aufnahme läuft" appearance="soft" variant="danger" size="small" />
+            } @if (session.status === 'paused') {
+            <mosaik-badge label="Pausiert" appearance="soft" size="small" /> } @if (session.status
+            === 'processing') {
+            <mosaik-badge label="Wird verarbeitet" appearance="soft" size="small" /> } @if
+            (session.status === 'interrupted') {
+            <mosaik-badge label="Unterbrochen" appearance="soft" variant="warning" size="small" /> }
+            @if (session.status === 'error') {
+            <mosaik-badge
+              label="Bearbeitung prüfen"
+              appearance="soft"
+              variant="warning"
+              size="small"
+            />
+            } @for (tag of session.tags; track tag) {
+            <mosaik-badge [label]="tag" appearance="soft" size="small" /> }
+          </div>
+        </div>
+        <mosaik-button
+          [attr.test-id]="'star-' + session.id"
+          icon="star"
+          [appearance]="session.starred ? 'soft' : 'plain'"
+          [variant]="session.starred ? 'primary' : 'neutral'"
+          [attr.aria-label]="session.starred ? 'Favorit entfernen' : 'Als Favorit markieren'"
+          [disabled]="presenter.mutating()"
+          (click)="presenter.toggleStar(session)"
+        />
+      </div>
+    </mosaik-card>
+    }
+  </div>
+  }
+</div>

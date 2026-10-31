@@ -1,0 +1,270 @@
+<div class="mx-auto flex w-full max-w-[1160px] flex-col gap-3 p-4" test-id="settings-view">
+  <header class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex flex-col gap-0.5">
+      <mosaik-text
+        text="Einstellungen"
+        role="heading"
+        aria-level="1"
+        mosaikTypography="headline5"
+      />
+      <mosaik-text text="Assistent, Stimme und Aufnahme einrichten." variant="neutral" />
+    </div>
+    <div class="flex items-center gap-1">
+      @if (presenter.saved()) {
+      <mosaik-text text="Gespeichert" mosaikTypography="caption" variant="success" role="status" />
+      }
+      <mosaik-button
+        test-id="save-settings"
+        label="Speichern"
+        appearance="solid"
+        variant="primary"
+        [isBusy]="presenter.saving()"
+        [disabled]="presenter.form().invalid() || presenter.saving() || presenter.capture.active()"
+        (click)="presenter.saveAndCheck()"
+      />
+    </div>
+  </header>
+  <div class="grid grid-cols-1 items-start gap-3 xl:grid-cols-2">
+    <mosaik-card appearance="outline">
+      <div slot="content" class="flex flex-col gap-2.5 p-3">
+        <div class="flex flex-col gap-0.5">
+          <mosaik-text text="Lokaler KI-Assistent" mosaikTypography="subtitle1" />
+          <mosaik-text
+            text="Mit deinem Konto über die installierte Codex- oder Claude-CLI anmelden. Der lokale Assistent übernimmt Zusammenfassungen, Fragen und Live-Gespräche."
+            mosaikTypography="body2"
+            variant="neutral"
+            [wrap]="true"
+          />
+        </div>
+        <mosaik-select
+          test-id="assistant-provider"
+          label="Assistent"
+          [formField]="presenter.form.provider"
+          [disabled]="presenter.capture.active()"
+        >
+          <mosaik-select-item value="codex" label="Codex" />
+          <mosaik-select-item value="claude" label="Claude Code" />
+        </mosaik-select>
+        <mosaik-textbox
+          test-id="assistant-model"
+          label="Modell (optional)"
+          placeholder="Standardmodell des Assistenten"
+          [formField]="presenter.form.model"
+        />
+        <mosaik-textbox label="Konto in Resonanz" [formField]="presenter.form.accountId" />
+        <mosaik-textbox
+          label="CLI-Pfad (optional)"
+          placeholder="Automatisch erkennen"
+          [formField]="presenter.form.executable"
+        />
+        <div class="flex flex-col gap-1" test-id="assistant-status">
+          @if (presenter.checking()) {
+          <mosaik-text text="Verbindung wird geprüft …" role="status" /> } @else if
+          (presenter.status(); as status) { @if (status.authenticated) {
+          <mosaik-text text="Assistent ist verbunden." variant="success" /> } @else if
+          (status.installed) { <mosaik-text text="Bitte den Assistenten für Resonanz anmelden." /> }
+          @else {
+          <mosaik-text
+            text="Assistent nicht gefunden. Prüfe die Installation oder trage den CLI-Pfad ein."
+            variant="warning"
+            [wrap]="true"
+          />
+          } @if (status.message) {
+          <mosaik-text
+            [text]="status.message"
+            mosaikTypography="caption"
+            variant="neutral"
+            [wrap]="true"
+          />
+          } @if (status.accountLabel) {
+          <mosaik-text [text]="status.accountLabel" mosaikTypography="caption" /> }
+          <div class="flex flex-wrap gap-1">
+            @if (status.authenticated) {
+            <mosaik-button
+              test-id="assistant-logout"
+              label="Abmelden"
+              appearance="outline"
+              (click)="presenter.logout()"
+            />
+            } @else { @for (method of presenter.authMethods(); track method.id) {
+            <mosaik-button
+              [attr.test-id]="'assistant-login-' + method.id"
+              [label]="method.label"
+              appearance="outline"
+              [disabled]="presenter.saving()"
+              (click)="presenter.connect(method.id)"
+            />
+            } }
+          </div>
+          }
+          <mosaik-button
+            test-id="check-assistant"
+            label="Verbindung prüfen"
+            icon="refresh"
+            appearance="plain"
+            [disabled]="presenter.checking()"
+            (click)="presenter.saveAndCheck()"
+          />
+        </div>
+        @if (presenter.login(); as login) {
+        <mosaik-card appearance="soft" test-id="assistant-login">
+          <div slot="content" class="flex flex-col gap-1.5 p-2" role="status">
+            @switch (login.state) { @case ('starting') {
+            <mosaik-text text="Anmeldung wird gestartet …" /> } @case ('waiting') {
+            <mosaik-text text="Anmeldung abschließen" mosaikTypography="subtitle2" /> } @case
+            ('verifying') { <mosaik-text text="Anmeldung wird geprüft …" /> } @case ('succeeded') {
+            <mosaik-text text="Anmeldung erfolgreich." variant="success" /> } @case ('cancelled') {
+            <mosaik-text text="Anmeldung abgebrochen." /> } @case ('failed') {
+            <mosaik-text text="Anmeldung fehlgeschlagen." variant="warning" /> } } @if
+            (login.message) { <mosaik-text [text]="login.message" [wrap]="true" /> } @if
+            (login.interaction; as interaction) { @if (interaction.message) {
+            <mosaik-text [text]="interaction.message" [wrap]="true" /> } @if (interaction.code) {
+            <mosaik-text
+              [text]="interaction.code"
+              mosaikTypography="subtitle1"
+              test-id="login-code"
+            />
+            } @if (interaction.url) {
+            <mosaik-button
+              test-id="open-login"
+              label="Im Browser anmelden"
+              appearance="solid"
+              (click)="presenter.openLogin()"
+            />
+            } @for (field of interaction.fields; track field.id) { @if
+            (presenter.loginForm[field.id]; as loginField) { @if (field.secret) {
+            <mosaik-passwordbox
+              [label]="field.label"
+              [formField]="loginField"
+              [autocomplete]="false"
+            />
+            } @else { <mosaik-textbox [label]="field.label" [formField]="loginField" /> } } } @if
+            (interaction.fields?.length) {
+            <mosaik-button label="Fortfahren" (click)="presenter.respondLogin()" /> } } @if
+            (login.state === 'starting' || login.state === 'waiting' || login.state === 'verifying')
+            {
+            <mosaik-button
+              label="Anmeldung abbrechen"
+              appearance="plain"
+              (click)="presenter.cancelLogin()"
+            />
+            }
+          </div>
+        </mosaik-card>
+        }
+      </div>
+    </mosaik-card>
+    <div class="flex flex-col gap-3">
+      <mosaik-card appearance="outline">
+        <div slot="content" class="flex flex-col gap-2.5 p-3">
+          <div class="flex flex-col gap-0.5">
+            <mosaik-text text="Live mit dem lokalen Assistenten" mosaikTypography="subtitle1" />
+            <mosaik-text
+              text="Die native Spracherkennung hört zu. Dein angemeldeter Assistent antwortet über Synapse und eine Systemstimme spricht die Antwort. Live-Gespräche verwenden das Systemstandardmikrofon."
+              mosaikTypography="body2"
+              variant="neutral"
+              [wrap]="true"
+            />
+          </div>
+          @if (presenter.library.capabilities()?.nativeConversation) {
+          <mosaik-text text="Native Sprachunterhaltung ist verfügbar." variant="success" />
+          } @else {
+          <mosaik-text
+            text="Native Sprachunterhaltung ist auf diesem System noch nicht verfügbar. Prüfe die Spracherkennung und ihre Berechtigungen."
+            variant="warning"
+            [wrap]="true"
+          />
+          } @if (presenter.library.capabilities()?.speechMessage; as message) {
+          <mosaik-text [text]="message" mosaikTypography="caption" [wrap]="true" />
+          }
+          <mosaik-select
+            test-id="native-voice"
+            label="Systemstimme"
+            [formField]="presenter.form.voice"
+            [disabled]="presenter.capture.active()"
+          >
+            <mosaik-select-item value="" label="Systemstandard" />
+            @for (voice of presenter.library.capabilities()?.speechVoices ?? []; track voice.id) {
+            <mosaik-select-item
+              [value]="voice.id"
+              [label]="voice.name + ' (' + voice.locale + ')'"
+            />
+            }
+          </mosaik-select>
+          <mosaik-textbox
+            test-id="conversation-instructions"
+            label="Gesprächsanweisung"
+            [multiline]="true"
+            [multilineRows]="4"
+            [formField]="presenter.form.conversationInstructions"
+            [disabled]="presenter.capture.active()"
+          />
+        </div>
+      </mosaik-card>
+      <mosaik-card appearance="outline">
+        <div slot="content" class="flex flex-col gap-2.5 p-3">
+          <mosaik-text text="Aufnahme und Spracherkennung" mosaikTypography="subtitle1" />
+          @if (presenter.library.capabilities()?.nativeTranscription) {
+          <mosaik-text
+            text="Native Spracherkennung ist verfügbar. Du kannst Aufzeichnungen automatisch oder später auf Wunsch transkribieren."
+            variant="neutral"
+            mosaikTypography="caption"
+            [wrap]="true"
+          />
+          } @else {
+          <mosaik-text
+            text="Native Spracherkennung ist hier nicht verfügbar. Aufnehmen und Abspielen bleiben möglich; ein Transkript kannst du manuell ergänzen."
+            variant="neutral"
+            mosaikTypography="caption"
+            [wrap]="true"
+          />
+          }
+          <mosaik-checkbox
+            test-id="auto-transcribe"
+            label="Aufnahmen automatisch transkribieren"
+            [formField]="presenter.form.autoTranscribe"
+            [disabled]="presenter.capture.active()"
+          />
+          @if (presenter.library.capabilities()?.platform === 'win32') {
+          <mosaik-text
+            text="Dateitranskription unter Windows: maximal 64 MiB je Audiodatei und etwa 35 Minuten je Aufnahme."
+            mosaikTypography="caption"
+            variant="neutral"
+            [wrap]="true"
+          />
+          }
+          <mosaik-textbox
+            label="Sprache der Spracherkennung"
+            placeholder="de-DE"
+            [formField]="presenter.form.locale"
+            [disabled]="presenter.capture.active()"
+          />
+          <mosaik-button
+            label="Mikrofone anzeigen"
+            icon="mic"
+            appearance="plain"
+            [disabled]="presenter.capture.active()"
+            (click)="presenter.capture.loadDevices()"
+          />
+          <mosaik-select
+            test-id="microphone-select"
+            label="Mikrofon für Aufzeichnungen"
+            [formField]="presenter.capture.deviceForm.id"
+            [disabled]="presenter.capture.active()"
+          >
+            <mosaik-select-item value="" label="Systemstandard" />
+            @for (device of presenter.capture.devices(); track device.deviceId) {
+            <mosaik-select-item [value]="device.deviceId" [label]="device.label" />
+            }
+          </mosaik-select>
+          <mosaik-text
+            text="Diese Gerätewahl gilt für Aufzeichnungen. Live-Gespräche verwenden das Systemstandardmikrofon."
+            mosaikTypography="caption"
+            variant="neutral"
+            [wrap]="true"
+          />
+        </div>
+      </mosaik-card>
+    </div>
+  </div>
+</div>

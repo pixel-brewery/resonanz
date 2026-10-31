@@ -1,0 +1,8 @@
+@import '@pixel-brewery/mosaik-themes/tailwind/v4/soho';
+@source "./**/*.{html,ts}";
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@theme {
+  --spacing: 8px;
+}
