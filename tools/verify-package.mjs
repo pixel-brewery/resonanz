@@ -31,6 +31,9 @@ const nativePackages = new Set([
 if (statSync(asarPath).size < 1_000) throw new Error('The packaged ASAR is unexpectedly small.');
 
 const normalize = (path) => path.replaceAll('\\', '/').replace(/^\/+/, '');
+// ASAR's lookup API splits on the host separator, even though the catalog above
+// uses portable member names for comparison and reporting.
+const archiveMember = (path) => path.split('/').join(sep);
 const entries = new Set(listPackage(asarPath).map(normalize));
 let comparedFiles = 0;
 
@@ -46,14 +49,14 @@ function filesWithin(directory) {
 
 function assertArchiveFile(path) {
   if (!entries.has(path)) throw new Error(`Packaged ASAR is missing ${path}.`);
-  const entry = statFile(asarPath, path, false);
+  const entry = statFile(asarPath, archiveMember(path), false);
   if (entry.files || entry.link !== undefined)
     throw new Error(`Packaged runtime file is not a regular file: ${path}`);
 }
 
 function compareArchiveFile(path, sourcePath = join(root, path)) {
   assertArchiveFile(path);
-  if (!extractFile(asarPath, path).equals(readFileSync(sourcePath)))
+  if (!extractFile(asarPath, archiveMember(path)).equals(readFileSync(sourcePath)))
     throw new Error(`Packaged file differs from the current build/source: ${path}`);
   comparedFiles += 1;
 }
