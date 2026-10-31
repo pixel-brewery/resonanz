@@ -11,8 +11,8 @@ Paketprüfung verglich 121 aktuelle Build-/Ressourcendateien, native Abhängigke
 Schriften, Worklet und Icons und bestätigte die lokale Ad-hoc-Signatur.
 Der abschließende Paketstand einschließlich Freigabe-/Statuskorrekturen bestand
 ebenfalls Paketprüfung und alle acht Bedienprüfgruppen. Der automatisierte
-Bedienlauf verwendete synthetisches
-Mikrofonsignal und kontrollierten Dateidialogen: Aufnahme, Pause/Fortsetzen,
+Bedienlauf verwendete ein synthetisches Mikrofonsignal und kontrollierte
+Dateidialoge: Aufnahme, Pause/Fortsetzen,
 Abschluss, Decoder/Wiedergabe, Organisation, Import/Export, keylose Einstellungen,
 Neuladen, vollständiger App-Neustart und persistierte Löschungen.
 
@@ -71,23 +71,27 @@ insbesondere `keyless-verify.log`, `keyless-final-verify.log`,
 und `run-forge-tests.log`.
 Persönliche Anmeldung und Aufzeichnungen werden nicht ins Repository übernommen.
 Die reproduzierbaren Prüfer stehen unter [tools](../../tools/).
+Die [Desktop-CI](https://github.com/pixel-brewery/resonanz/actions/workflows/ci.yml)
+führt Herkunft, Formatierung, Typen, Tests, Builds, Paketprüfung und den
+kontrollierten App-Bedienlauf getrennt unter macOS und Windows aus. Ein grüner
+Matrixlauf ersetzt keine physische Mikrofon-/Sprachprüfung unter Windows.
 
 ## Umfang und Grenzen
 
-| Bereich                  | Nachgewiesen                                                                                                                                     | Verbleibende Prüfung                                             |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| macOS-App und Oberfläche | Abschließendes natives Paket einschließlich Freigabe-/Statuskorrekturen; Angular/Mosaik, keylose Einstellungen, gespeicherte Anmeldung und Daten | Weitere Geräte-/OS-Versionen                                     |
-| Tray und Icon            | Eigene Icons; Fenster schließen/verstecken, über natives Tray-Menü öffnen und neue Aufnahme starten tatsächlich bedient                          | Weitere OS-Menüvarianten                                         |
-| Aufnahme                 | Synthetische Aufnahme sowie physisches Mikrofon im Sprachgespräch; geordneter Abschluss                                                          | Weitere physische Geräte und Aufnahmequalität                    |
-| Transkription            | Tatsächliche deutsche macOS-Datei- und Live-Erkennung                                                                                            | Andere Sprachpakete; Windows-Erkennung                           |
-| Sprachgespräch           | Tatsächliche Erkennung → Synapse/Codex → native Stimme                                                                                           | Weitere Geräte-/Sprachkombinationen                              |
-| Lebenszyklus             | Mute, explizites Unterbrechen, Pause/Fortsetzen und Stop tatsächlich bedient                                                                     | Automatisches Unterbrechen bei verschiedenem Raum-/Echoverhalten |
-| Gesprächsarchiv          | Zwei decodierte Kanäle mit positiver Energie, beide Sprecher und Zeitmarken                                                                      | Lange Gespräche und Gerätewechsel                                |
-| Lokale Assistenten       | Codex-Anmeldung, Modellkatalog, echte Analyse, Folgefrage und gesprochene Turns                                                                  | Claude-Konto separat verifizieren                                |
-| Unverändertes Audio      | 51 Produktionsdateien und 12 Specs bytegleich; Recorder, Player und TTS verwendet                                                                | Bewusste spätere Upstream-Updates                                |
-| Organisation und Daten   | Titel, Tags, Favoriten, Suche, Sammlungen, Löschen; Audio-/JSON-/Markdown-I/O und Neustart                                                       | Größere Bestände                                                 |
-| Windows                  | Native SAPI-Brücke und begrenzter WAV-Decoder implementiert, Verträge lokal geprüft                                                              | Nativer Windows-Build und Laufzeitprüfung; CI vorbereitet        |
-| Repository               | Hero, eigene Bildmarke, tatsächliche App-Abbildung, Dokumentation und Notices                                                                    | Finalen Stand im privaten Repository sichern                     |
+| Bereich                  | Nachgewiesen                                                                                                                                                              | Verbleibende Prüfung                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| macOS-App und Oberfläche | Abschließendes natives Paket einschließlich Freigabe-/Statuskorrekturen; Angular/Mosaik, keylose Einstellungen, gespeicherte Anmeldung und Daten                          | Weitere Geräte-/OS-Versionen                                     |
+| Tray und Icon            | Eigene Icons; Fenster schließen/verstecken, über natives Tray-Menü öffnen und neue Aufnahme starten tatsächlich bedient                                                   | Weitere OS-Menüvarianten                                         |
+| Aufnahme                 | Synthetische Aufnahme sowie physisches Mikrofon im Sprachgespräch; geordneter Abschluss                                                                                   | Weitere physische Geräte und Aufnahmequalität                    |
+| Transkription            | Tatsächliche deutsche macOS-Datei- und Live-Erkennung                                                                                                                     | Andere Sprachpakete; Windows-Erkennung                           |
+| Sprachgespräch           | Tatsächliche Erkennung → Synapse/Codex → native Stimme                                                                                                                    | Weitere Geräte-/Sprachkombinationen                              |
+| Lebenszyklus             | Mute, explizites Unterbrechen, Pause/Fortsetzen und Stop tatsächlich bedient                                                                                              | Automatisches Unterbrechen bei verschiedenem Raum-/Echoverhalten |
+| Gesprächsarchiv          | Zwei decodierte Kanäle mit positiver Energie, beide Sprecher und Zeitmarken                                                                                               | Lange Gespräche und Gerätewechsel                                |
+| Lokale Assistenten       | Codex-Anmeldung, Modellkatalog, echte Analyse, Folgefrage und gesprochene Turns                                                                                           | Claude-Konto separat verifizieren                                |
+| Unverändertes Audio      | 51 Produktionsdateien und 12 Specs bytegleich; Recorder, Player und TTS verwendet                                                                                         | Bewusste spätere Upstream-Updates                                |
+| Organisation und Daten   | Titel, Tags, Favoriten, Suche, Sammlungen, Löschen; Audio-/JSON-/Markdown-I/O und Neustart                                                                                | Größere Bestände                                                 |
+| Windows                  | Native SAPI-Brücke und begrenzter WAV-Decoder implementiert; automatische Build-/Paket-/Bedienprüfung in der CI-Matrix                                                    | Physische Windows-Sprachhardware und deutsche Sprachpakete       |
+| Repository               | Quellstand im privaten Repository gesichert; [Draft-PR 1](https://github.com/pixel-brewery/resonanz/pull/1) enthält Hero, Icons, App-Abbildung, Dokumentation und Notices | Keine öffentliche Auslieferung                                   |
 
 Mit dem in `.nvmrc` gepinnten Node-24-LTS-Basisstand:
 
