@@ -76,6 +76,11 @@ Systemfreigaben werden unabhängig vom gespeicherten Audio beurteilt.
 
 Auf macOS bleibt die vorhandene native Dateitranskription der Ausgangsweg.
 Windows nutzt die verfügbare SAPI-Erkennung mit lokal decodiertem PCM-WAV.
+Die Dateierkennung sammelt Ergebnisse bis zum nativen `RecognizeCompleted`-Ereignis.
+Damit bleibt der letzte erkannte Abschnitt auch beim Dateiende erhalten;
+erneute Erkennungsaufrufe nach WAV-Ende können laut
+[Microsoft-Dokumentation](https://learn.microsoft.com/en-us/dotnet/api/system.speech.recognition.speechrecognitionengine.setinputtowavefile?view=netframework-4.8.1)
+eine Ausnahme auslösen.
 Der Browserdecoderpfad ist auf 64MiB WAV begrenzt und ersetzt das Originalarchiv
 nicht. Ein fehlendes Sprachpaket erzeugt einen Einrichtungsfehler und keinen
 Cloud-Fallback.

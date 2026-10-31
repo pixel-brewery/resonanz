@@ -27,6 +27,7 @@ function run(mode, configuration) {
       script,
       '-Mode',
       mode,
+      '-Diagnostics',
     ],
     {
       input: `${JSON.stringify(configuration)}\n`,

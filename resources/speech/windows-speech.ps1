@@ -1,4 +1,4 @@
-param([ValidateSet('inspect', 'listen', 'synthesize', 'transcribe')][string]$Mode)
+﻿param([ValidateSet('inspect', 'listen', 'synthesize', 'transcribe')][string]$Mode, [switch]$Diagnostics)
 $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding($false)
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
+using System.Threading;
 using System.Web.Script.Serialization;
 
 public static class ResonanzSystemSpeech {
@@ -60,18 +61,38 @@ public static class ResonanzSystemSpeech {
     }
     public static void Transcribe(string locale, string path) {
         var segments = new List<object>();
-        using (var engine = new SpeechRecognitionEngine(new CultureInfo(locale))) {
+        using (var engine = new SpeechRecognitionEngine(new CultureInfo(locale)))
+        using (var finished = new ManualResetEvent(false)) {
+            Exception failure = null;
             engine.LoadGrammar(new DictationGrammar());
             engine.SetInputToWaveFile(path);
-            RecognitionResult result;
-            while ((result = engine.Recognize()) != null) {
+            engine.SpeechRecognized += (sender, e) => {
+                var result = e.Result;
+                if (result == null) return;
                 if (!String.IsNullOrWhiteSpace(result.Text)) {
+                    if (segments.Count >= 20000) {
+                        failure = new InvalidOperationException("The transcript exceeds its segment limit.");
+                        engine.RecognizeAsyncCancel();
+                        return;
+                    }
                     var start = result.Audio == null ? 0 : result.Audio.AudioPosition.TotalMilliseconds;
                     var end = result.Audio == null ? start : start + result.Audio.Duration.TotalMilliseconds;
                     segments.Add(new { id = Guid.NewGuid().ToString(), text = result.Text, startMs = start, endMs = end });
                 }
-                if (segments.Count > 20000) throw new InvalidOperationException();
+            };
+            engine.RecognizeCompleted += (sender, e) => {
+                if (e.Error != null) failure = e.Error;
+                finished.Set();
+            };
+            // The stream ends through RecognizeCompleted; restarting a synchronous
+            // recognition operation after WAV EOF can throw and discard valid text.
+            engine.RecognizeAsync(RecognizeMode.Multiple);
+            if (!finished.WaitOne(150000)) {
+                engine.RecognizeAsyncCancel();
+                finished.WaitOne(5000);
+                throw new TimeoutException("Native file recognition timed out.");
             }
+            if (failure != null) throw new InvalidOperationException("Native file recognition failed.", failure);
         }
         Emit(new { segments = segments });
     }
@@ -86,6 +107,13 @@ try {
         'transcribe' { [ResonanzSystemSpeech]::Transcribe($configuration.locale, $configuration.filePath) }
     }
 } catch {
+    if ($Diagnostics) {
+        $exception = $_.Exception
+        while ($null -ne $exception) {
+            [Console]::Error.WriteLine($exception.GetType().FullName + ': ' + $exception.Message)
+            $exception = $exception.InnerException
+        }
+    }
     [Console]::Error.WriteLine('Die native Windows-Sprachfunktion ist nicht verfügbar. Prüfe installierte Erkennungssprache, Stimme und Mikrofonfreigabe.')
     exit 1
 }
