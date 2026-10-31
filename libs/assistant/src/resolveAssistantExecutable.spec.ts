@@ -2,8 +2,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { access, chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { resolveAssistantExecutable } from './resolveAssistantExecutable.js';
 
 // #endregion
@@ -18,17 +17,25 @@ afterEach(async () => {
 describe('resolveAssistantExecutable', () => {
   it('finds an executable in a path containing shell syntax without running that executable', async () => {
     // Arrange
-    const root = await mkdtemp(join(tmpdir(), 'resonanz-discovery-'));
+    await mkdir('.codex-work', { recursive: true });
+    const root = await mkdtemp(resolve('.codex-work/resonanz-discovery-'));
     directories.push(root);
     const directory = join(root, 'assistant $(not-a-command) with spaces');
-    const executable = join(directory, 'codex');
+    const windows = process.platform === 'win32';
+    const executable = join(directory, windows ? 'codex.CMD' : 'codex');
     const marker = join(root, 'must-not-exist');
     await mkdir(directory);
-    await writeFile(executable, `#!/bin/sh\ntouch '${marker}'\n`);
-    await chmod(executable, 0o700);
+    await writeFile(
+      executable,
+      windows ? `@echo off\r\necho executed > "${marker}"\r\n` : `#!/bin/sh\ntouch '${marker}'\n`,
+    );
+    if (!windows) await chmod(executable, 0o700);
 
     // Act
-    const discovered = resolveAssistantExecutable('codex', { PATH: directory }, 'linux');
+    const discovered = resolveAssistantExecutable('codex', {
+      PATH: directory,
+      ...(windows ? { PATHEXT: '.CMD' } : {}),
+    });
 
     // Assert
     expect(discovered).toBe(executable);

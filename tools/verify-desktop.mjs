@@ -233,9 +233,13 @@ try {
   await control('toggle-favorite').click();
   await waitFor(async () => (await session()).starred, 'favourite');
   await control('nav-favorites').click();
+  await page.waitForURL((url) => url.hash === '#/?scope=favorites');
+  await control(`session-row-${recordedId}`).waitFor({ state: 'visible' });
   await control('session-search').locator('input').fill('nichtvorhanden');
+  await control('session-search').locator('input').press('Enter');
   await control('no-search-results').waitFor({ state: 'visible' });
   await control('session-search').locator('input').fill('Planung');
+  await control('session-search').locator('input').press('Enter');
   await control(`session-row-${recordedId}`).waitFor({ state: 'visible' });
   await control(`collection-${collection.id}`).click();
   await control('rename-collection').click();
@@ -390,12 +394,28 @@ try {
   await writeFile(join(artifacts, 'evidence.json'), `${JSON.stringify(evidence, null, 2)}\n`);
   process.stdout.write(`Desktop verification passed. Artifacts: ${artifacts}\n`);
 } catch (error) {
+  const ui =
+    page && !page.isClosed()
+      ? await page
+          .evaluate(() => {
+            const search = document.querySelector('[test-id="session-search"]');
+            return {
+              route: location.hash,
+              searchValue: search?.value,
+              searchInputValue: search?.shadowRoot?.querySelector('input')?.value,
+              visibleSessionIds: [...document.querySelectorAll('[test-id^="session-row-"]')].map(
+                (element) => element.getAttribute('test-id'),
+              ),
+            };
+          })
+          .catch(() => null)
+      : null;
   if (page && !page.isClosed())
     await page.screenshot({ path: join(artifacts, 'failure.png') }).catch(() => undefined);
   await writeFile(
     join(artifacts, 'failure.json'),
     JSON.stringify(
-      { checks, errors, lifecycle, message: String(error), stack: error?.stack },
+      { checks, errors, lifecycle, ui, message: String(error), stack: error?.stack },
       null,
       2,
     ),
