@@ -79,6 +79,8 @@ export default {
   },
   packagerConfig: {
     asar: true,
+    // The stage hook owns the runtime allowlist; Packager's default removes private.
+    sanitizePackageJson: [(manifest) => manifest],
     // fs-extra rejects copying the checkout into its own descendant directory.
     tmpdir: resolve(root, '../.resonanz-package-staging'),
     // The source manifest uses workspaces and local archives; runtime pruning must
