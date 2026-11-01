@@ -1,16 +1,13 @@
-# Mosaik-Distributionen
+# Mosaik distributions
 
-Die Archive enthalten unveränderte veröffentlichte Mosaik-Pakete der Version
-`0.1.183`. Sie wurden deterministisch aus den ursprünglichen Yarn-Cache-ZIPs in
-das übliche npm-Archivformat `package/` umgepackt. Paketnamen, Manifeste, öffentliche
-Exports, Typdeklarationen, Lizenzen und Laufzeitdateien bleiben unverändert.
+These archives contain unchanged Mosaik `0.1.183` distribution files, deterministically
+repacked from original Yarn cache ZIPs into npm's `package/` archive layout. Names,
+manifests, public exports, declarations, licenses and runtime content are preserved.
 
-`provenance.json` dokumentiert Version, ursprünglichen Cache-Artefaktnamen,
-Prüfsummen und Dateianzahl. `yarn verify:vendor` prüft die installierbaren Archive.
-Abhängigkeiten verwenden die öffentlichen `@pixel-brewery/*`-Namen; es gibt keine
-Quellcode-Aliase auf benachbarte Repositories. Die rootweiten Yarn-Resolutions
-halten transitive Paketbezüge auf denselben Distributionen.
+`provenance.json` records version, original cache artifact, digests and file counts.
+`yarn verify:vendor` verifies the archives. Dependencies use public
+`@pixel-brewery/*` names; root Yarn resolutions keep transitive references coherent.
+No personal peer-checkout aliases are used.
 
-Dieser Weg ermöglicht die Installation des Prototyps ohne neue Anmeldung an einer
-privaten Paketregistry. Aktualisierungen erfolgen als bewusster Austausch aller
-zusammengehörigen Pakete einschließlich Lockfile und Prüfsummen.
+This lets a fresh checkout install the prototype without a new private registry
+login. Deliberate upgrades update related archives, lockfile and digests together.

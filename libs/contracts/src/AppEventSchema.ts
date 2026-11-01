@@ -1,6 +1,8 @@
 // #region Imports
 import { z } from 'zod';
 import { dataSchemas } from './DataSchemas.js';
+import { miniRecorderSchema, miniRecorderActionSchema } from './MiniRecorderSchema.js';
+import { updateStateSchema } from './UpdateStateSchema.js';
 // #endregion
 
 /**
@@ -9,10 +11,29 @@ import { dataSchemas } from './DataSchemas.js';
  * @public
  */
 export const appEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('mini.state'), snapshot: miniRecorderSchema }),
+  miniRecorderActionSchema.extend({ type: z.literal('capture.command') }),
   z.object({ type: z.literal('library.changed') }),
+  z.object({ type: z.literal('update.state'), state: updateStateSchema }),
+  z.object({ type: z.literal('storage.failed'), message: z.string().max(1000) }),
+  z.object({
+    type: z.literal('capture.reminder.failed'),
+    sessionId: dataSchemas.identifier,
+    message: z.string().max(1000),
+  }),
   z.object({
     type: z.literal('ui.command'),
-    command: z.enum(['recording.start', 'conversation.start', 'recording.stop']),
+    command: z.enum([
+      'recording.start',
+      'conversation.start',
+      'recording.stop',
+      'capture.toggle',
+      'capture.pause',
+      'capture.mark',
+      'voice.open',
+      'tray.open',
+      'window.open',
+    ]),
   }),
   z.object({ type: z.literal('session.updated'), sessionId: dataSchemas.identifier }),
   z.object({
@@ -42,6 +63,7 @@ export const appEventSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('speech.result'),
+    operationId: dataSchemas.identifier.optional(),
     sessionId: dataSchemas.identifier,
     id: dataSchemas.identifier,
     text: z.string().max(40_000),

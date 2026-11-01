@@ -1,0 +1,226 @@
+@if (presenter.session(); as session) {
+  <div class="playback-band" test-id="recording-player">
+    <div class="playback-controls">
+      <button
+        [attr.aria-label]="'loc.resonanz.session.back15' | translate"
+        (click)="presenter.seek(presenter.positionMs() - 15000)"
+      >
+        −15</button
+      ><button
+        class="round-play"
+        test-id="play-recording"
+        [disabled]="!session.audioAvailable || presenter.capturing()"
+        [attr.aria-label]="
+          presenter.playingHere()
+            ? ('loc.resonanz.common.pause' | translate)
+            : ('loc.resonanz.session.listen' | translate)
+        "
+        (click)="presenter.togglePlayback()"
+      >
+        {{ presenter.playingHere() ? 'Ⅱ' : '▶' }}</button
+      ><button
+        [attr.aria-label]="'loc.resonanz.session.forward15' | translate"
+        (click)="presenter.seek(presenter.positionMs() + 15000)"
+      >
+        +15
+      </button>
+    </div>
+    <div class="playback-wave">
+      <resonanz-waveform
+        [values]="presenter.waveform()"
+        [markers]="presenter.markers()"
+        [durationMs]="session.durationMs"
+        [positionMs]="presenter.positionMs()"
+        [selectedMarkerId]="presenter.selectedMarkerId()"
+        [count]="96"
+        [interactive]="true"
+        (seek)="presenter.seek($event)"
+        (markerSelected)="presenter.selectMarker($event)"
+      />
+      <div class="playback-caption">
+        <span test-id="playback-position"
+          ><strong>{{ presenter.positionMs() | duration }}</strong
+          ><span>{{
+            intl.t('loc.resonanz.session.totalDuration', session.durationMs | duration)
+          }}</span></span
+        ><resonanz-marker-legend [includeUser]="true" />
+      </div>
+    </div>
+  </div>
+  <div class="analysis-layout">
+    <section class="analysis-pane" test-id="summary-panel">
+      <div class="section-heading">
+        <h2>{{ 'loc.resonanz.session.summary' | translate }}</h2>
+        @if (!session.analysis && !session.summary) {
+          <mosaik-button
+            test-id="analyze-session"
+            [label]="
+              session.summary
+                ? ('loc.resonanz.session.reanalyze' | translate)
+                : ('loc.resonanz.session.analyze' | translate)
+            "
+            icon="sparkle"
+            appearance="plain"
+            [disabled]="
+              !presenter.hasTranscript() || presenter.running() || presenter.editingTranscript()
+            "
+            (click)="presenter.analyze()"
+          />
+        }
+      </div>
+      @if (presenter.runKind() === 'analysis' && presenter.pendingRunId()) {
+        <p class="working" role="status">
+          {{ 'loc.resonanz.session.analysisLoading' | translate }}
+        </p>
+      } @else if (session.analysis; as analysis) {
+        <p class="summary-text" test-id="session-summary">
+          @for (claim of analysis.summary; track claim.id) {
+            {{ claim.text }}
+            @for (evidence of claim.evidence; track evidence.segmentId) {
+              <resonanz-evidence-chip
+                [atMs]="evidence.atMs"
+                [marked]="presenter.isUserMarked(claim)"
+                [selected]="presenter.selectedEvidence()?.segmentId === evidence.segmentId"
+                (selectedChange)="presenter.selectEvidence(evidence)"
+              />
+            }
+          }
+        </p>
+        @for (section of sections; track section.key) {
+          <section class="insight-section">
+            <h2>
+              <resonanz-marker [kind]="section.kind" />{{ section.label | message
+              }}<span>{{
+                section.key === 'tasks' && presenter.myTaskCount()
+                  ? intl.t(
+                      'loc.resonanz.session.taskCounts',
+                      analysis.tasks.length,
+                      presenter.myTaskCount()
+                    )
+                  : analysis[section.key].length
+              }}</span>
+            </h2>
+            <div class="insight-list outline-card">
+              @for (claim of analysis[section.key]; track claim.id) {
+                <article [class.selected]="presenter.selectedClaim()?.id === claim.id">
+                  <div>
+                    <p>{{ claim.text }}</p>
+                    @if (section.key === 'tasks') {
+                      <div class="task-meta">
+                        @if (presenter.isMine(claim)) {
+                          <span class="for-me">{{ 'loc.resonanz.marker.forYou' | translate }}</span>
+                          @if (claim.due) {
+                            <span>{{ intl.dueLabel(claim.due) }}</span>
+                          }
+                        } @else {
+                          <span
+                            >{{ claim.assignee ?? ('loc.resonanz.marker.unassigned' | translate)
+                            }}{{ claim.due ? ' · ' + intl.dueLabel(claim.due) : '' }}</span
+                          >
+                        }
+                      </div>
+                    }
+                    @if (section.key !== 'tasks' && presenter.isMarkedDuringCapture(claim)) {
+                      <span class="marked-caption caption">{{
+                        'loc.resonanz.session.markedDuringCapture' | translate
+                      }}</span>
+                    }
+                    @if (!claim.evidence.length) {
+                      <span class="caption">{{ 'loc.resonanz.marker.none' | translate }}</span>
+                    }
+                  </div>
+                  <div class="claim-evidence">
+                    @for (evidence of claim.evidence; track evidence.segmentId) {
+                      <resonanz-evidence-chip
+                        [atMs]="evidence.atMs"
+                        [marked]="presenter.isUserMarked(claim)"
+                        [selected]="presenter.selectedEvidence()?.segmentId === evidence.segmentId"
+                        (selectedChange)="presenter.selectEvidence(evidence)"
+                      />
+                    }
+                  </div>
+                </article>
+              }
+              @if (!analysis[section.key].length) {
+                <p class="no-insights caption">{{ section.empty | translate }}</p>
+              }
+            </div>
+          </section>
+        }
+      } @else if (session.summary) {
+        <mosaik-text
+          test-id="session-summary"
+          [text]="session.summary"
+          mosaikTextFormatter="markdown"
+          [wrap]="true"
+        />
+        <p class="caption">{{ 'loc.resonanz.session.legacyAnalysis' | translate }}</p>
+      } @else {
+        <div class="empty-analysis">
+          <h3>{{ 'loc.resonanz.session.summaryPrompt' | translate }}</h3>
+          <p>{{ 'loc.resonanz.session.analysisIntro' | translate }}</p>
+        </div>
+      }
+      @if (session.summary) {
+        <mosaik-button
+          [label]="'loc.resonanz.session.read' | translate"
+          icon="speaker"
+          appearance="plain"
+          [disabled]="!presenter.speech.isSupported() || presenter.capture.active()"
+          (click)="presenter.speak(session.summary)"
+        />
+      }
+    </section>
+    <resonanz-transcript-panel
+      class="transcript-pane"
+      test-id="transcript-panel"
+      [entries]="presenter.transcriptEntries()"
+      [query]="presenter.transcriptSearch()"
+      (queryChange)="presenter.setTranscriptSearch($event)"
+      [metadata]="presenter.transcriptMetadata()"
+      [selectedId]="presenter.selectedEvidence()?.segmentId ?? null"
+      [editing]="presenter.editingTranscript()"
+      [canEdit]="!presenter.capturing()"
+      [canTranscribe]="session.audioAvailable && !presenter.capturing() && !presenter.mutating()"
+      (selected)="presenter.selectTranscript($event)"
+      (editRequested)="presenter.beginTranscriptEdit()"
+      (transcribeRequested)="presenter.transcribe()"
+    >
+      @if (presenter.editingTranscript()) {
+        <div class="transcript-editor" test-id="transcript-editor">
+          @for (
+            segment of presenter.transcriptDraft().segments;
+            track segment.id;
+            let index = $index
+          ) {
+            @if (presenter.transcriptForm.segments[index]; as segmentForm) {
+              <mosaik-textbox
+                [label]="
+                  segment.speaker === 'assistant'
+                    ? ('loc.resonanz.settings.assistant' | translate)
+                    : ('loc.resonanz.session.spoken' | translate)
+                "
+                [multiline]="true"
+                [multilineRows]="3"
+                [maxlength]="40000"
+                [formField]="segmentForm.text"
+              />
+            }
+          }
+          <div>
+            <mosaik-button
+              test-id="save-transcript"
+              [label]="'loc.resonanz.common.save' | translate"
+              [disabled]="presenter.mutating()"
+              (click)="presenter.saveTranscript()"
+            /><mosaik-button
+              [label]="'loc.resonanz.common.cancel' | translate"
+              appearance="plain"
+              (click)="presenter.editingTranscript.set(false)"
+            />
+          </div>
+        </div>
+      }
+    </resonanz-transcript-panel>
+  </div>
+}

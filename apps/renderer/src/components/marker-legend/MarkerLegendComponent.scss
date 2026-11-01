@@ -1,0 +1,13 @@
+:host {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

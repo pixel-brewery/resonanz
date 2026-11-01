@@ -60,11 +60,11 @@ describe('OrderedAudioChunkWriter', () => {
     // Act
     writer.enqueue(audioBlob(5), 'audio/webm', 1_000);
     expect(() => writer.enqueue(audioBlob(4), 'audio/webm', 2_000)).toThrow(
-      'Audioablage ist zu langsam',
+      'loc.resonanz.error.captureBackpressure',
     );
 
     // Assert
-    await expect(writer.close()).rejects.toThrow('Audioablage ist zu langsam');
+    await expect(writer.close()).rejects.toThrow('loc.resonanz.error.captureBackpressure');
     expect(persistChunk).toHaveBeenCalledTimes(1);
     expect(persistChunk.mock.calls[0]?.[0]).toMatchObject({ sequence: 1, channel: 'conversation' });
     expect(failure).toHaveBeenCalledTimes(1);

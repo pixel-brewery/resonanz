@@ -1,270 +1,697 @@
-<div class="mx-auto flex w-full max-w-[1160px] flex-col gap-3 p-4" test-id="settings-view">
-  <header class="flex flex-wrap items-center justify-between gap-2">
-    <div class="flex flex-col gap-0.5">
-      <mosaik-text
-        text="Einstellungen"
-        role="heading"
-        aria-level="1"
-        mosaikTypography="headline5"
-      />
-      <mosaik-text text="Assistent, Stimme und Aufnahme einrichten." variant="neutral" />
-    </div>
-    <div class="flex items-center gap-1">
-      @if (presenter.saved()) {
-      <mosaik-text text="Gespeichert" mosaikTypography="caption" variant="success" role="status" />
-      }
-      <mosaik-button
-        test-id="save-settings"
-        label="Speichern"
-        appearance="solid"
-        variant="primary"
-        [isBusy]="presenter.saving()"
-        [disabled]="presenter.form().invalid() || presenter.saving() || presenter.capture.active()"
-        (click)="presenter.saveAndCheck()"
-      />
-    </div>
-  </header>
-  <div class="grid grid-cols-1 items-start gap-3 xl:grid-cols-2">
-    <mosaik-card appearance="outline">
-      <div slot="content" class="flex flex-col gap-2.5 p-3">
-        <div class="flex flex-col gap-0.5">
-          <mosaik-text text="Lokaler KI-Assistent" mosaikTypography="subtitle1" />
-          <mosaik-text
-            text="Mit deinem Konto über die installierte Codex- oder Claude-CLI anmelden. Der lokale Assistent übernimmt Zusammenfassungen, Fragen und Live-Gespräche."
-            mosaikTypography="body2"
-            variant="neutral"
-            [wrap]="true"
-          />
-        </div>
-        <mosaik-select
-          test-id="assistant-provider"
-          label="Assistent"
-          [formField]="presenter.form.provider"
-          [disabled]="presenter.capture.active()"
+<div class="settings" test-id="settings-view">
+  <aside class="settings-sidebar" [attr.aria-label]="'loc.resonanz.settings.sections' | translate">
+    <div class="window-drag-region" part="window-drag-region" aria-hidden="true"></div>
+    <mosaik-searchbox
+      test-id="settings-search"
+      [placeholder]="'loc.resonanz.settings.search' | translate"
+      [attr.aria-label]="'loc.resonanz.settings.search' | translate"
+      [formField]="searchForm.text"
+    />
+    <nav>
+      @for (section of sections; track section.id) {
+        <mosaik-button
+          [icon]="section.icon"
+          iconSize="small"
+          [appearance]="activeSection() === section.id ? 'soft' : 'plain'"
+          [hidden]="!visibility()[section.id]"
+          [attr.aria-current]="activeSection() === section.id ? 'location' : null"
+          fit="width"
+          horizontalContentAlignment="left"
+          (click)="scroll(section.id)"
+          ><span slot="label" class="section-label">{{
+            section.label | message
+          }}</span></mosaik-button
         >
-          <mosaik-select-item value="codex" label="Codex" />
-          <mosaik-select-item value="claude" label="Claude Code" />
-        </mosaik-select>
-        <mosaik-textbox
-          test-id="assistant-model"
-          label="Modell (optional)"
-          placeholder="Standardmodell des Assistenten"
-          [formField]="presenter.form.model"
-        />
-        <mosaik-textbox label="Konto in Resonanz" [formField]="presenter.form.accountId" />
-        <mosaik-textbox
-          label="CLI-Pfad (optional)"
-          placeholder="Automatisch erkennen"
-          [formField]="presenter.form.executable"
-        />
-        <div class="flex flex-col gap-1" test-id="assistant-status">
-          @if (presenter.checking()) {
-          <mosaik-text text="Verbindung wird geprüft …" role="status" /> } @else if
-          (presenter.status(); as status) { @if (status.authenticated) {
-          <mosaik-text text="Assistent ist verbunden." variant="success" /> } @else if
-          (status.installed) { <mosaik-text text="Bitte den Assistenten für Resonanz anmelden." /> }
-          @else {
-          <mosaik-text
-            text="Assistent nicht gefunden. Prüfe die Installation oder trage den CLI-Pfad ein."
-            variant="warning"
-            [wrap]="true"
-          />
-          } @if (status.message) {
-          <mosaik-text
-            [text]="status.message"
-            mosaikTypography="caption"
-            variant="neutral"
-            [wrap]="true"
-          />
-          } @if (status.accountLabel) {
-          <mosaik-text [text]="status.accountLabel" mosaikTypography="caption" /> }
-          <div class="flex flex-wrap gap-1">
-            @if (status.authenticated) {
-            <mosaik-button
-              test-id="assistant-logout"
-              label="Abmelden"
-              appearance="outline"
-              (click)="presenter.logout()"
-            />
-            } @else { @for (method of presenter.authMethods(); track method.id) {
-            <mosaik-button
-              [attr.test-id]="'assistant-login-' + method.id"
-              [label]="method.label"
-              appearance="outline"
-              [disabled]="presenter.saving()"
-              (click)="presenter.connect(method.id)"
-            />
-            } }
+      }
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <mosaik-button
+      routerLink="/"
+      test-id="settings-back"
+      [label]="'loc.resonanz.settings.back' | translate"
+      icon="back"
+      appearance="plain"
+      fit="width"
+      horizontalContentAlignment="left"
+    /><mosaik-button
+      routerLink="/onboarding"
+      [label]="'loc.resonanz.onboarding.openSetup' | translate"
+      appearance="plain"
+      fit="width"
+      horizontalContentAlignment="left"
+    />
+  </aside>
+  <div class="settings-main">
+    <header class="workspace-header" part="window-drag-region">
+      <div class="header-title">
+        <h1>{{ 'loc.resonanz.nav.settings' | translate }}</h1>
+      </div>
+      <span class="caption" role="status">{{
+        presenter.saving()
+          ? ('loc.resonanz.common.saving' | translate)
+          : presenter.saved()
+            ? ('loc.resonanz.settings.saved' | translate)
+            : ('loc.resonanz.settings.immediate' | translate)
+      }}</span>
+    </header>
+    <div class="settings-scroll">
+      <div class="settings-grid">
+        <section id="settings-recording" [hidden]="!visibility()['recording']">
+          <h2>{{ 'loc.resonanz.capture.recording' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting device-setting">
+              <mosaik-select
+                test-id="microphone-select"
+                [label]="'loc.resonanz.capture.microphone' | translate"
+                [placeholder]="'loc.resonanz.capture.defaultDevice' | translate"
+                [formField]="presenter.capture.deviceForm.id"
+                [disabled]="presenter.capture.active()"
+                ><mosaik-select-item
+                  value="default"
+                  [label]="'loc.resonanz.capture.defaultDevice' | translate"
+                />
+                @for (device of presenter.capture.devices(); track device.deviceId) {
+                  <mosaik-select-item [value]="device.deviceId" [label]="device.label" />
+                }</mosaik-select
+              ><mosaik-button
+                icon="refresh"
+                [attr.aria-label]="'loc.resonanz.capture.devices' | translate"
+                appearance="plain"
+                size="small"
+                [disabled]="presenter.capture.active()"
+                (click)="presenter.capture.loadDevices()"
+              />
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span
+                ><span class="caption">{{ 'loc.resonanz.error.systemCapture' | translate }}</span>
+              </div>
+              <mosaik-toggle-switch
+                [disabled]="true"
+                [attr.aria-label]="'loc.resonanz.capture.systemUnavailable' | translate"
+              />
+            </div>
+            <div class="setting">
+              <span>{{ 'loc.resonanz.settings.startup' | translate }}</span>
+              <mosaik-segment
+                appearance="soft"
+                [attr.aria-label]="'loc.resonanz.settings.startup' | translate"
+                ><mosaik-segment-item value="click" fit="width" [isChecked]="true"
+                  ><span slot="label">{{
+                    'loc.resonanz.capture.wait' | translate
+                  }}</span></mosaik-segment-item
+                ><mosaik-segment-item value="automatic" fit="width" [disabled]="true"
+                  ><span slot="label">{{
+                    'loc.resonanz.onboarding.automaticStart' | translate
+                  }}</span></mosaik-segment-item
+                ></mosaik-segment
+              ><span class="caption">{{ 'loc.resonanz.settings.explicit' | translate }}</span>
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.settings.mini' | translate }}</span
+                ><span class="caption">{{ 'loc.resonanz.settings.miniHint' | translate }}</span>
+              </div>
+              <mosaik-toggle-switch
+                [formField]="presenter.form.showMiniRecorder"
+                [disabled]="presenter.capture.active()"
+                [attr.aria-label]="'loc.resonanz.settings.mini' | translate"
+              />
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.settings.silenceReminder' | translate }}</span
+                ><span class="caption">{{ 'loc.resonanz.settings.silenceHint' | translate }}</span>
+              </div>
+              <mosaik-toggle-switch
+                test-id="silence-reminder"
+                [formField]="presenter.form.silenceReminder"
+                [disabled]="presenter.capture.active()"
+                [attr.aria-label]="'loc.resonanz.settings.silenceReminder' | translate"
+              />
+            </div>
           </div>
-          }
-          <mosaik-button
-            test-id="check-assistant"
-            label="Verbindung prüfen"
-            icon="refresh"
-            appearance="plain"
-            [disabled]="presenter.checking()"
-            (click)="presenter.saveAndCheck()"
-          />
-        </div>
-        @if (presenter.login(); as login) {
-        <mosaik-card appearance="soft" test-id="assistant-login">
-          <div slot="content" class="flex flex-col gap-1.5 p-2" role="status">
-            @switch (login.state) { @case ('starting') {
-            <mosaik-text text="Anmeldung wird gestartet …" /> } @case ('waiting') {
-            <mosaik-text text="Anmeldung abschließen" mosaikTypography="subtitle2" /> } @case
-            ('verifying') { <mosaik-text text="Anmeldung wird geprüft …" /> } @case ('succeeded') {
-            <mosaik-text text="Anmeldung erfolgreich." variant="success" /> } @case ('cancelled') {
-            <mosaik-text text="Anmeldung abgebrochen." /> } @case ('failed') {
-            <mosaik-text text="Anmeldung fehlgeschlagen." variant="warning" /> } } @if
-            (login.message) { <mosaik-text [text]="login.message" [wrap]="true" /> } @if
-            (login.interaction; as interaction) { @if (interaction.message) {
-            <mosaik-text [text]="interaction.message" [wrap]="true" /> } @if (interaction.code) {
-            <mosaik-text
-              [text]="interaction.code"
-              mosaikTypography="subtitle1"
-              test-id="login-code"
-            />
-            } @if (interaction.url) {
-            <mosaik-button
-              test-id="open-login"
-              label="Im Browser anmelden"
-              appearance="solid"
-              (click)="presenter.openLogin()"
-            />
-            } @for (field of interaction.fields; track field.id) { @if
-            (presenter.loginForm[field.id]; as loginField) { @if (field.secret) {
-            <mosaik-passwordbox
-              [label]="field.label"
-              [formField]="loginField"
-              [autocomplete]="false"
-            />
-            } @else { <mosaik-textbox [label]="field.label" [formField]="loginField" /> } } } @if
-            (interaction.fields?.length) {
-            <mosaik-button label="Fortfahren" (click)="presenter.respondLogin()" /> } } @if
-            (login.state === 'starting' || login.state === 'waiting' || login.state === 'verifying')
-            {
-            <mosaik-button
-              label="Anmeldung abbrechen"
-              appearance="plain"
-              (click)="presenter.cancelLogin()"
-            />
+        </section>
+        <section id="settings-assistant" [hidden]="!visibility()['assistant']">
+          <h2>{{ 'loc.resonanz.settings.assistant' | translate }}</h2>
+          <div class="settings-card">
+            <div class="provider-row">
+              <mosaik-icon icon="claude" size="small" />
+              <div>
+                <span>Claude Code</span
+                ><span
+                  class="caption"
+                  [class.success]="
+                    presenter.status()?.provider === 'claude' && presenter.status()?.authenticated
+                  "
+                  >{{
+                    (presenter.status()?.provider === 'claude'
+                      ? presenter.status()?.authenticated
+                        ? 'loc.resonanz.auth.standard'
+                        : presenter.status()?.installed
+                          ? 'loc.resonanz.auth.installedOut'
+                          : 'loc.resonanz.auth.notInstalled'
+                      : 'loc.resonanz.auth.choose'
+                    ) | translate
+                  }}</span
+                >
+              </div>
+              <mosaik-button
+                [label]="
+                  (presenter.form.provider().value() === 'claude'
+                    ? presenter.status()?.authenticated
+                      ? 'loc.resonanz.settings.test'
+                      : 'loc.resonanz.auth.connect'
+                    : 'loc.resonanz.common.choose'
+                  ) | translate
+                "
+                appearance="outline"
+                [isBusy]="presenter.form.provider().value() === 'claude' && presenter.testing()"
+                [disabled]="presenter.capture.active() || presenter.saving() || presenter.testing()"
+                (click)="chooseProvider('claude')"
+              />
+            </div>
+            <div class="provider-row">
+              <mosaik-icon icon="openai" size="small" />
+              <div>
+                <span>Codex</span
+                ><span
+                  class="caption"
+                  [class.success]="
+                    presenter.status()?.provider === 'codex' && presenter.status()?.authenticated
+                  "
+                  >{{
+                    (presenter.status()?.provider === 'codex'
+                      ? presenter.status()?.authenticated
+                        ? 'loc.resonanz.auth.standard'
+                        : presenter.status()?.installed
+                          ? 'loc.resonanz.auth.installedOut'
+                          : 'loc.resonanz.auth.notInstalled'
+                      : 'loc.resonanz.auth.choose'
+                    ) | translate
+                  }}</span
+                >
+              </div>
+              <mosaik-button
+                [label]="
+                  (presenter.form.provider().value() === 'codex'
+                    ? presenter.status()?.authenticated
+                      ? 'loc.resonanz.settings.test'
+                      : 'loc.resonanz.auth.connect'
+                    : 'loc.resonanz.common.choose'
+                  ) | translate
+                "
+                appearance="outline"
+                [isBusy]="presenter.form.provider().value() === 'codex' && presenter.testing()"
+                [disabled]="presenter.capture.active() || presenter.saving() || presenter.testing()"
+                (click)="chooseProvider('codex')"
+              />
+            </div>
+            <div class="setting">
+              <span>{{ 'loc.resonanz.settings.context' | translate }}</span
+              ><mosaik-segment
+                appearance="soft"
+                [attr.aria-label]="'loc.resonanz.settings.contextLabel' | translate"
+                ><mosaik-segment-item
+                  value="transcript"
+                  fit="width"
+                  [isChecked]="presenter.form.context().value() === 'transcript'"
+                  (checked)="presenter.form.context().value.set('transcript')"
+                  ><span slot="label">{{
+                    'loc.resonanz.question.transcriptOnly' | translate
+                  }}</span></mosaik-segment-item
+                ><mosaik-segment-item
+                  value="transcriptAndMoments"
+                  fit="width"
+                  [isChecked]="presenter.form.context().value() === 'transcriptAndMoments'"
+                  (checked)="presenter.form.context().value.set('transcriptAndMoments')"
+                  ><span slot="label">{{
+                    'loc.resonanz.settings.contextMarkers' | translate
+                  }}</span></mosaik-segment-item
+                ></mosaik-segment
+              ><span class="caption">{{ 'loc.resonanz.settings.contextHint' | translate }}</span>
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.settings.autoAnalysis' | translate }}</span
+                ><span class="caption">{{
+                  'loc.resonanz.settings.manualAnalysis' | translate
+                }}</span>
+              </div>
+              <mosaik-toggle-switch
+                [formField]="presenter.form.autoAnalyze"
+                [attr.aria-label]="'loc.resonanz.settings.autoAnalyzeLabel' | translate"
+                [disabled]="presenter.capture.active()"
+              />
+            </div>
+          </div>
+          <details class="connection-details" [open]="connectionOpen() || !!presenter.login()">
+            <summary>{{ 'loc.resonanz.settings.connectionDetails' | translate }}</summary>
+            <div class="setting" test-id="assistant-status">
+              @if (presenter.checking()) {
+                <span role="status">{{ 'loc.resonanz.settings.checking' | translate }}</span>
+              } @else if (presenter.status(); as status) {
+                <span class="caption">{{
+                  status.authenticated
+                    ? ('loc.resonanz.auth.connected' | translate)
+                    : status.message
+                      ? (status.message | message)
+                      : ('loc.resonanz.error.signInRequired' | translate)
+                }}</span>
+                <div class="auth-actions">
+                  @if (status.authenticated) {
+                    <mosaik-button
+                      test-id="assistant-logout"
+                      [label]="'loc.resonanz.auth.logout' | translate"
+                      appearance="plain"
+                      (click)="presenter.logout()"
+                    />
+                  } @else {
+                    @for (method of presenter.authMethods(); track method.id) {
+                      <mosaik-button
+                        [attr.test-id]="'assistant-login-' + method.id"
+                        [label]="method.label"
+                        appearance="outline"
+                        [disabled]="presenter.saving()"
+                        (click)="presenter.connect(method.id)"
+                      />
+                    }
+                  }
+                </div>
+              }
+              <mosaik-button
+                [label]="'loc.resonanz.settings.testHint' | translate"
+                appearance="plain"
+                [disabled]="!presenter.status()?.authenticated || presenter.testing()"
+                [isBusy]="presenter.testing()"
+                (click)="presenter.testAssistant()"
+              />
+              @if (presenter.testResult(); as result) {
+                <p class="success" role="status">{{ result }}</p>
+              }
+              <mosaik-button
+                test-id="check-assistant"
+                [label]="'loc.resonanz.settings.checkConnection' | translate"
+                icon="refresh"
+                appearance="plain"
+                [disabled]="presenter.checking()"
+                (click)="presenter.saveAndCheck()"
+              />
+            </div>
+            <resonanz-assistant-login />
+          </details>
+          <details class="advanced">
+            <summary>{{ 'loc.resonanz.settings.advanced' | translate }}</summary>
+            <div class="setting">
+              <mosaik-select
+                test-id="assistant-provider"
+                [label]="'loc.resonanz.settings.assistant' | translate"
+                [formField]="presenter.form.provider"
+                [disabled]="presenter.capture.active()"
+                ><mosaik-select-item value="codex" label="Codex" /><mosaik-select-item
+                  value="claude"
+                  label="Claude Code" /></mosaik-select
+              ><mosaik-textbox
+                test-id="assistant-model"
+                [label]="'loc.resonanz.settings.model' | translate"
+                [placeholder]="'loc.resonanz.settings.defaultModel' | translate"
+                [formField]="presenter.form.model"
+              /><mosaik-textbox
+                [label]="'loc.resonanz.settings.account' | translate"
+                [formField]="presenter.form.accountId"
+              /><mosaik-textbox
+                [label]="'loc.resonanz.settings.path' | translate"
+                [placeholder]="'loc.resonanz.settings.autoDetect' | translate"
+                [formField]="presenter.form.executable"
+              /><mosaik-button
+                test-id="save-settings"
+                [label]="'loc.resonanz.settings.saveCheck' | translate"
+                appearance="outline"
+                [disabled]="
+                  presenter.form().invalid() || presenter.saving() || presenter.capture.active()
+                "
+                (click)="presenter.saveAndCheck()"
+              />
+            </div>
+          </details>
+        </section>
+        <section id="settings-transcription" [hidden]="!visibility()['transcription']">
+          <h2>{{ 'loc.resonanz.settings.transcription' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting">
+              <mosaik-select
+                [label]="'loc.resonanz.settings.conversationLanguage' | translate"
+                [formField]="presenter.form.locale"
+                [disabled]="presenter.capture.active()"
+                ><mosaik-select-item
+                  value="de-DE"
+                  [label]="'loc.resonanz.common.german' | translate"
+                /><mosaik-select-item
+                  value="en-US"
+                  [label]="'loc.resonanz.common.englishUs' | translate"
+                />
+                @for (
+                  locale of presenter.library.capabilities()?.speechLocales ?? [];
+                  track locale
+                ) {
+                  @if (locale !== 'de-DE' && locale !== 'en-US') {
+                    <mosaik-select-item [value]="locale" [label]="locale" />
+                  }
+                }
+              </mosaik-select>
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.settings.autoTranscribe' | translate }}</span
+                ><span class="caption">{{
+                  'loc.resonanz.settings.afterRecording' | translate
+                }}</span>
+              </div>
+              <mosaik-toggle-switch
+                test-id="auto-transcribe"
+                [formField]="presenter.form.autoTranscribe"
+                [disabled]="presenter.capture.active()"
+                [attr.aria-label]="'loc.resonanz.settings.autoTranscribeLabel' | translate"
+              />
+            </div>
+            <div class="setting toggle-setting">
+              <div>
+                <span>{{ 'loc.resonanz.settings.markPauses' | translate }}</span
+                ><span class="caption">{{ 'loc.resonanz.settings.pauseHint' | translate }}</span>
+              </div>
+              <mosaik-toggle-switch
+                test-id="mark-pauses"
+                [formField]="presenter.form.markPausesInTranscript"
+                [disabled]="presenter.capture.active()"
+                [attr.aria-label]="'loc.resonanz.settings.markPauses' | translate"
+              />
+            </div>
+            <div class="setting">
+              <p class="caption">
+                {{
+                  presenter.library.capabilities()?.nativeTranscription
+                    ? ('loc.resonanz.settings.transcriptionHint' | translate)
+                    : ('loc.resonanz.settings.noTranscription' | translate)
+                }}
+              </p>
+              @if (presenter.library.capabilities()?.platform === 'win32') {
+                <p class="caption">{{ 'loc.resonanz.settings.windowsLimit' | translate }}</p>
+              }
+            </div>
+          </div>
+        </section>
+        <section id="settings-profile" [hidden]="!visibility()['profile']">
+          <h2>{{ 'loc.resonanz.settings.you' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting">
+              <mosaik-textbox
+                [label]="'loc.resonanz.settings.name' | translate"
+                [placeholder]="'loc.resonanz.settings.namePlaceholder' | translate"
+                [formField]="presenter.form.userName"
+              />
+            </div>
+            <div class="setting">
+              <mosaik-textbox
+                [label]="'loc.resonanz.settings.aliases' | translate"
+                [placeholder]="'loc.resonanz.settings.aliasesPlaceholder' | translate"
+                [formField]="presenter.form.addressedAs"
+              />
+            </div>
+            <div class="setting">
+              <p class="caption">{{ 'loc.resonanz.settings.nameHint' | translate }}</p>
+            </div>
+          </div>
+        </section>
+        <section id="settings-speech" [hidden]="!visibility()['speech']">
+          <h2>{{ 'loc.resonanz.nav.voice' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting recognition">
+              <div>
+                <span>{{ 'loc.resonanz.settings.recognition' | translate }}</span
+                ><span class="caption"
+                  >{{
+                    presenter.library.capabilities()?.platform === 'darwin'
+                      ? 'macOS'
+                      : ('loc.resonanz.settings.os' | translate)
+                  }}, {{ conversationLanguage() }}</span
+                >
+              </div>
+              <span class="availability" [class.success]="recognitionAvailable()">{{
+                recognitionAvailable() ? '✓' : '!'
+              }}</span>
+            </div>
+            <div class="setting">
+              <mosaik-select
+                test-id="native-voice"
+                [label]="'loc.resonanz.settings.voice' | translate"
+                [placeholder]="'loc.resonanz.settings.systemVoice' | translate"
+                [formField]="presenter.form.voice"
+                [disabled]="presenter.capture.active()"
+                ><mosaik-select-item
+                  value="default"
+                  [label]="'loc.resonanz.settings.systemVoice' | translate"
+                />
+                @for (
+                  voice of presenter.library.capabilities()?.speechVoices ?? [];
+                  track voice.id
+                ) {
+                  <mosaik-select-item
+                    [value]="voice.id"
+                    [label]="voice.name + ' (' + voice.locale + ')'"
+                  />
+                }
+              </mosaik-select>
+            </div>
+            <div class="setting">
+              <span>{{ 'loc.resonanz.settings.speechRate' | translate }}</span
+              ><mosaik-slider
+                [min]="0"
+                [max]="4"
+                test-id="speech-rate"
+                [value]="presenter.speechRateIndex()"
+                [step]="1"
+                [ticks]="5"
+                [disabled]="presenter.capture.active()"
+                (rangeValueChanged)="presenter.setSpeechRateIndex($event.newValue)"
+                [attr.aria-label]="'loc.resonanz.settings.speechRate' | translate"
+              /><span class="range-labels caption"
+                ><span>{{ 'loc.resonanz.settings.speechSlow' | translate }}</span
+                ><span>{{ 'loc.resonanz.settings.speechFast' | translate }}</span></span
+              ><span class="caption">{{ 'loc.resonanz.settings.speechRateHint' | translate }}</span>
+            </div>
+            @if (presenter.library.capabilities()?.speechMessage; as message) {
+              <div class="setting">
+                <p class="caption">{{ message | message }}</p>
+              </div>
             }
           </div>
-        </mosaik-card>
+          <details class="speech-advanced advanced">
+            <summary>{{ 'loc.resonanz.settings.instructions' | translate }}</summary>
+            <div class="setting">
+              <mosaik-textbox
+                test-id="conversation-instructions"
+                [label]="'loc.resonanz.settings.instructions' | translate"
+                [multiline]="true"
+                [multilineRows]="4"
+                [formField]="presenter.form.conversationInstructions"
+                [disabled]="presenter.capture.active()"
+              />
+            </div>
+          </details>
+        </section>
+        <section id="settings-storage" [hidden]="!visibility()['storage']">
+          <h2>{{ 'loc.resonanz.settings.storage' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting">
+              <resonanz-storage-breakdown
+                label="loc.resonanz.settings.localData"
+                [segments]="storageSegments()"
+                [totalBytes]="presenter.library.storage()?.totalBytes ?? 0"
+                [busy]="presenter.library.measuringStorage()"
+                busyLabel="loc.resonanz.settings.measuringStorage"
+              />
+              <p class="caption">
+                {{
+                  intl.t(
+                    'loc.resonanz.settings.storageHint',
+                    presenter.library.storage()?.sessionCount ?? presenter.library.sessions().length
+                  )
+                }}
+              </p>
+            </div>
+            <div class="setting">
+              <mosaik-select
+                [label]="'loc.resonanz.settings.deleteAuto' | translate"
+                test-id="audio-retention"
+                [formField]="presenter.form.audioRetentionDays"
+                [disabled]="presenter.capture.active() || presenter.saving()"
+                ><mosaik-select-item
+                  value="never"
+                  [label]="'loc.resonanz.settings.neverShort' | translate"
+                />
+                <mosaik-select-item
+                  value="30"
+                  [label]="'loc.resonanz.settings.after30Days' | translate"
+                />
+                <mosaik-select-item
+                  value="90"
+                  [label]="'loc.resonanz.settings.after90Days' | translate"
+                /> </mosaik-select
+              ><span class="caption">{{ 'loc.resonanz.settings.retentionHint' | translate }}</span>
+            </div>
+            <div class="setting">
+              <div class="storage-actions">
+                <mosaik-button
+                  [label]="
+                    presenter.library.capabilities()?.platform === 'darwin'
+                      ? ('loc.resonanz.settings.finder' | translate)
+                      : ('loc.resonanz.settings.explorer' | translate)
+                  "
+                  icon="folder"
+                  appearance="outline"
+                  (click)="reveal()"
+                /><mosaik-button
+                  [label]="'loc.resonanz.settings.deleteAll' | translate"
+                  icon="trash"
+                  appearance="outline"
+                  variant="danger"
+                  test-id="clear-library"
+                  [disabled]="
+                    !!presenter.clearBlockedReason() ||
+                    presenter.clearingLibrary() ||
+                    !presenter.library.sessions().length
+                  "
+                  [attr.title]="presenter.clearBlockedReason() | message"
+                  (click)="presenter.requestClearLibrary()"
+                />
+              </div>
+              <p class="caption">{{ 'loc.resonanz.settings.onlineHint' | translate }}</p>
+            </div>
+          </div>
+        </section>
+        <section id="settings-shortcuts" class="wide-section" [hidden]="!visibility()['shortcuts']">
+          <h2>{{ 'loc.resonanz.settings.shortcutsEverywhere' | translate }}</h2>
+          <div class="settings-card shortcut-grid">
+            @for (shortcut of shortcuts(); track shortcut.id) {
+              <div>
+                <span>{{ shortcut.label | message }}</span
+                ><mosaik-kbd [value]="shortcut.keys" [isCompact]="true" />
+              </div>
+            }
+          </div>
+        </section>
+        <section
+          id="settings-appearance"
+          class="wide-section"
+          [hidden]="!visibility()['appearance']"
+        >
+          <h2>{{ 'loc.resonanz.settings.appearance' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting">
+              <mosaik-select
+                test-id="ui-language"
+                [label]="'loc.resonanz.settings.language' | translate"
+                [formField]="presenter.form.uiLanguage"
+              >
+                <mosaik-select-item value="en" label="English" />
+                <mosaik-select-item value="de" label="Deutsch" />
+              </mosaik-select>
+              <span class="caption">{{ 'loc.resonanz.settings.languageHint' | translate }}</span>
+            </div>
+            <div class="setting">
+              <mosaik-select
+                [label]="'loc.resonanz.settings.color' | translate"
+                test-id="appearance"
+                [formField]="presenter.form.appearance"
+                ><mosaik-select-item
+                  value="system"
+                  [label]="'loc.resonanz.settings.system' | translate" /><mosaik-select-item
+                  value="light"
+                  [label]="'loc.resonanz.settings.light' | translate" /><mosaik-select-item
+                  value="dark"
+                  [label]="'loc.resonanz.settings.dark' | translate" /></mosaik-select
+              ><span class="caption">{{ 'loc.resonanz.settings.systemHint' | translate }}</span>
+            </div>
+          </div>
+        </section>
+        <section id="settings-updates" class="wide-section" [hidden]="!visibility()['updates']">
+          <h2>{{ 'loc.resonanz.settings.updates' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting update-setting" test-id="update-settings">
+              <div class="update-summary">
+                <strong>{{
+                  intl.t('loc.resonanz.update.version', updates.state()?.currentVersion ?? '–')
+                }}</strong>
+                <span class="caption" test-id="update-status" role="status">{{
+                  updateStatus()
+                }}</span>
+              </div>
+              @switch (updates.state()?.kind) {
+                @case ('available') {
+                  <mosaik-button
+                    test-id="settings-download-update"
+                    icon="download"
+                    appearance="solid"
+                    [label]="'loc.resonanz.update.download' | translate"
+                    [disabled]="updates.busy()"
+                    (click)="updates.download()"
+                  />
+                }
+                @case ('ready') {
+                  <mosaik-button
+                    test-id="settings-install-update"
+                    icon="refresh"
+                    appearance="solid"
+                    [label]="'loc.resonanz.update.restart' | translate"
+                    [disabled]="updates.busy() || presenter.capture.active()"
+                    (click)="updates.install()"
+                  />
+                }
+                @default {
+                  <mosaik-button
+                    test-id="check-updates"
+                    icon="refresh"
+                    appearance="outline"
+                    [label]="'loc.resonanz.update.check' | translate"
+                    [disabled]="
+                      updates.busy() ||
+                      !updates.state() ||
+                      updates.state()?.kind === 'disabled' ||
+                      updates.state()?.kind === 'checking' ||
+                      updates.state()?.kind === 'downloading'
+                    "
+                    (click)="updates.check()"
+                  />
+                }
+              }
+            </div>
+          </div>
+        </section>
+        @if (noMatches()) {
+          <p class="caption wide-section" role="status">
+            {{ 'loc.resonanz.settings.noMatches' | translate }}
+          </p>
         }
       </div>
-    </mosaik-card>
-    <div class="flex flex-col gap-3">
-      <mosaik-card appearance="outline">
-        <div slot="content" class="flex flex-col gap-2.5 p-3">
-          <div class="flex flex-col gap-0.5">
-            <mosaik-text text="Live mit dem lokalen Assistenten" mosaikTypography="subtitle1" />
-            <mosaik-text
-              text="Die native Spracherkennung hört zu. Dein angemeldeter Assistent antwortet über Synapse und eine Systemstimme spricht die Antwort. Live-Gespräche verwenden das Systemstandardmikrofon."
-              mosaikTypography="body2"
-              variant="neutral"
-              [wrap]="true"
-            />
-          </div>
-          @if (presenter.library.capabilities()?.nativeConversation) {
-          <mosaik-text text="Native Sprachunterhaltung ist verfügbar." variant="success" />
-          } @else {
-          <mosaik-text
-            text="Native Sprachunterhaltung ist auf diesem System noch nicht verfügbar. Prüfe die Spracherkennung und ihre Berechtigungen."
-            variant="warning"
-            [wrap]="true"
-          />
-          } @if (presenter.library.capabilities()?.speechMessage; as message) {
-          <mosaik-text [text]="message" mosaikTypography="caption" [wrap]="true" />
-          }
-          <mosaik-select
-            test-id="native-voice"
-            label="Systemstimme"
-            [formField]="presenter.form.voice"
-            [disabled]="presenter.capture.active()"
-          >
-            <mosaik-select-item value="" label="Systemstandard" />
-            @for (voice of presenter.library.capabilities()?.speechVoices ?? []; track voice.id) {
-            <mosaik-select-item
-              [value]="voice.id"
-              [label]="voice.name + ' (' + voice.locale + ')'"
-            />
-            }
-          </mosaik-select>
-          <mosaik-textbox
-            test-id="conversation-instructions"
-            label="Gesprächsanweisung"
-            [multiline]="true"
-            [multilineRows]="4"
-            [formField]="presenter.form.conversationInstructions"
-            [disabled]="presenter.capture.active()"
-          />
-        </div>
-      </mosaik-card>
-      <mosaik-card appearance="outline">
-        <div slot="content" class="flex flex-col gap-2.5 p-3">
-          <mosaik-text text="Aufnahme und Spracherkennung" mosaikTypography="subtitle1" />
-          @if (presenter.library.capabilities()?.nativeTranscription) {
-          <mosaik-text
-            text="Native Spracherkennung ist verfügbar. Du kannst Aufzeichnungen automatisch oder später auf Wunsch transkribieren."
-            variant="neutral"
-            mosaikTypography="caption"
-            [wrap]="true"
-          />
-          } @else {
-          <mosaik-text
-            text="Native Spracherkennung ist hier nicht verfügbar. Aufnehmen und Abspielen bleiben möglich; ein Transkript kannst du manuell ergänzen."
-            variant="neutral"
-            mosaikTypography="caption"
-            [wrap]="true"
-          />
-          }
-          <mosaik-checkbox
-            test-id="auto-transcribe"
-            label="Aufnahmen automatisch transkribieren"
-            [formField]="presenter.form.autoTranscribe"
-            [disabled]="presenter.capture.active()"
-          />
-          @if (presenter.library.capabilities()?.platform === 'win32') {
-          <mosaik-text
-            text="Dateitranskription unter Windows: maximal 64 MiB je Audiodatei und etwa 35 Minuten je Aufnahme."
-            mosaikTypography="caption"
-            variant="neutral"
-            [wrap]="true"
-          />
-          }
-          <mosaik-textbox
-            label="Sprache der Spracherkennung"
-            placeholder="de-DE"
-            [formField]="presenter.form.locale"
-            [disabled]="presenter.capture.active()"
-          />
-          <mosaik-button
-            label="Mikrofone anzeigen"
-            icon="mic"
-            appearance="plain"
-            [disabled]="presenter.capture.active()"
-            (click)="presenter.capture.loadDevices()"
-          />
-          <mosaik-select
-            test-id="microphone-select"
-            label="Mikrofon für Aufzeichnungen"
-            [formField]="presenter.capture.deviceForm.id"
-            [disabled]="presenter.capture.active()"
-          >
-            <mosaik-select-item value="" label="Systemstandard" />
-            @for (device of presenter.capture.devices(); track device.deviceId) {
-            <mosaik-select-item [value]="device.deviceId" [label]="device.label" />
-            }
-          </mosaik-select>
-          <mosaik-text
-            text="Diese Gerätewahl gilt für Aufzeichnungen. Live-Gespräche verwenden das Systemstandardmikrofon."
-            mosaikTypography="caption"
-            variant="neutral"
-            [wrap]="true"
-          />
-        </div>
-      </mosaik-card>
     </div>
   </div>
 </div>
+
+@if (presenter.confirmingClear()) {
+  <resonanz-confirmation-dialog
+    title="loc.resonanz.settings.clearTitle"
+    description="loc.resonanz.settings.clearDescription"
+    [details]="[
+      intl.t('loc.resonanz.settings.clearSessions', presenter.library.sessions().length),
+      'loc.resonanz.settings.clearContents',
+    ]"
+    warning="loc.resonanz.settings.clearWarning"
+    confirmLabel="loc.resonanz.settings.clearConfirm"
+    confirmTestId="confirm-clear-library"
+    [busy]="presenter.clearingLibrary()"
+    [blockedReason]="presenter.clearBlockedReason()"
+    (confirmed)="presenter.clearLibrary()"
+    (cancelled)="presenter.cancelClearLibrary()"
+  />
+}

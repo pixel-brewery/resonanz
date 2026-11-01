@@ -41,7 +41,7 @@ public static class ResonanzSystemSpeech {
             engine.SpeechHypothesized += (sender, e) => Emit(new { type = "result", text = e.Result.Text, isFinal = false, timestampMs = clock.ElapsedMilliseconds });
             engine.SpeechRecognized += (sender, e) => Emit(new { type = "result", text = e.Result.Text, isFinal = true, timestampMs = clock.ElapsedMilliseconds });
             engine.RecognizeCompleted += (sender, e) => {
-                if (e.Error != null) Emit(new { type = "error", message = "Die native Spracherkennung wurde unterbrochen." });
+                if (e.Error != null) Emit(new { type = "error", message = "loc.resonanz.error.recognitionInterrupted" });
             };
             engine.RecognizeAsync(RecognizeMode.Multiple);
             Emit(new { type = "ready" });
@@ -50,9 +50,10 @@ public static class ResonanzSystemSpeech {
             engine.RecognizeAsyncCancel();
         }
     }
-    public static void Synthesize(string text, string voice, string path) {
+    public static void Synthesize(string text, string voice, string path, int rate) {
         using (var synth = new SpeechSynthesizer()) {
             if (!String.IsNullOrEmpty(voice)) synth.SelectVoice(voice);
+            synth.Rate = rate;
             synth.SetOutputToWaveFile(path);
             synth.Speak(text);
             synth.SetOutputToNull();
@@ -103,7 +104,7 @@ try {
     switch ($Mode) {
         'inspect' { [ResonanzSystemSpeech]::Inspect() }
         'listen' { [ResonanzSystemSpeech]::Listen($configuration.locale) }
-        'synthesize' { [ResonanzSystemSpeech]::Synthesize($configuration.text, $configuration.voice, $configuration.outputPath) }
+        'synthesize' { [ResonanzSystemSpeech]::Synthesize($configuration.text, $configuration.voice, $configuration.outputPath, [int]$configuration.rate) }
         'transcribe' { [ResonanzSystemSpeech]::Transcribe($configuration.locale, $configuration.filePath) }
     }
 } catch {
@@ -114,6 +115,6 @@ try {
             $exception = $exception.InnerException
         }
     }
-    [Console]::Error.WriteLine('Die native Windows-Sprachfunktion ist nicht verfügbar. Prüfe installierte Erkennungssprache, Stimme und Mikrofonfreigabe.')
+    [Console]::Error.WriteLine('Native Windows speech is unavailable. Check installed recognition languages, voices and microphone permission.')
     exit 1
 }

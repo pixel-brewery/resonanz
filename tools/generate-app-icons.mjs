@@ -7,62 +7,111 @@ import sharp from 'sharp';
 // #endregion
 
 const root = resolve('resources/icons');
+const trayOnly = process.argv.slice(2).includes('--tray-only');
 const source = await readFile(resolve(root, 'resonanz-mark.svg'), 'utf8');
 const mark = source.match(/<g\s+id="resonanz-mark"[\s\S]*?<\/g>/u)?.[0];
-if (!mark) throw new Error('Die kanonische Resonanz-Bildmarke fehlt.');
+if (!mark) throw new Error('The canonical Resonanz mark is missing.');
 
-const appSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="color:#087f8c">
-  <rect x="48" y="48" width="928" height="928" rx="224" fill="#fafaf9"/>
+const appSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="color:#ffffff">
+  <rect x="48" y="48" width="928" height="928" rx="224" fill="#171717"/>
   <g transform="translate(128 128) scale(24)">${mark}</g>
 </svg>\n`;
-await writeFile(resolve(root, 'resonanz.svg'), appSvg);
 const appDirectory = resolve(root, 'png/app');
 const trayDirectory = resolve(root, 'png/tray');
 const markDirectory = resolve(root, 'png/mark');
-await Promise.all(
-  [appDirectory, trayDirectory, markDirectory].map((path) => mkdir(path, { recursive: true })),
-);
+await mkdir(trayDirectory, { recursive: true });
 
-for (const size of [16, 20, 24, 32, 40, 48, 64, 128, 180, 192, 256, 512, 1024]) {
-  await render(appSvg, size, resolve(appDirectory, `resonanz-${size}.png`));
+if (!trayOnly) {
+  await writeFile(resolve(root, 'resonanz.svg'), appSvg);
+  await Promise.all([appDirectory, markDirectory].map((path) => mkdir(path, { recursive: true })));
+  for (const size of [16, 20, 24, 32, 40, 48, 64, 128, 180, 192, 256, 512, 1024]) {
+    await render(appSvg, size, resolve(appDirectory, `resonanz-${size}.png`));
+  }
+  for (const size of [16, 24, 32, 48, 64, 128, 256]) {
+    await render(source, size, resolve(markDirectory, `resonanz-mark-${size}.png`));
+  }
 }
-for (const size of [16, 24, 32, 48, 64, 128, 256]) {
-  await render(source, size, resolve(markDirectory, `resonanz-mark-${size}.png`));
-}
-for (const [suffix, badge] of [
-  ['', ''],
-  ['-recording', '<circle cx="27" cy="5" r="3" fill="currentColor"/>'],
+for (const [suffix, contents] of [
+  ['', mark],
+  ['-recording', '<circle cx="16" cy="16" r="7" fill="#e7000b"/>'],
+  ['-paused', '<circle cx="16" cy="16" r="7" fill="#737373"/>'],
+  [
+    '-attention',
+    `${mark}<circle cx="25" cy="7" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>`,
+  ],
+  [
+    '-attention-dark',
+    `<g style="color:#ffffff">${mark}</g><circle cx="25" cy="7" r="5" fill="#f59e0b" stroke="#171717" stroke-width="2"/>`,
+  ],
 ]) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="color:#000">${mark}${badge}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="color:#000">${contents}</svg>`;
   await render(svg, 24, resolve(trayDirectory, `resonanz-tray${suffix}.png`));
   await render(svg, 48, resolve(trayDirectory, `resonanz-tray${suffix}@2x.png`));
   await render(svg, 24, resolve(trayDirectory, `resonanz${suffix}Template.png`));
   await render(svg, 48, resolve(trayDirectory, `resonanz${suffix}Template@2x.png`));
 }
 
-const icoImages = await Promise.all(
-  [16, 24, 32, 48, 64, 128, 256].map(async (size) => ({
-    size,
-    data: await readFile(resolve(appDirectory, `resonanz-${size}.png`)),
-  })),
+// Windows retains the app's glyph; badges carry the same capture state as macOS dots.
+for (const dark of [false, true]) {
+  const glyph = dark ? `<g style="color:#ffffff">${mark}</g>` : mark;
+  const backdrop = dark ? '#171717' : '#ffffff';
+  for (const [state, color] of [
+    ['', null],
+    ['-recording', '#e7000b'],
+    ['-paused', '#737373'],
+  ]) {
+    const badge = color
+      ? `<circle cx="25" cy="25" r="5" fill="${color}" stroke="${backdrop}" stroke-width="2"/>`
+      : '';
+    await renderTray(`-windows${state}${dark ? '-dark' : ''}`, `${glyph}${badge}`);
+  }
+}
+
+// Frame zero is the existing solid recording dot. Seven finite halo frames finish a 1.6s pulse.
+for (let frame = 1; frame < 8; frame++) {
+  const fraction = frame / 8;
+  const halo = `<circle cx="16" cy="16" r="${7 + fraction * 9}" fill="#e7000b" opacity="${0.35 * (1 - fraction)}"/>`;
+  await renderTray(
+    `-recording-pulse-${frame}`,
+    `${halo}<circle cx="16" cy="16" r="7" fill="#e7000b"/>`,
+  );
+}
+
+if (!trayOnly) {
+  const icoImages = await Promise.all(
+    [16, 24, 32, 48, 64, 128, 256].map(async (size) => ({
+      size,
+      data: await readFile(resolve(appDirectory, `resonanz-${size}.png`)),
+    })),
+  );
+  await writeFile(resolve(root, 'resonanz.ico'), createIco(icoImages));
+  const icnsImages = await Promise.all(
+    [
+      ['icp4', 16],
+      ['icp5', 32],
+      ['icp6', 64],
+      ['ic07', 128],
+      ['ic08', 256],
+      ['ic09', 512],
+      ['ic10', 1024],
+    ].map(async ([type, size]) => ({
+      type,
+      data: await readFile(resolve(appDirectory, `resonanz-${size}.png`)),
+    })),
+  );
+  await writeFile(resolve(root, 'resonanz.icns'), createIcns(icnsImages));
+}
+console.log(
+  trayOnly
+    ? 'Resonanz: tray assets generated.'
+    : 'Resonanz: SVG, PNG, tray, ICO and ICNS generated.',
 );
-await writeFile(resolve(root, 'resonanz.ico'), createIco(icoImages));
-const icnsImages = await Promise.all(
-  [
-    ['icp4', 16],
-    ['icp5', 32],
-    ['icp6', 64],
-    ['ic07', 128],
-    ['ic08', 256],
-    ['ic09', 512],
-    ['ic10', 1024],
-  ].map(async ([type, size]) => ({
-    type,
-    data: await readFile(resolve(appDirectory, `resonanz-${size}.png`)),
-  })),
-);
-await writeFile(resolve(root, 'resonanz.icns'), createIcns(icnsImages));
-console.log('Resonanz: SVG, PNG, Tray-Vorlagen, ICO und ICNS erzeugt.');
+
+async function renderTray(suffix, contents) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" style="color:#000">${contents}</svg>`;
+  await render(svg, 24, resolve(trayDirectory, `resonanz-tray${suffix}.png`));
+  await render(svg, 48, resolve(trayDirectory, `resonanz-tray${suffix}@2x.png`));
+}
 
 async function render(svg, size, destination) {
   const sized = svg.replace('<svg ', `<svg width="${size}" height="${size}" `);

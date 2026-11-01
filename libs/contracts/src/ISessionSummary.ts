@@ -1,3 +1,4 @@
+import type { ISessionPipeline } from './ISessionPipeline.js';
 /**
  * Public metadata for the recording library; contains no filesystem paths.
  *
@@ -17,4 +18,14 @@ export interface ISessionSummary {
   readonly starred: boolean;
   readonly tags: readonly string[];
   readonly collectionId: string | null;
+  readonly waveform?: readonly number[];
+  readonly insightCounts?: {
+    readonly decisions: number;
+    readonly tasks: number;
+    readonly questions: number;
+    readonly moments: number;
+    readonly forMe?: number;
+  };
+  readonly transcriptAvailable?: boolean;
+  readonly pipeline?: ISessionPipeline;
 }

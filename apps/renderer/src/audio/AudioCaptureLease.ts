@@ -32,7 +32,7 @@ export class AudioCaptureLease {
    */
   public acquire(owner: symbol): void {
     if (this._owner !== null && this._owner !== owner) {
-      throw new Error('Es läuft bereits eine Aufnahme oder Live-Unterhaltung.');
+      throw new Error('loc.resonanz.error.activeCapture');
     }
 
     this._owner = owner;

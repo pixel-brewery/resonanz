@@ -64,7 +64,7 @@ export class AudioBrowserRuntime {
     const supported = preferences.find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
 
     if (!supported) {
-      throw new Error('Dieser Browser unterstützt kein geeignetes Audio-Aufnahmeformat.');
+      throw new Error('loc.resonanz.error.browserAudio');
     }
 
     return supported;

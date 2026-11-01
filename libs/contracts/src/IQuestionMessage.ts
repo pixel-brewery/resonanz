@@ -1,3 +1,5 @@
+import type { ISessionAnswer } from './ISessionInsight.js';
+
 /**
  * A persisted question or answer belonging to one session.
  *
@@ -9,5 +11,8 @@ export interface IQuestionMessage {
   readonly text: string;
   readonly createdAt: string;
   readonly runId?: string;
+  /** Actual executing provider; absent on legacy messages whose source is unknown. */
+  readonly provider?: string;
   readonly state: 'complete' | 'streaming' | 'cancelled' | 'error';
+  readonly answer?: ISessionAnswer;
 }

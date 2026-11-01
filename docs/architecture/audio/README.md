@@ -1,100 +1,98 @@
-# Aufnahme, Sprachausgabe und Sprachgespräch
+# Recording, speech output and conversation audio
 
-## Unverändert aus Flamox übernommen
+## Provenance-verified upstream sources
 
-`@resonanz/audio` enthält 51 Produktionsdateien und 12 Verhaltensspezifikationen
-bytegleich aus dem FLAMOX365-Core-Frontend. Revision, Originalpfade, Zielpfade und
-SHA-256-Digests stehen im [Herkunftsmanifest](../../../libs/audio/provenance.json).
-Die vollständigen Attributionen und MIT-Texte bleiben erhalten.
+`@resonanz/audio` contains 51 production files and 12 supplied behavior specs from
+a private upstream. [The provenance manifest](../../../libs/audio/provenance.json)
+records revision, original/copied paths and original SHA-256 hashes without
+publishing the private repository identity. All files remain byte-identical except
+`PcmAudioWorkletDefinition.ts`: its processor class and registration identifiers
+were renamed for Resonanz. Its original `sha256`, separate `downstreamSha256` and
+modification description preserve both upstream evidence and current integrity.
+The DSP and message protocol are unchanged. Preserve complete upstream notices and
+license text. Other product adaptations belong outside the copied file set.
 
-| Gemeinsamer Besitzer    | Verantwortung                                                 |
-| ----------------------- | ------------------------------------------------------------- |
-| AudioInputDeviceService | Verfügbare Aufnahmemikrofone und Gerätefreigabe               |
-| AudioRecorder           | Mikrofonstream, MediaRecorder, geordnete Chunks und Abschluss |
-| PcmAudioCapture         | Begrenzte PCM-Fragmente für Pegel- und Sprachaktivität        |
-| PcmAudioStreamPlayer    | Gemeinsame gepufferte PCM-Ausgabe                             |
-| AudioPlayer             | Gespeicherte Aufzeichnungen anhören                           |
-| TextToSpeechService     | Gespeicherten Text mit Browser-/Systemstimme vorlesen         |
-| DurableAudioChunkOutbox | Gemeinsam bereitgestellte IndexedDB-Outbox                    |
+| Primitive               | Responsibility                                        |
+| ----------------------- | ----------------------------------------------------- |
+| AudioInputDeviceService | Microphone discovery and device permission            |
+| AudioRecorder           | MediaRecorder stream, ordered chunks and finalization |
+| PcmAudioCapture         | Bounded PCM samples for level/activity                |
+| PcmAudioStreamPlayer    | Buffered PCM playback                                 |
+| AudioPlayer             | Saved recording playback                              |
+| TextToSpeechService     | Browser/system reading of saved text                  |
+| DurableAudioChunkOutbox | Shared IndexedDB outbox primitive                     |
 
-Produktkomposition liegt außerhalb des kopierten Dateisatzes. Der statische
-Worklet-Loader verwendet dessen unveränderte Prozessordefinition als lokale
-Datei. `tools/generate-audio-worklet.mjs --check` bestätigt die Übereinstimmung;
-die strikte Skriptrichtlinie muss keine Blob-Skripte erlauben.
+The static worklet loader emits the provenance-verified processor definition as a local asset.
+`tools/generate-audio-worklet.mjs --check` verifies it; the script policy need not
+allow blob scripts. WaveformService decodes protected local recordings in a bounded,
+serialized path and caches measured normalized peaks. Missing/silent data is not
+replaced with decorative random amplitude.
 
-## Keyloser Live-Pfad
+## Keyless live composition
 
-Resonanz verwendet die systemeigene Spracherkennung, den angemeldeten lokalen
-Codex-/Claude-Assistenten über Synapse und native Sprachausgabe. Flamox-spezifische
-Cloud-Audioverträge, Credits und API-Key-Einrichtung gehören nicht zum Produkt.
-Die vorhandenen Audioprimitive bleiben dabei unverändert.
+The renderer owns capture, PCM, playback and ConversationAudioRecorder's stereo graph.
+Main owns system recognition and native WAV clips. Utility owns session context and
+Synapse turns. No cloud audio billing/key setup is introduced.
 
-Der Renderer besitzt Mikrofonaufnahme, PCM-Auswertung, Wiedergabe und den
-Stereo-Mediengraphen. Electron Main besitzt native Erkennung und Sprachclips.
-Der Utility Process besitzt Gesprächskontext und Synapse-Ausführung.
+Final `speech.result` participant segments are persisted before confirmation.
+`live.respond` starts actual Synapse work. Ordered speakable response sections are
+synthesized and played through protected clip URLs. Microphone and actual output
+occupy separate archive channels. Only fully played sections are confirmed in the
+assistant transcript. Interrupted partial sound remains in audio; its unheard rest
+is never claimed as spoken. Live capture and the native recognizer use the same
+system-default microphone source.
 
-- `speech.start/stop/listen` koordinieren die systemeigene Erkennung.
-- `speech.result` trägt Session, Segmentkennung, Text, Finalität und Zeitmarken.
-- Der Host persistiert einen finalen Teilnehmerbeitrag vor seiner Bestätigung.
-- `live.respond` startet einen echten Assistententurn für diesen Gesprächsstand.
-- `assistant.text/completed/failed` sind an dessen Session und Run-ID gebunden.
-- `speech.synthesize` erstellt lokale WAV-Clips; eine geschützte Voice-URL erlaubt
-  die Wiedergabe ohne allgemeine Dateisystemrechte im Renderer.
+A shared AudioCaptureLease prevents parallel recording/live/preview/dictation owners.
+Generation/session/run/clip identities reject late work. Recognition is coordinated
+around native output; mute stops native listening as well as the archive input.
+Pause/stop release the microphone and recognition, await the final browser chunk and
+finalize only after acknowledged writes. Cleanup affects owned resources only.
 
-Der Renderer führt sprechbare Antwortabschnitte in geordneter Folge aus.
-Tatsächliche Wiedergabe und Mikrofon gehen auf getrennte Kanäle des bestehenden
-ConversationAudioRecorder. Nur vollständig abgespielte Antwortabschnitte werden
-als Assistententranskript bestätigt. Ein unterbrochener Anfang bleibt im Audio;
-sein ungehörter Rest wird nicht archiviert. Das native Systemmikrofon und
-das Aufnahmemikrofon müssen bei Live dieselbe Standardquelle verwenden.
+OrderedAudioChunkWriter starts at sequence 1 and bounds queued audio to 16 MiB.
+Backpressure stops further capture rather than silently dropping accepted blocks.
+Host writes reject gaps/changed retries and accept identical retries idempotently.
 
-## Lebenszyklus und Begrenzungen
+## Transcription and reading
 
-Eine gemeinsame Mikrofon-Lease verhindert parallele Recording-/Live-Starts.
-Generationen trennen Session, Assistententurn und Sprachclip. Späte Ergebnisse
-abgebrochener Arbeit dürfen weder eine neue Session verändern noch hörbar werden.
-Während eigener Ausgabe wird die Erkennung passend pausiert; Unterbrechung gibt
-das Hören wieder frei. Die Audioaktivität wird aus dem vorhandenen PCM-Pfad
-bestimmt. Mute stoppt auch native Erkennung, nicht bloß die Archivspur.
+Automatic file transcription is a separate setting and runs after recording ends.
+Availability, selected speech locale and OS permissions remain independent from
+stored audio. macOS uses native file recognition. Windows receives locally decoded
+mono 16 kHz PCM16 WAV up to 64 MiB. It collects results through RecognizeCompleted,
+including the final passage at WAV EOF; repeated recognition beyond EOF can fail.
+See the [System.Speech API documentation](https://learn.microsoft.com/en-us/dotnet/api/system.speech.recognition.speechrecognitionengine.setinputtowavefile?view=netframework-4.8.1).
 
-Pause und Stop geben Mikrofon und native Erkennungsressourcen frei. Der
-abschließende Browserchunk wird abgewartet und erst nach bestätigter Ablage wird
-die Session finalisiert. Native Syntheseprozesse und Helper besitzen begrenzte,
-abgewartete Bereinigung; fremde Prozesse bleiben unberührt.
+Saved summary/answer reading uses unchanged TextToSpeechService, including its voice,
+rate, pitch, volume and cancellation behavior. Native live clips are separate so
+heard speech can be included in the stereo archive. Selected native voices are mapped
+to the public TTS voice-name option without accessing private audio implementation.
 
-`OrderedAudioChunkWriter` schreibt ab Sequenz 1 nacheinander über die typisierte
-Desktop-Grenze. Der zurückgehaltene Audiopuffer ist auf 16MiB begrenzt. Ein
-Datenträgerfehler erzeugt keine Bestätigungslücke; vorhandene vollständige Blöcke
-bleiben als Teilaudio wiederherstellbar. Die Sessionablage bestätigt identische
-Wiederholungen idempotent und verwirft abweichende Wiederholungen oder Lücken.
+## Speech-rate preference
 
-## Transkription und Vorlesen
+The optional persisted `speechRate` preference is finite, between 0.5 and 2, with
+neutral value 1. It controls subsequent output; saving a new value does not alter
+existing recordings or already requested utterances. Saved-text reading passes it
+through the copied upstream service's public `ITextToSpeechOptions.rate` option.
+No copied source is modified.
 
-Normale Aufzeichnungen können nach ihrem Abschluss automatisch transkribiert
-werden. Die Option ist abschaltbar. Native Verfügbarkeit, ausgewählte Sprache und
-Systemfreigaben werden unabhängig vom gespeicherten Audio beurteilt.
+Native live synthesis reads current settings for every requested WAV clip, so it
+does not require a second IPC preference or a renderer-side speech owner. The
+installed `electron-native-speech` packages provide recognition, not synthesis;
+Resonanz retains its existing operating-system output composition:
 
-Auf macOS bleibt die vorhandene native Dateitranskription der Ausgangsweg.
-Windows nutzt die verfügbare SAPI-Erkennung mit lokal decodiertem PCM-WAV.
-Die Dateierkennung sammelt Ergebnisse bis zum nativen `RecognizeCompleted`-Ereignis.
-Damit bleibt der letzte erkannte Abschnitt auch beim Dateiende erhalten;
-erneute Erkennungsaufrufe nach WAV-Ende können laut
-[Microsoft-Dokumentation](https://learn.microsoft.com/en-us/dotnet/api/system.speech.recognition.speechrecognitionengine.setinputtowavefile?view=netframework-4.8.1)
-eine Ausnahme auslösen.
-Der Browserdecoderpfad ist auf 64MiB WAV begrenzt und ersetzt das Originalarchiv
-nicht. Ein fehlendes Sprachpaket erzeugt einen Einrichtungsfehler und keinen
-Cloud-Fallback.
+- macOS `say(1)` defines `-r` in words per minute. Neutral omits that option and
+  preserves the selected voice's default. Other values map to a 180-WPM reference
+  (`round(180 * speechRate)`), followed by the existing local WAV conversion.
+- Windows maps the preference to `round(10 * log2(speechRate))` and sets the native
+  [System.Speech `SpeechSynthesizer.Rate`](https://learn.microsoft.com/en-us/dotnet/api/system.speech.synthesis.speechsynthesizer.rate?view=netframework-4.8.1),
+  whose supported integer range is -10 through 10. Neutral maps to zero.
 
-Für das Vorlesen gespeicherter Zusammenfassungen und Antworten wird weiterhin
-`TextToSpeechService` unverändert genutzt. Seine Stimmen-, Sprach-, Rate-,
-Tonhöhen-, Lautstärke- und Abbruchbehandlung bleiben identisch zu Flamox.
-Live-Antworten verwenden native WAV-Clips, damit die gehörte Stimme tatsächlich
-im Stereoarchiv enthalten ist.
+These native scales and the browser speech factor are different; the control
+represents a calm-to-brisk preference, not identical physical speed across voices
+or platforms. Controlled specs cover parameter mapping, legacy defaults and the
+unchanged-clip invariant. They do not establish actual audible pacing or Windows
+native execution; those require separate runtime evidence.
 
-## Prüfung
-
-Der Herkunftscheck beweist die übernommenen Bytes. Unit- und kontrollierte
-Medientests beweisen ihre jeweiligen Verträge; sie ersetzen kein reales
-Sprachgespräch. Die aktuelle [Abnahme](../../project/abnahme.md) unterscheidet
-synthetischen Mikrofoneingang, tatsächliche Systemstimme, native Spracherkennung,
-wirkliche CLI-Inferenz und native Zielplattformstarts.
+Provenance checks prove the recorded current bytes; the original digest remains
+upstream evidence for the one documented identifier adaptation. Unit/controlled media tests prove their own
+contracts. Physical recognition, native account inference, actual system output and
+archive energy each require separate [runtime evidence](../../project/verification.md).

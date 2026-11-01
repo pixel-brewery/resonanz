@@ -91,7 +91,7 @@ and awaits native/auth/runtime/process teardown. It reports cleanup failures.
 ## Audio boundary and remaining verification
 
 Synapse supplies text/CLI integration. It does not implement microphone recording,
-speech recognition or text-to-speech. The unchanged Flamox primitives own browser
+speech recognition or text-to-speech. The unchanged upstream primitives own browser
 media; Electron Main owns system recognition and archiveable native voice clips.
 The application sends persisted recognized utterances through the same Synapse
 text-turn API and records actually played replies in its stereo archive.

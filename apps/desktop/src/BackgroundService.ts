@@ -55,7 +55,7 @@ export class BackgroundService {
    * @public
    */
   public start(): Promise<void> {
-    if (this._stopping) return Promise.reject(new Error('Resonanz wird beendet.'));
+    if (this._stopping) return Promise.reject(new Error('loc.resonanz.error.quitting'));
     if (this._cleanup) return this._cleanup.then(() => this.start());
     if (this._cleanupFailure) return Promise.reject(this._cleanupFailure);
     if (this._ready) return this._ready;
@@ -66,7 +66,7 @@ export class BackgroundService {
     });
     void this._ready.catch(() => undefined);
     const worker = utilityProcess.fork(this._entry, [], {
-      serviceName: 'Resonanz Hintergrunddienst',
+      serviceName: 'Resonanz background service',
       env: { ...process.env, RESONANZ_DATA_ROOT: this._root },
       stdio: 'pipe',
     });
@@ -74,7 +74,7 @@ export class BackgroundService {
     const ownership = new OwnedProcessSupervisor(() => worker.pid);
     let graceful = false;
     const readyTimeout = setTimeout(() => {
-      this._rejectReady?.(new Error('Der Hintergrunddienst ist nicht rechtzeitig gestartet.'));
+      this._rejectReady?.(new Error('loc.resonanz.error.backgroundStart'));
       worker.kill();
     }, 30_000);
     worker.stdout?.on('data', (bytes: Buffer) => process.stdout.write(bytes));
@@ -83,9 +83,7 @@ export class BackgroundService {
       const owned = ownedProcessMessageSchema.safeParse(raw);
       if (owned.success) {
         void ownership.observe(owned.data).catch(() => {
-          this._cleanupFailure = new Error(
-            'Die Prozessverantwortung des Hintergrunddiensts konnte nicht bestätigt werden.',
-          );
+          this._cleanupFailure = new Error('loc.resonanz.error.ownerUnconfirmed');
           worker.kill();
         });
         return;
@@ -120,14 +118,10 @@ export class BackgroundService {
       clearTimeout(readyTimeout);
       this._process = undefined;
       this._ready = undefined;
-      this._rejectReady?.(new Error('Der Hintergrunddienst wurde beendet.'));
+      this._rejectReady?.(new Error('loc.resonanz.error.backgroundExit'));
       for (const pending of this._pending.values()) {
         clearTimeout(pending.timer);
-        pending.reject(
-          new Error(
-            'Der Hintergrunddienst wurde unterbrochen. Bereits gespeicherte Daten bleiben erhalten.',
-          ),
-        );
+        pending.reject(new Error('loc.resonanz.error.backgroundInterrupted'));
       }
       this._pending.clear();
       const cleanup = ownership.cleanup(graceful);
@@ -141,19 +135,12 @@ export class BackgroundService {
             this._restartTimer = setTimeout(() => {
               void this.start().catch(() => undefined);
             }, 500);
-          else
-            this.stopped(
-              'Der Hintergrunddienst konnte nicht neu gestartet werden. Starte Resonanz erneut; gespeicherte Aufnahmen bleiben erhalten.',
-            );
+          else this.stopped('loc.resonanz.error.backgroundRestart');
         },
         (cause: unknown) => {
           if (this._cleanup === cleanup) this._cleanup = undefined;
           this._cleanupFailure =
-            cause instanceof Error
-              ? cause
-              : new Error(
-                  'Die Bereinigung nativer Assistentenprozesse konnte nicht bestätigt werden.',
-                );
+            cause instanceof Error ? cause : new Error('loc.resonanz.error.assistantCleanup');
           this.stopped(this._cleanupFailure.message);
         },
       );
@@ -194,7 +181,7 @@ export class BackgroundService {
         const graceful = setTimeout(() => {
           worker.kill();
           forced = setTimeout(
-            () => reject(new Error('Der Hintergrundprozess konnte nicht beendet werden.')),
+            () => reject(new Error('loc.resonanz.error.backgroundTerminate')),
             2500,
           );
         }, 10_000);
@@ -217,12 +204,11 @@ export class BackgroundService {
     timeout: number,
   ): Promise<unknown> {
     await this.start();
-    if (this._pending.size >= 100)
-      throw new Error('Zu viele Anfragen warten auf den Hintergrunddienst.');
+    if (this._pending.size >= 100) throw new Error('loc.resonanz.error.queueFull');
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this._pending.delete(message.correlationId);
-        reject(new Error('Der Hintergrunddienst hat nicht rechtzeitig geantwortet.'));
+        reject(new Error('loc.resonanz.error.backgroundTimeout'));
       }, timeout);
       this._pending.set(message.correlationId, { resolve, reject, timer });
       this._process?.postMessage(message);

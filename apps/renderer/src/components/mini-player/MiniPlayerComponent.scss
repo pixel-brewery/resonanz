@@ -1,0 +1,80 @@
+:host {
+  display: flex;
+  min-width: 0;
+}
+.mini-player {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 26px;
+  padding: 0 10px 0 2px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 999px;
+  background: var(--mosaik-scheme-surface);
+}
+mosaik-button {
+  --button-padding-left: 4px;
+  --button-padding-right: 4px;
+  --button-height: 22px;
+}
+.now-playing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-left: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: var(--mosaik-typography-caption);
+  cursor: pointer;
+}
+.now-playing:disabled {
+  cursor: default;
+}
+.now-playing:not(:disabled):hover .title {
+  text-decoration: underline;
+}
+.label {
+  flex: none;
+  color: var(--mosaik-scheme-lowlight);
+}
+.title {
+  min-width: 0;
+  max-width: 260px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.time {
+  flex: none;
+  color: var(--mosaik-scheme-lowlight);
+  font-variant-numeric: tabular-nums;
+}
+.progress {
+  position: relative;
+  flex: none;
+  width: 96px;
+  height: 3px;
+  margin-left: 10px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--mosaik-scheme-foreground) 14%, transparent);
+}
+.progress > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--mosaik-color-primary-500);
+}
+.paused .progress > span {
+  background: var(--mosaik-scheme-lowlight);
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

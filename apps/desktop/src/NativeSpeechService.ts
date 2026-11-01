@@ -13,6 +13,7 @@ import { WindowsSpeechSession } from './WindowsSpeechSession.js';
 const require = createRequire(import.meta.url);
 type Voice = ICapabilities['speechVoices'][number];
 interface IRecognition {
+  readonly operationId?: string;
   readonly sessionId: string;
   readonly locale: string;
   readonly origin: number;
@@ -60,7 +61,7 @@ export class NativeSpeechService {
     if (!['darwin', 'win32'].includes(process.platform))
       return {
         ...unavailable,
-        speechMessage: 'Für dieses Betriebssystem ist keine native Sprachbrücke eingerichtet.',
+        speechMessage: 'loc.resonanz.error.noSpeechBridge',
       };
     try {
       const metadata = await (this._metadata ??= this.metadata());
@@ -84,8 +85,7 @@ export class NativeSpeechService {
         speechVoices: metadata.voices,
         ...(!available || !localeAvailable || !voiceAvailable
           ? {
-              speechMessage:
-                'Prüfe die installierte Erkennungssprache, Systemstimme sowie Mikrofon- und Spracherkennungsfreigabe. Unter Windows werden Dateien im WAV-Format transkribiert.',
+              speechMessage: 'loc.resonanz.settings.speechHint',
             }
           : {}),
       };
@@ -93,21 +93,23 @@ export class NativeSpeechService {
       this._metadata = undefined;
       return {
         ...unavailable,
-        speechMessage:
-          'Die systemeigene Sprachfunktion ist derzeit nicht verfügbar. Prüfe installierte Sprachen und Betriebssystemfreigaben.',
+        speechMessage: 'loc.resonanz.error.speechUnavailable',
       };
     }
   }
 
-  public async start(sessionId: string): Promise<void> {
+  public async start(sessionId: string, operationId?: string): Promise<void> {
     await this.serial(async () => {
-      if (this._disposed) throw new Error('Die Sprachfunktion wurde beendet.');
+      if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
       const session = await this._host.session(dataSchemas.identifier.parse(sessionId));
-      if (this._disposed) throw new Error('Die Sprachfunktion wurde beendet.');
-      if (!['recording', 'paused'].includes(session.status))
-        throw new Error('Starte zuerst eine neue Aufnahme oder Unterhaltung.');
-      if (this._active && this._active.sessionId !== sessionId)
-        throw new Error('Das Mikrofon wird bereits von einer anderen Unterhaltung verwendet.');
+      if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
+      if (!operationId && !['recording', 'paused'].includes(session.status))
+        throw new Error('loc.resonanz.error.captureFirst');
+      if (
+        this._active &&
+        (this._active.sessionId !== sessionId || this._active.operationId !== operationId)
+      )
+        throw new Error('loc.resonanz.error.micBusy');
       if (!this._active)
         this._active = {
           sessionId,
@@ -115,6 +117,7 @@ export class NativeSpeechService {
           baseMs: session.durationMs,
           origin: performance.now(),
           generation: 0,
+          ...(operationId ? { operationId } : {}),
         };
       await this.listenActive(this._active);
     });
@@ -124,7 +127,7 @@ export class NativeSpeechService {
     await this.serial(async () => {
       const active = this._active;
       if (!active || active.sessionId !== sessionId) {
-        if (enabled) throw new Error('Starte zuerst die Spracherkennung für diese Session.');
+        if (enabled) throw new Error('loc.resonanz.error.recognitionStartFirst');
         return;
       }
       if (enabled) await this.listenActive(active);
@@ -136,9 +139,10 @@ export class NativeSpeechService {
     await this.listen(sessionId, false);
   }
 
-  public async stop(sessionId: string): Promise<void> {
+  public async stop(sessionId: string, operationId?: string): Promise<void> {
     await this.serial(async () => {
       if (this._active?.sessionId !== sessionId) return;
+      if (operationId && this._active.operationId !== operationId) return;
       await this.pauseActive(this._active);
       this._active = undefined;
     });
@@ -148,7 +152,7 @@ export class NativeSpeechService {
     path: string,
     locale: string,
   ): Promise<readonly ITranscriptSegment[]> {
-    if (this._disposed) throw new Error('Die Sprachfunktion wurde beendet.');
+    if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
     const operation = this.transcribeOwnedFile(path, locale);
     this._transcriptions.add(operation);
     try {
@@ -170,12 +174,8 @@ export class NativeSpeechService {
         final: true,
       }));
     }
-    if (process.platform !== 'win32')
-      throw new Error('Keine native Dateitranskription für dieses Betriebssystem verfügbar.');
-    if (!path.toLowerCase().endsWith('.wav'))
-      throw new Error(
-        'Die native Windows-Dateitranskription benötigt eine WAV-Datei. Live-Unterhaltungen werden direkt vom Systemmikrofon erkannt.',
-      );
+    if (process.platform !== 'win32') throw new Error('loc.resonanz.error.noFileTranscription');
+    if (!path.toLowerCase().endsWith('.wav')) throw new Error('loc.resonanz.error.wavRequired');
     const result = JSON.parse(
       await this.windows('transcribe', { locale, filePath: path }, undefined, 180_000),
     ) as { segments: { id: string; text: string; startMs: number; endMs: number }[] };
@@ -192,17 +192,15 @@ export class NativeSpeechService {
   ): Promise<string> {
     dataSchemas.identifier.parse(sessionId);
     dataSchemas.identifier.parse(speechId);
-    if (!text.trim() || text.length > 4000)
-      throw new Error('Ein Sprachclip benötigt 1 bis 4000 Textzeichen.');
+    if (!text.trim() || text.length > 4000) throw new Error('loc.resonanz.error.clipText');
     if (
       this._disposed ||
       this._closedSessions.has(sessionId) ||
       this._synthesis.size >= 2 ||
       this._synthesis.has(sessionId)
     )
-      throw new Error('Warte auf die laufende System-Sprachausgabe oder brich sie ab.');
-    if (this._clips.has(`${sessionId}:${speechId}`))
-      throw new Error('Diese Sprachclip-Kennung wurde bereits verwendet.');
+      throw new Error('loc.resonanz.error.speechPending');
+    if (this._clips.has(`${sessionId}:${speechId}`)) throw new Error('loc.resonanz.error.clipUsed');
     const controller = new AbortController();
     this._synthesis.set(sessionId, controller);
     let complete!: () => void;
@@ -220,8 +218,9 @@ export class NativeSpeechService {
       const session = await this._host.session(sessionId);
       controller.signal.throwIfAborted();
       if (session.kind !== 'conversation' || !['recording', 'paused'].includes(session.status))
-        throw new Error('Die Unterhaltung ist nicht aktiv.');
-      const settings = await this._host.settings();
+        throw new Error('loc.resonanz.error.conversationInactive');
+      const settings = dataSchemas.settings.parse(await this._host.settings());
+      const speechRate = settings.speechRate ?? 1;
       controller.signal.throwIfAborted();
       const metadata = await (this._metadata ??= this.metadata());
       controller.signal.throwIfAborted();
@@ -234,16 +233,23 @@ export class NativeSpeechService {
           metadata.voices.find(
             (item) => item.locale.split('-')[0] === settings.locale.split('-')[0],
           ));
-      if (!voice)
-        throw new Error(
-          'Für die gewählte Sprache ist keine passende installierte Systemstimme verfügbar.',
-        );
+      if (!voice) throw new Error('loc.resonanz.error.noMatchingVoice');
       await mkdir(directory, { recursive: true, mode: 0o700 });
       if (process.platform === 'darwin') {
         await writeFile(source, text, { encoding: 'utf8', mode: 0o600, flag: 'wx' });
         await this.command(
           '/usr/bin/say',
-          ['-v', voice.id, '-o', intermediate, '-f', source],
+          [
+            '-v',
+            voice.id,
+            // Neutral preserves the voice's own default. Other settings use a
+            // documented 180-WPM reference; native engines have different scales.
+            ...(speechRate === 1 ? [] : ['-r', String(Math.round(180 * speechRate))]),
+            '-o',
+            intermediate,
+            '-f',
+            source,
+          ],
           undefined,
           controller.signal,
         );
@@ -256,14 +262,14 @@ export class NativeSpeechService {
       } else if (process.platform === 'win32')
         await this.windows(
           'synthesize',
-          { text, voice: voice.id, outputPath: path },
+          { text, voice: voice.id, outputPath: path, rate: Math.round(10 * Math.log2(speechRate)) },
           controller.signal,
         );
-      else throw new Error('Keine native Systemstimme für dieses Betriebssystem eingerichtet.');
+      else throw new Error('loc.resonanz.error.noSystemVoice');
       controller.signal.throwIfAborted();
       const information = await stat(path);
       if (information.size < 44 || information.size > 32 * 1024 * 1024)
-        throw new Error('Der Sprachclip überschreitet die erlaubte Größe.');
+        throw new Error('loc.resonanz.error.clipSize');
       const header = (await readFile(path)).subarray(0, 12);
       if (
         information.size < 44 ||
@@ -271,15 +277,13 @@ export class NativeSpeechService {
         header.toString('ascii', 0, 4) !== 'RIFF' ||
         header.toString('ascii', 8, 12) !== 'WAVE'
       )
-        throw new Error('Die Systemstimme hat keine gültige begrenzte WAV-Datei erzeugt.');
+        throw new Error('loc.resonanz.error.speechFormat');
       this._clips.set(`${sessionId}:${speechId}`, { sessionId, path, bytes: information.size });
       await this.trimClips(sessionId);
       return `resonanz-voice://session/${sessionId}/${speechId}`;
     } catch (cause) {
       await rm(path, { force: true });
-      throw controller.signal.aborted
-        ? new Error('Die System-Sprachausgabe wurde abgebrochen.')
-        : cause;
+      throw controller.signal.aborted ? new Error('loc.resonanz.error.speechAborted') : cause;
     } finally {
       try {
         await Promise.all([rm(source, { force: true }), rm(intermediate, { force: true })]);
@@ -295,7 +299,7 @@ export class NativeSpeechService {
     dataSchemas.identifier.parse(sessionId);
     dataSchemas.identifier.parse(speechId);
     const clip = this._clips.get(`${sessionId}:${speechId}`);
-    if (!clip) throw new Error('Dieser Sprachclip ist nicht verfügbar.');
+    if (!clip) throw new Error('loc.resonanz.error.nativeClip');
     return clip.path;
   }
 
@@ -352,7 +356,7 @@ export class NativeSpeechService {
   }
 
   private async listenActive(active: IRecognition): Promise<void> {
-    if (this._disposed) throw new Error('Die Sprachfunktion wurde beendet.');
+    if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
     if (active.recognition) return;
     const recognition = this._host.createSession
       ? await this._host.createSession()
@@ -361,11 +365,10 @@ export class NativeSpeechService {
         : process.platform === 'win32'
           ? new WindowsSpeechSession(this._windowsExecutable, this._host.windowsScript)
           : undefined;
-    if (!recognition)
-      throw new Error('Die native Spracherkennung ist auf diesem System nicht verfügbar.');
+    if (!recognition) throw new Error('loc.resonanz.error.recognitionUnavailable');
     if (this._disposed) {
       await recognition.dispose();
-      throw new Error('Die Sprachfunktion wurde beendet.');
+      throw new Error('loc.resonanz.error.recognitionStopped');
     }
     active.recognition = recognition;
     const generation = ++active.generation;
@@ -385,8 +388,7 @@ export class NativeSpeechService {
           this._host.publish({
             type: 'speech.error',
             sessionId: active.sessionId,
-            message:
-              'Die native Spracherkennung konnte nach einer Sprechpause nicht fortgesetzt werden.',
+            message: 'loc.resonanz.error.recognitionSilenceResume',
           }),
         );
         return;
@@ -395,8 +397,7 @@ export class NativeSpeechService {
         this._host.publish({
           type: 'speech.error',
           sessionId: active.sessionId,
-          message:
-            'Die native Spracherkennung wurde unterbrochen. Prüfe Systemsprache und Mikrofonfreigabe.',
+          message: 'loc.resonanz.error.recognitionInterrupted',
         });
     });
     try {
@@ -427,7 +428,12 @@ export class NativeSpeechService {
       startMs: active.pending?.startMs ?? Math.max(active.baseMs, now - 500),
       endMs: now,
     };
-    this._host.publish({ type: 'speech.result', sessionId: active.sessionId, ...active.pending });
+    this._host.publish({
+      type: 'speech.result',
+      sessionId: active.sessionId,
+      ...active.pending,
+      ...(active.operationId ? { operationId: active.operationId } : {}),
+    });
     // Native recognizers can keep cumulative hypotheses open for a long time.
     // Endpoint only stable text and retire this recognition generation before committing.
     if (result.isFinal || changed) {
@@ -440,7 +446,7 @@ export class NativeSpeechService {
             this._host.publish({
               type: 'speech.error',
               sessionId: active.sessionId,
-              message: 'Der erkannte Beitrag konnte nicht gespeichert werden.',
+              message: 'loc.resonanz.error.recognizedSave',
             }),
           );
         },
@@ -465,9 +471,14 @@ export class NativeSpeechService {
     const pending = active.pending;
     if (!pending) return;
     const final = { ...pending, final: true };
-    await this._host.persist(active.sessionId, final);
+    if (!active.operationId) await this._host.persist(active.sessionId, final);
     active.pending = undefined;
-    this._host.publish({ type: 'speech.result', sessionId: active.sessionId, ...final });
+    this._host.publish({
+      type: 'speech.result',
+      sessionId: active.sessionId,
+      ...final,
+      ...(active.operationId ? { operationId: active.operationId } : {}),
+    });
   }
 
   private serial<T>(operation: () => Promise<T>): Promise<T> {
@@ -580,8 +591,8 @@ export class NativeSpeechService {
           reject(
             new Error(
               signal?.aborted
-                ? 'Die Sprachfunktion wurde abgebrochen.'
-                : 'Die systemeigene Sprachfunktion konnte nicht ausgeführt werden. Prüfe installierte Sprachen und Stimmen.',
+                ? 'loc.resonanz.error.recognitionCancelled'
+                : 'loc.resonanz.error.speechFailed',
             ),
           );
       });

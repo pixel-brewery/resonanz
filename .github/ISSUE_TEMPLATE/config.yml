@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Produkt und Einrichtung
+  - name: Product documentation
     url: https://github.com/pixel-brewery/resonanz/tree/main/docs/project
-    about: Aufnahme, Sprachgespräche, Organisation und native Assistentenanmeldung.
-  - name: Sicherheitslücke privat melden
+    about: Recording, voice conversations, organization and native assistant setup.
+  - name: Report a vulnerability privately
     url: https://github.com/pixel-brewery/resonanz/security/advisories/new
-    about: Vertrauliche Meldungen über GitHub Private Vulnerability Reporting.
+    about: Confidential reports through GitHub private vulnerability reporting.

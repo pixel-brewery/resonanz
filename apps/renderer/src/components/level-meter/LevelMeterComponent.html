@@ -1,0 +1,13 @@
+<div
+  role="img"
+  [attr.aria-label]="
+    paused()
+      ? ('loc.resonanz.common.levelPaused' | translate)
+      : ('loc.resonanz.common.inputLevel' | translate)
+  "
+  [class.paused]="paused()"
+>
+  @for (sample of samples(); track $index) {
+    <span [style.height.%]="5 + sample * 95"></span>
+  }
+</div>

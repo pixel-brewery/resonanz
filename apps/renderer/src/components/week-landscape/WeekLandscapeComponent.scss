@@ -1,0 +1,192 @@
+:host {
+  display: block;
+  min-width: 680px;
+}
+.landscape-grid {
+  position: relative;
+}
+.connections {
+  position: absolute;
+  left: 82px;
+  top: 24px;
+  width: calc(100% - 106px);
+  pointer-events: none;
+  overflow: visible;
+}
+.connections path {
+  fill: none;
+  stroke-width: 1.5px;
+  stroke-dasharray: 3 6;
+  opacity: 0.45;
+}
+.connections path.active {
+  stroke-width: 2.5px;
+  stroke-dasharray: 6 6;
+  opacity: 1;
+  animation: flow 1.2s linear infinite;
+}
+.connections circle {
+  stroke-width: 2.5px;
+  fill: var(--mosaik-scheme-background);
+}
+@keyframes flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.hours,
+.day {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+}
+.hours {
+  height: 24px;
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+  font-variant-numeric: tabular-nums;
+}
+.hours > div {
+  position: relative;
+  margin-right: 24px;
+}
+.hours > div > span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.day {
+  height: 88px;
+}
+.day-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  font: var(--mosaik-typography-caption);
+}
+.day-label strong {
+  font: var(--mosaik-typography-body2);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.day-label > span {
+  color: var(--mosaik-scheme-lowlight);
+}
+.today .day-label strong {
+  color: var(--mosaik-color-danger-500);
+}
+.track {
+  position: relative;
+  border-top: 1px solid var(--mosaik-scheme-highlight);
+  margin-right: 24px;
+}
+.today .track {
+  background: color-mix(in oklab, var(--mosaik-scheme-highlight) 18%, transparent);
+}
+.gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in oklab, var(--mosaik-scheme-highlight) 70%, transparent);
+}
+.ribbon {
+  position: absolute;
+  top: 11px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.ribbon resonanz-waveform {
+  --waveform-height: 44px;
+  height: 44px;
+  overflow: visible;
+}
+.ribbon-label {
+  position: absolute;
+  left: 0;
+  top: 45px;
+  display: flex;
+  flex-direction: column;
+  width: 170px;
+  max-width: 210px;
+  pointer-events: none;
+  font: var(--mosaik-typography-caption);
+}
+.ribbon-label strong {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ribbon-label.right {
+  left: auto;
+  right: 0;
+  align-items: flex-end;
+  text-align: right;
+}
+.ribbon-label > span {
+  white-space: nowrap;
+}
+.ribbon-label > span {
+  font-size: 10px;
+  color: var(--mosaik-scheme-lowlight);
+}
+.ribbon.selected,
+.ribbon:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 3px;
+}
+.ribbon.connected {
+  outline: 1px solid var(--thread-color);
+  outline-offset: 4px;
+  border-radius: 9px;
+}
+.waiting .ribbon-label > span {
+  color: var(--mosaik-color-warning-700);
+}
+.error {
+  color: var(--mosaik-color-danger-500);
+}
+.error .ribbon-label > span {
+  color: var(--mosaik-color-danger-500);
+}
+.no-sessions {
+  position: absolute;
+  left: 12px;
+  top: 30px;
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+.now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--mosaik-color-danger-500);
+  pointer-events: none;
+}
+.now > span {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 1px 6px;
+  background: var(--mosaik-color-danger-500);
+  color: var(--mosaik-color-danger-0);
+  border-radius: 4px;
+  font: 600 10px/14px var(--mosaik-font-family, Georgia, serif);
+}
+@keyframes shimmer {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}

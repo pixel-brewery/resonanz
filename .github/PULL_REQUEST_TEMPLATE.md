@@ -1,21 +1,20 @@
-## Problem und neues Verhalten
+## Problem and resulting behavior
 
-<!-- Was löst die Änderung? Beschreibe den finalen Stand mit einem konkreten Beispiel. -->
+<!-- Describe the final change with a concrete trigger/example. -->
 
-## Umsetzung
+## Implementation
 
-<!-- Nenne die betroffenen fachlichen Besitzer und wichtige Entscheidungen. -->
+<!-- Name relevant owners and decisions that help review the change. -->
 
-## Geprüft
+## Validation
 
-<!-- Welche Befehle und Nutzerwege wurden tatsächlich geprüft? -->
-<!-- Trenne synthetische Daten von realem Mikrofon, Systemstimme und nativer Konto-Inferenz. -->
+<!-- List checks actually run. Separate fixtures from physical media, native speech and real account inference. -->
 
-## Grenzen und Nachbereitung
+## Limits and follow-up work
 
-<!-- Nenne relevante offene Plattform-/Sprachprüfungen oder Auslieferungsschritte. -->
+<!-- Note material remaining platform/language or distribution requirements. -->
 
-- [ ] Dokumentation und tatsächliche Abnahme passen zur Änderung.
-- [ ] Übernommene Audioquellen und Lizenzhinweise bleiben erhalten; bewusste Updates haben passende Herkunftsnachweise.
+- [ ] Documentation and verification records match the change.
+- [ ] Copied audio sources and full license notices are preserved; intentional updates include provenance.
 
-<!-- Vor einer neuen PR-Erstellung den lokalen Ship-it-Review ausführen, sofern im Repository vorhanden. Einen nicht ausgeführten Review nicht als bestanden melden. -->
+<!-- Run the local Ship-it review before creating a PR when available. Do not claim a review that did not run. -->

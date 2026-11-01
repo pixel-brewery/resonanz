@@ -12,7 +12,7 @@
 }
 :root {
   color-scheme: light;
-  font-family: var(--mosaik-font-family, 'Inter', system-ui, sans-serif);
+  font-family: var(--mosaik-font-family, Georgia, serif);
   color: var(--mosaik-scheme-foreground);
   background: var(--mosaik-scheme-background);
 }
@@ -26,6 +26,7 @@ resonanz-shell {
 }
 body {
   background: var(--mosaik-scheme-background);
+  font: var(--mosaik-typography-body2);
 }
 * {
   box-sizing: border-box;
@@ -34,4 +35,130 @@ button,
 input,
 textarea {
   font: inherit;
+}
+a {
+  color: inherit;
+}
+.caption {
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+.flex-spacer {
+  flex: 1;
+}
+.text-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--mosaik-scheme-middlelight);
+}
+.status-dot.success {
+  background: var(--mosaik-color-success-500);
+}
+.status-dot.recording {
+  background: var(--mosaik-color-danger-500);
+}
+// Toasts appear at the bottom left above the status bar (34px) and its mini player.
+mosaik-toast {
+  --toast-offset-x: 16px;
+  --toast-offset-y: 46px;
+  --toast-max-width: 520px;
+}
+// The window toolbar and the other title bars are the window's drag region (Symphony's window
+// chrome rule): every non-interactive part moves the window, only controls stay clickable.
+[part~='window-drag-region'] {
+  app-region: drag;
+  -webkit-app-region: drag;
+  user-select: none;
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  details[open],
+  mosaik-button,
+  mosaik-searchbox,
+  mosaik-select,
+  mosaik-textbox,
+  mosaik-checkbox,
+  mosaik-toggle-switch,
+  mosaik-dropdown-button,
+  resonanz-segmented-tabs,
+  [part~='window-no-drag'] {
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
+  }
+}
+.workspace-header {
+  height: 52px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px 0 24px;
+  border-bottom: 1px solid var(--mosaik-scheme-highlight);
+}
+.header-title {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.header-title h1 {
+  margin: 0;
+  font: var(--mosaik-typography-subtitle2);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.header-title .caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.outline-card {
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 12px;
+  background: var(--mosaik-scheme-surface);
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 32px;
+  flex: 1;
+  text-align: center;
+}
+.empty-state h2 {
+  margin: 0;
+  font: var(--mosaik-typography-headline6);
+}
+.empty-state p {
+  max-width: 430px;
+  margin: 0;
+  color: var(--mosaik-scheme-lowlight);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }

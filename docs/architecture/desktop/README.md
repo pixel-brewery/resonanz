@@ -1,244 +1,214 @@
-# Desktop, Sitzungen und native Audioanbindung
+# Desktop, sessions and native media
 
-Stand: 31. Oktober 2026. Diese Seite beschreibt die implementierten Besitzer und
-Verträge des ersten Prototyps. Eine vorhandene Implementierung ist getrennt von
-Ende-zu-Ende-Nachweisen und von noch offenen Plattformprüfungen zu beurteilen.
+## Runtime owners
 
-## Laufzeit und Verantwortlichkeiten
+Angular owns views, browser microphone recording/playback and the live stereo media
+graph. Its sandboxed preload exposes only `window.resonanz.request` and `onEvent`.
+Requests, responses and events are independently validated using the shared Zod
+catalog; response correlation IDs must match. Subscriptions return cleanup functions.
+Main validates the sending window/frame and owns native dialogs, permissions,
+windows/tray and one supervised Utility. The Utility owns OrchestratorApplication,
+SessionStore and the long-lived Synapse AssistantService.
 
-```mermaid
-flowchart LR
-  UI[Angular und Mosaik] --> Preload[Sandboxed Preload]
-  Preload --> Main[Electron Main]
-  Main --> Worker[Utility Process]
-  Worker --> Store[SessionStore]
-  Worker --> Synapse[Synapse Assistenten]
-  Main --> Speech[Systemeigene Spracherkennung und Sprachclips]
-  Speech --> Archive[Lokale native Mediendateien]
-```
+`tools/build-node-apps.mjs` bundles Main/Utility as ESM and preload as sandbox-compatible
+CommonJS. The packaged renderer loads from `dist/apps/renderer/browser/index.html`.
+Esbuild inlines workspace/Synapse dependencies and reports unexpected runtime imports.
+Only the explicitly late-bound native speech dependencies remain external.
 
-- Der Angular-Renderer besitzt Ansichten, Mosaik-Steuerelemente, Mikrofonaufnahme,
-  Audio-Wiedergabe und den Mediengraphen der Sprachunterhaltung. Er besitzt keine
-  Node.js-, Dateisystem-, Shell- oder Schlüsselbundschnittstelle.
-- `apps/desktop/src/preload.ts` stellt ausschließlich `window.resonanz.request`
-  und `window.resonanz.onEvent` bereit. Anfragen und Antworten werden unabhängig
-  mit den Zod-Verträgen aus `@resonanz/contracts` geprüft. Eine Antwort muss die
-  Korrelationskennung der Anfrage tragen. Event-Abonnements geben eine
-  Abmeldefunktion zurück.
-- Electron Main prüft Fenster und Frame des Absenders, vermittelt native Dialoge,
-  verwaltet Tray und Fenster und beaufsichtigt genau einen Utility Process.
-  Die systemeigene Sprachschnittstelle bleibt im Main; fachliche
-  Assistententurns werden im Utility Process koordiniert.
-- Der Utility Process besitzt `OrchestratorApplication`, `SessionStore` und den
-  langlebigen `AssistantService`. Er persistiert Sitzungen und erstellt die
-  fachlichen Analyse-, Frage- und Live-Delegationsaufträge.
-- Synapse besitzt CLI-Treiber, isolierte Profile, native Anmeldevorgänge,
-  Prozessausführung, Streaming und Abbruch. Die Auswahl von Sessionkontext und
-  fachlichen Prompts bleibt in Resonanz. Details stehen in der
-  [Assistentenanbindung](../local-assistants/README.md).
+## Window, tray and shutdown
 
-Die Prozessgrenzen folgen Symphony. Für den Prototyp werden Sitzungen als
-versionierte, atomar ersetzte JSON-Dokumente mit separaten Audiojournalen
-persistiert. Symphony verwendet hierfür SQLite; die Wahl von JSON ist eine
-bewusste Anpassung des Speicheradapters und kein zusätzlicher Server.
+The single-instance lock reopens the existing window on a second launch. Hiding or
+closing it keeps recording alive. A tray click presents the existing window as a
+compact capture panel; opening the workspace restores normal bounds. The same
+renderer owns media in both sizes. `WindowPresentation` selects fixed surface
+geometry: workspace 1440×900, onboarding 1000×720 and Settings 1000×1180, clamped to
+the current display's work area. Each surface preserves later user bounds/maximization.
+The tray uses 368 content pixels with an intrinsic height clamped to its display;
+coalesced renderer measurements resize/reanchor the existing window. Hiding it or
+restoring the workspace rejects late height requests. Returning restores the
+requested surface. Route changes do not reload, show or replace the renderer, and
+fullscreen changes defer until native fullscreen exit. Main disables renderer background
+throttling during active capture and restores it afterwards. The context menu offers the workspace, capture,
+live conversation and quit. A timer projects current capture/processing state.
 
-## Start, Tray und Beenden
+The optional mini recorder is a separate transparent, always-on-top native window.
+Its renderer has a passive bootstrap with no LibraryStore, account or media owner.
+The workspace coalesces a bounded time/level/state projection at 100 ms. Main trusts
+the exact passive window and main frame and allowlists only `mini.get`, `mini.action`
+and `mini.resize`; the passive preload independently enforces the same restriction.
+Actions identify the session shown, and both Main and CapturePresenter reject stale
+session commands. Fixed expanded/collapsed/feedback modes determine native dimensions.
+Renderer loss and shutdown invalidate its controls. Failure of this passive surface
+does not restart capture or repeatedly spawn another window.
 
-`tools/build-node-apps.mjs` bündelt Electron Main und den Utility Process als ESM
-und den sandboxfähigen Preload als CommonJS. Die Artefakte liegen unter
-`dist/apps/desktop` und `dist/apps/orchestrator`; der gepackte Angular-Renderer
-wird aus `dist/apps/renderer/browser/index.html` geladen.
+Cmd/Ctrl+Alt+R/M/P/Space publish typed capture, marker, pause and voice commands.
+Task-controlled E2E avoids registering those global shortcuts. Interface language
+changes update native menus and tooltips from the shared translation tables.
 
-Die Anwendung erhält eine Single-Instance-Sperre. Ein zweiter Start öffnet das
-bestehende Fenster. Der Tray ist unter macOS und Windows vorgesehen; das
-Schließen des Fensters blendet es aus, während die Aufnahme im lebenden Renderer
-weiterlaufen kann. Der Tray öffnet Resonanz oder fordert eine neue Aufnahme bzw.
-Live-Unterhaltung über ein typisiertes `ui.command`-Event an.
+Windows tray assets retain the Resonanz glyph with recording/paused badges and
+light/dark variants. Capture tooltips include the actual elapsed duration;
+processing tooltips include a percentage only when a stage reports one. On macOS,
+one bounded timer animates eight cached recording frames over 1.6 seconds. Native
+reduced-motion settings disable the pulse. Pause, stop, renderer loss and shutdown
+stop it; updates for the same active session preserve its animation phase.
 
-Beim ausdrücklichen Beenden einer aktiven Aufnahme fragt die native Oberfläche
-nach. Danach kann der Renderer seine Aufnahme stoppen und letzte Blöcke
-bestätigen. Bereits persistierte Blöcke werden auch dann erhalten, wenn der
-Renderer nicht rechtzeitig antwortet. Der Main beendet bekannte native Sprachsessions, fordert Synapse- und Schreibbereinigung im Utility Process an und
-beendet nur seinen eigenen Hintergrundprozess. Ein abgestürzter Renderer
-hinterlässt eine als unterbrochen erkennbare Aufnahme.
+Quitting with active capture asks for confirmation. Main requests renderer stop and
+waits for final audio acknowledgments, then closes native speech, drains Utility
+writes/Synapse work and stops its owned process. Already persisted blocks survive
+a renderer timeout. Renderer loss closes owned speech and marks active recordings
+interrupted. Shutdown removes owned timers and shortcuts.
 
-Der Hintergrund-Supervisor korreliert maximal 100 wartende Anfragen, begrenzt
-normale Anfragen auf 30 Sekunden und Live-Delegationen auf 180 Sekunden. Bei
-Prozessabbruch werden wartende Anfragen abgelehnt. Vor einem Ersatzprozess werden registrierte native Kinder bereinigt. Nur bei
-bestätigter Bereinigung werden bis zu drei automatische Neustarts versucht;
-persistierte Aufnahmen bleiben erhalten. Ein Neustart
-stellt unterbrochene Spracherkennung oder Medienwiedergabe nicht stillschweigend
-wieder her.
+The supervisor admits at most 100 pending requests, with 30-second ordinary and
+180-second live delegation timeouts. Unexpected exit rejects waiting requests.
+Registered native children must be safely cleaned up before up to three automatic
+restarts. Saved recordings survive; recognition/playback never silently resumes.
 
-## Native Prozessverantwortung nach einem Absturz
+## Updates
 
-Der Utility-Bootstrap installiert explizit einen Beobachter des eingebauten
-Node-Diagnosekanals `child_process.spawn`. Er ersetzt oder verändert den
-Synapse-Runner nicht. Nach dem nativen Spawn werden ausschließlich ein
-zufälliges Besitz-Token, PID und Detached-Kennzeichen an Main übermittelt;
-Kommandozeilen, Prompts und Umgebungswerte gehören nicht zu diesen Nachrichten.
-Main erfasst dazu begrenzte Betriebssystem-Metadaten: Elternprozess,
-Prozessgruppe und Startzeit. Geschlossene Gruppen bleiben registriert, solange
-noch zugehörige Prozesse nachweisbar sind.
+`UpdateCoordinator` follows Symphony's installer update path. Only packaged macOS and
+Windows builds check; development, E2E and other platforms report `disabled`. Main
+checks 20 seconds after startup and every six hours, and on request from Settings.
+`HttpInstallerUpdateAdapter` reads `update-<platform>-<arch>.json` from the
+credential-free HTTPS feed (`UpdateFeed.ts`: the assets of the latest GitHub release).
+No manifest means up to date. A newer numeric version becomes `available`; the
+download streams into the temporary `resonanz-updates` directory, enforces the
+declared size and SHA-256, publishes whole-percent progress at most every 150 ms and
+becomes `ready`. Installing opens the verified `.dmg`/`.exe` and quits through the
+normal shutdown; Main refuses while a capture runs. Installer URLs and paths never
+reach the renderer, which receives `update.state` events with versions, progress and
+a stable failure key. `tools/write-update-manifest.mjs` writes a manifest for a made
+installer; publishing releases remains a separate decision.
 
-Nach unerwartetem Utility-Ende werden bestätigte POSIX-Gruppen zunächst mit
-SIGTERM, bei Bedarf mit SIGKILL beendet und ihre Abwesenheit wird abgewartet.
-Abweichende Prozessidentität oder nicht belegbare Bereinigung erlaubt weder ein
-Signal an einen möglicherweise wiederverwendeten PID noch einen automatischen
-Ersatzprozess mit denselben Profilen. Unter Windows wird ein noch vorhandener,
-identischer registrierter Stamm mit `taskkill /T` beendet. Ist der Stamm nach
-unerwartetem Ende bereits verschwunden, gilt die übrige Baumbereinigung als
-unbestätigt und die automatische Wiederaufnahme bleibt gesperrt. Ein bestätigter
-normaler Shutdown nutzt zusätzlich Synapses zugesicherte, abgewartete
-Runner-Bereinigung.
+## Native process ownership
 
-**Grenze des Prototyps:** Der native Spawn geht seiner nachfolgenden
-Diagnosemeldung voraus. Ein harter Absturz vor Meldung und Identitätsbestätigung
-kann deshalb nicht als vollständig verwaisungssicher behandelt werden. Die
-Implementierung behauptet weder ein Betriebssystem-Job-Objekt noch eine
-universelle Vor-Start-Besitzbestätigung. Der stille Prozessfixture hat auf dem vorhandenen POSIX-Host nachgewiesen, dass
-ein registrierter, vollständig stiller Stamm samt Nachkomme den hart beendeten
-Besitzer zunächst überlebt und anschließend durch den Main-Besitzer beseitigt
-wird. Ein unregistrierter Vergleichsprozess bleibt dabei unberührt; die
-Testbereinigung bestätigt anschließend auch sein Ende. Es wurden keine
-persönlichen KI-Konten verwendet. Die entsprechende Windows-Prüfung bleibt ein
-gesonderter Nachweis.
+The Utility observes Node's `child_process.spawn` diagnostic channel without replacing
+the Synapse runner. It reports an ownership token, PID and detached flag to Main,
+without command lines, prompts or environment values. Main records bounded parent,
+process-group and start-time metadata. Groups remain registered while members exist.
 
-## Sitzungs- und Sammlungsvertrag
+On POSIX, confirmed owned groups receive SIGTERM and, if necessary, SIGKILL; absence
+is awaited. Reused/unconfirmed identities are never signalled. On Windows, an
+identical registered root can be terminated with `taskkill /T`. If the root has
+already vanished after an unexpected owner exit, descendant cleanup is unconfirmed
+and automatic replacement is blocked. Normal shutdown additionally awaits Synapse's
+runner cleanup.
 
-`ISessionSummary` beschreibt Identität, Titel, Art, Status, Zeitpunkte, Dauer,
-Audioformat und -größe, Favorit, Tags und Sammlung. `ISession` ergänzt Transkript,
-Zusammenfassung, Fragen und Antworten, nächste Audiosequenz und die geschützte
-Wiedergabe-URL. Absolute Dateipfade und native Provider-Fortsetzungsreferenzen
-werden dem Renderer nicht mitgeteilt.
+The spawn precedes its diagnostic report: a hard crash before identity registration
+is not universally orphan-safe. No OS job object or universal pre-spawn ownership
+proof is claimed. Controlled silent-root/descendant tests preserve unrelated
+processes; platform-specific execution evidence remains separate.
 
-Die Operationsgruppen sind:
+## Contract catalog
 
-| Gruppe                                                       | Verhalten                                                                                      |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `bootstrap.get`                                              | Metadaten, Sammlungen, nicht geheime Einstellungen und native Fähigkeiten lesen                |
-| `sessions.create/get/update/delete/finish`                   | Aufnahme anlegen, lesen, benennen, organisieren, löschen und abschließen                       |
-| `collections.create/update/delete`                           | Sammlungen verwalten; deren Löschen erhält zugehörige Aufnahmen                                |
-| `audio.append`                                               | Geordneten, bestätigbaren Audioblock journalisieren                                            |
-| `transcript.append/replace`                                  | Sprecherbezogene Fragmente persistieren oder ein Transkript ersetzen                           |
-| `sessions.analyze/ask`                                       | Einen echten Synapse-Auftrag aufnehmen und Ergebnisereignisse veröffentlichen                  |
-| `assistant.*`                                                | Installation, Status, Anmeldung, Abmeldung und Abbruch des ausgewählten CLI-Assistenten        |
-| `speech.start/stop/listen/synthesize/cancel`, `live.respond` | Native Sprache koordinieren und gesprochene Beiträge direkt über Synapse beantworten           |
-| `transcription.run`                                          | Fertige Aufzeichnung über die systemeigene Spracherkennung transkribieren                      |
-| `sessions.import/export`                                     | Native Dateidialoge öffnen; Export startet in Downloads, Pfade bleiben außerhalb des Renderers |
-| `settings.save`                                              | Validierte nicht geheime Konfiguration speichern                                               |
+| Methods                                         | Behavior                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `bootstrap.get`                                 | Session summaries, collections, non-secret settings and native capabilities           |
+| `sessions.create/get/update/delete/finish`      | Session lifecycle and organization                                                    |
+| `sessions.mark/waveform/search`                 | Idempotent user markers, measured peak cache and local text search                    |
+| `sessions.unmark/task/pipeline`                 | Capture-marker undo, task completion and separate durable processing stages           |
+| `collections.create/update/delete`              | Collections; deletion preserves sessions                                              |
+| `audio.append`                                  | Ordered, acknowledged audio journal writes                                            |
+| `transcript.append/replace`                     | Speaker fragments or source replacement with evidence invalidation                    |
+| `sessions.analyze/ask`                          | Admit real Synapse work and stream correlated events                                  |
+| `assistant.*`                                   | Detection, exact account status, explicit native sign-in/out, bounded test and cancel |
+| `speech.*`, `live.respond`                      | Native recognition/output and direct spoken Synapse turns                             |
+| `dictation.start/stop`                          | Operation-scoped question recognition without altering the source transcript          |
+| `transcription.run`                             | Native transcription of a completed recording                                         |
+| `sessions.import/export`                        | Native dialogs and validated session/audio I/O                                        |
+| `settings.save`                                 | Validated non-secret preferences                                                      |
+| `window.*`, `storage.reveal`                    | Native presentation and explicit storage-folder reveal                                |
+| `mini.*`                                        | Main-owned passive projection, fixed geometry and session-bound capture commands      |
+| `capture.reminder`                              | One session-bound native quiet-input reminder with explicit continue/stop actions     |
+| `sessions.pause/clear`, `storage.usage/cleanup` | Pause metadata, confirmed library deletion, measured storage and audio retention      |
+| `updates.get/check/download/install`            | Main-owned update state, manifest check, verified installer download and restart      |
 
-Analysen und Fragen werden mit einer vom Aufrufer erzeugten Run-ID aufgenommen.
-Der Aufruf bestätigt die Aufnahme des Auftrags; `assistant.text`,
-`assistant.progress`, `assistant.completed` bzw. `assistant.failed` beschreiben
-den tatsächlichen Verlauf. Abschließende Ergebnisse und Fragen werden in der
-Session gespeichert. Pro Session arbeitet jeweils ein fachlicher Auftrag;
-Abbruch beendet den zugehörigen Synapse-Run. Eine Aufnahme darf währenddessen
-weiterlaufen. Der Abschluss einer Aufnahme bricht zugehörige Live-Delegationen
-ab und wartet deren Bereinigung ab; normale Fragen und Analysen sind davon
-unabhängig. Eine späte Antwort darf eine inzwischen pausierte oder beendete
-Aufnahme nicht wieder aktivieren. Nur ein Auftrag, der selbst den Zustand
-`processing` übernommen hat, darf ihn beim Abschluss atomar zurückgeben.
+Summaries include waveform/count projections without sending complete transcripts
+or analyses for every row. Full sessions add transcript, summary, structured analysis,
+user markers, messages and a protected playback URL. Absolute paths and native
+continuation references are never renderer DTO fields.
 
-Vor bewusst gestarteter An-/Abmeldung und vor geänderter Assistentenkonfiguration
-werden private native Fortsetzungsreferenzen verworfen. Das gilt auch für später
-fehlgeschlagene oder abgebrochene Anmeldevorgänge, da Synapse die Profilgeneration
-bereits beim Übergang ändern kann. Transkript, Zusammenfassung und Fragen bleiben
-erhalten und liefern einer neuen Session ihren vollständigen Hostkontext. Ein
-Host-Bindungszähler verhindert, dass ein älterer, parallel abschließender Run
-eine inzwischen ungültige Referenz erneut speichert. Während eines laufenden
-Anmelde- oder Konfigurationsübergangs wird keine neue Inferenz aufgenommen. Eine
-fehlgeschlagene oder unklare Inferenz wird dafür nicht automatisch wiederholt. Transkriptinhalt wird im Prompt als zitierter Kontext behandelt;
-fehlende Aussagen sollen kenntlich bleiben und Zeitmarken konkrete Antworten
-belegen.
+Optional processing-stage state survives restart. Startup changes an interrupted
+running stage to failed without removing audio or transcript. Native transcription
+and actual assistant execution own their stage transitions. The UI shows a percentage
+only when one exists. [Automatic analysis recovery](../local-assistants/analysis-recovery.md)
+uses a durable, bounded intent after supported recoverable failures; manual retry
+and cancellation remain explicit controls. Optional analysis topics carry stable
+keys, original evidence and explicitly reported resolution; they are validated with
+the other claims. Historical answer messages retain the executing provider rather
+than taking their label from the current account selection. Saved gap notes have
+`origin: note` and are not attributed to speech during capture.
 
-## Audiojournal und Wiederherstellung
+Analysis/questions use caller-generated run IDs. Admission is separate from completion:
+`assistant.text`, `progress`, `completed` and `failed` carry actual execution state.
+One semantic run per session is allowed. Only a run that acquired `processing` may
+restore it atomically. Late completion cannot reactivate paused/stopped capture.
+Finishing capture cancels related live delegations and awaits cleanup.
 
-Jede Aufnahme hat ein privates Verzeichnis. Audioblöcke sind **ab 1** lückenlos
-nummeriert und auf 4 MiB pro Nachricht begrenzt. Identische Wiederholungen bereits
-bestätigter Blöcke sind idempotent; abweichende Wiederholungen und Sequenzlücken
-werden abgelehnt. Metadatenänderungen werden erst nach erfolgreichem atomarem
-Dateiersatz in den sichtbaren Speicherzustand übernommen.
+Authentication/configuration transitions invalidate private continuations even on
+failure/cancellation. A binding epoch prevents older runs from restoring invalid
+references. Transcript replacement cancels runs, clears structured evidence and
+continuations, and preserves readable old message text. Transcript-only questions
+have their own continuation scope and omit markers/history from the selected context.
 
-Beim Abschluss entsteht aus den geordneten Blöcken eine zusammenhängende
-Audiodatei mit passender Dateiendung. Fehlerhaft beendete Aufnahmen können ihre
-bereits gespeicherte Teildatei behalten und tragen den Status `error` mit einer
-Erklärung. Nach einem Prozessabbruch werden vorhandene vollständige Journalblöcke
-wieder eingelesen; aktive Zustände werden als `interrupted` gekennzeichnet und
-vorhandenes Audio wird wieder abspielbar gemacht. Es wird kein vollständiges
-Gespräch vorgetäuscht, wenn die Quelle abgerissen ist.
+## Storage and protected media
 
-Eine Session ist auf 512 MiB Audio begrenzt. Transkripte enthalten höchstens
-20.000 Fragmente und insgesamt zwei Millionen Textzeichen. Der Katalog akzeptiert
-höchstens 5.000 Sessions und 200 Sammlungen. Das sind technische Grenzen des
-Prototyps; Lasttests für diese Maximalgrößen stehen noch aus.
+Session documents are versioned JSON, atomically replaced alongside the catalog.
+Audio is separate and ordered from sequence 1. Identical retries are idempotent;
+changed retries and gaps fail. Acknowledged partial recordings can be recovered.
+`resonanz-audio` accepts validated session identifiers and bounded byte ranges.
+`resonanz-voice` exposes only an owned speech clip. Neither accepts arbitrary paths.
 
-Die Wiedergabe verwendet `resonanz-audio://session/<UUID>`. Der Handler akzeptiert
-nur vorhandene Sessionkennungen, keine Dateipfade. Er unterstützt begrenzte
-Byte-Range-Anfragen für das Springen in Aufnahmen. Eine exportierte JSON-Datei
-enthält Sessionmetadaten, Transkript und Fragen; Audio wird über den eigenen
-Audioexport gespeichert. Beim erneuten JSON-Import entsteht eine neue Session
-und eine fehlende Audiodatei wird nicht als vorhanden markiert.
+`storage.usage` measures owned logical file bytes on explicit request, never on each
+bootstrap/tray poll. It reports four disjoint categories that sum exactly: recording
+files/journals, serialized transcript payloads, analysis/question payloads and remaining
+catalog/session framing and owned staging files. Scans reject symlinks and stay within managed file names.
+Audio retention defaults to never and optionally expires completed audio after an elapsed duration of 30 or 90 days from session creation (24 hours per day). One coalesced Utility sweep removes at most 32 recordings,
+then schedules another bounded batch. In-flight provider sessions, active capture and
+processing are protected. Targeted session events refresh open audio controls after
+cleanup. Confirmed library clearing preserves settings/accounts and unrelated files.
 
-## Keylose Sprachunterhaltung und Transkription
+Optional pause annotations store an archive offset and observed excluded duration.
+Idempotent upserts preserve identity/timing; a missing end stays unknown. Markdown
+exports put pauses in a separate nonspeech section. They never enter transcript evidence.
 
-Der native Host besitzt Spracherkennung und die Erzeugung lokaler WAV-Sprachclips.
-Auf macOS wird die vorhandene `electron-native-speech`-Integration verwendet;
-Windows verwendet die installierten System.Speech-/SAPI-Sprachkomponenten. Stimme,
-Sprache und Verfügbarkeit werden vom Betriebssystem erfragt. Es gibt keinen
-zusätzlichen Audioprovider und keine API-Key-Ablage im Produkt.
+`CaptureReminderNotification` owns at most one native notification for measured quiet
+input. Identity deduplication and live session checks reject stale/dismissed callbacks.
+The banner remains usable when OS notifications are unavailable. Main closes the notice
+on pause, stop, renderer loss and shutdown. OS delivery remains separate runtime evidence.
 
-`speech.start` beginnt die Erkennung für eine vorhandene Session. `speech.listen`
-koordiniert Mute und Sprechphasen. Teilresultate werden einer stabilen
-Segmentkennung zugeordnet; bestätigte Beiträge werden vor dem finalen Ereignis
-persistiert. `live.respond` führt darauf einen wirklichen Synapse-Turn mit dem
-aktuellen Gesprächskontext aus. Textdeltas und Abschluss bleiben an Session und
-Run-ID gebunden. Ein abgebrochener Turn darf keine späte Ausgabe einschleusen.
+JSON export carries metadata/transcript/analysis/questions, with separate audio export.
+Reimport creates a new identity and never marks missing audio present. Imported
+running stages become failed/interrupted, and imported progress/retry deadlines are
+removed before persistence. Completed content remains available without admitting
+background work or blocking library clearing. Native file
+paths stay in Main/Utility. Native dialogs default to user-facing locations, never
+to a source checkout or credential directory.
 
-`speech.synthesize` erzeugt einen begrenzten lokalen WAV-Clip für einen
-Antwortabschnitt. Der Renderer erhält eine geschützte `resonanz-voice`-URL,
-keinen beliebigen Dateipfad. Die tatsächlich abgespielten Clips bilden den
-Assistentenkanal der Stereoaufnahme. Sprachsynthese und Wiedererkennung werden
-so koordiniert, dass die App ihre eigene Ausgabe nicht als neuen Nutzerturn
-behandelt. Stop und Pause warten native Ressourcenfreigabe ab.
+## Native speech
 
-Dateitranskription verwendet auf macOS den nativen Dateipfad. Für Windows werden
-unterstützte Browser-Audioformate lokal decodiert, in mono16kHz/PCM16-WAV
-umgewandelt und begrenzt an den Host übergeben. Die temporäre WAV-Datei liegt im
-privaten App-Verzeichnis und wird auch bei Fehlern entfernt. Dieser Pfad ist auf
-64MiB PCM-WAV begrenzt; das ursprüngliche Aufnahmeformat und Archiv bleiben
-unverändert. Fehlende native Sprachpakete werden nicht durch Cloudaufrufe ersetzt.
+macOS uses `electron-native-speech`; Windows uses the supplied System.Speech/SAPI
+bridge. Capabilities query installed languages/voices and report unavailable state.
+No additional audio provider or key store exists. Native live recognition persists
+final participant text before confirming it. Session/run/operation IDs reject stale
+results and foreign dictation stops.
 
-## Anmeldung und Verpackung
+Synthesis produces bounded local WAV clips. The renderer receives protected URLs
+and archives actually played output on its assistant channel. Recognition/output
+coordination prevents deliberate self-feedback. Pause/stop await owned cleanup.
+Windows file transcription decodes supported browser recordings locally into
+mono 16 kHz PCM16 WAV, bounded to 64 MiB. Task-owned conversion files live under the
+private app data directory and are removed on success/failure. The original archive
+is unchanged. Missing speech packages do not cause cloud fallback.
 
-Die KI-Anmeldung gehört zu Synapse und der ausgewählten nativen CLI. Browser- und
-Geräteanmeldung werden als korrelierte Kontovorgänge angeboten. Derselbe Account
-trägt Analyse, Fragen und Sprachturns. Die Produktoberfläche hat keine
-API-Key-Einrichtung.
+## Packaging and evidence
 
-Forge verwendet eigene Resonanz-Icons, einen eigenen Bundle-Identifier und auf
-macOS beide Nutzungsbeschreibungen für Mikrofon und Spracherkennung. Der native
-SpeechHelper wird außerhalb des ASAR-Archivs als Ressource mitgeliefert. Die
-Drittlizenzen werden als `THIRD_PARTY_NOTICES.md` ebenfalls in die App übernommen.
-Die gebündelten Anwendungen enthalten Synapse und die privaten Workspaces. Forge
-übernimmt ausschließlich die drei spät geladenen nativen Speech-Pakete aus
-`node_modules` und schreibt nur im Paket-Staging ein reduziertes Laufzeitmanifest;
-das Quellmanifest mit Workspace- und Vendor-Abhängigkeiten bleibt erhalten.
-Das lokale Paket entsteht unter `out/Resonanz-<Plattform>-<Architektur>`.
-`node tools/verify-package.mjs` prüft dort die tatsächlichen ASAR-Bundles und
-Rendererdateien gegen den aktuellen Build, die native Abhängigkeitsmenge,
-externe Icons und Lizenzhinweise sowie auf macOS Nutzungsbeschreibungen,
-ausführbaren SpeechHelper und lokale Codesign-Konsistenz. Sein Prüfbericht liegt
-im ignorierten `.codex-work/out/`; die Existenz dieses Skripts allein ist kein
-Nachweis einer erfolgreichen Paketprüfung.
-Lokale macOS-Pakete werden ad hoc signiert. Eine notarisiert veröffentlichte App
-oder eine verifizierte Windows-Installation ist damit noch nicht nachgewiesen.
+Forge includes Resonanz icons, bundle metadata, microphone/speech usage descriptions,
+the external native helper/bridge and complete MIT/upstream notices. Its staging-only
+runtime manifest includes required late-bound speech packages; source workspace/vendor
+metadata is preserved. Local macOS bundles are ad hoc signed.
 
-## Referenzen und Prüfung
-
-Die übernommenen Symphony-Muster wurden am lokalen Referenzstand
-`4eac851f2dc465c4ed1ae7a09c245d6bce5de4ee` geprüft, besonders Preload, Main,
-Utility-Transport, esbuild-/Forge-Konfiguration und Icon-Ressourcen. Die Audioübernahme und die systemeigenen Sprachschnittstellen sind getrennte
-Integrationsgrenzen. Aktuelle Typ-, Verhaltens-, App- und Paketnachweise stehen
-in der [Abnahme](../../project/abnahme.md). Ein erfolgreicher Systemstart ersetzt
-keine echte Mikrofon-/Spracherkennungsprüfung auf einer weiteren Zielplattform.
+`verify:package` compares ASAR/renderer bundles, resources, native dependencies and
+license text to the current build, plus macOS helper/signature consistency. Packaged
+E2E drives the actual executable. Neither proves trusted public signing, a physical
+microphone on another OS or real account inference. See
+[verification](../../project/verification.md) and [distribution](../../project/distribution.md).

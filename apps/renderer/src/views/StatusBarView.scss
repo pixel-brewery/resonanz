@@ -1,0 +1,88 @@
+:host {
+  display: flex;
+  flex: none;
+}
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px 0 12px;
+  border-top: 1px solid var(--mosaik-scheme-highlight);
+  background: color-mix(
+    in oklab,
+    var(--mosaik-scheme-highlight) 40%,
+    var(--mosaik-scheme-background)
+  );
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-foreground);
+}
+mosaik-button {
+  --button-padding-left: 4px;
+  --button-padding-right: 4px;
+}
+.capture {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.capture .status-dot.recording {
+  animation: capture-pulse 1.4s ease-in-out infinite;
+}
+.capture-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-left: 4px;
+  font: inherit;
+  font-weight: 500;
+}
+.capture-label .clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.capture-label .caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.version {
+  flex: none;
+  color: var(--mosaik-scheme-lowlight);
+  font-variant-numeric: tabular-nums;
+}
+.update-download {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+}
+.update-progress {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+}
+@keyframes capture-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .capture .status-dot.recording {
+    animation: none;
+  }
+}

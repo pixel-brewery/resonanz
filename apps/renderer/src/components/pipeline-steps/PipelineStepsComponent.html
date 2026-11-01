@@ -1,0 +1,26 @@
+<div class="steps" role="list">
+  @for (item of items(); track item.id) {
+    <div class="step" role="listitem" [class]="'step ' + item.state">
+      <span class="symbol" aria-hidden="true">
+        @if (item.state === 'done') {
+          ✓
+        } @else if (item.state === 'failed') {
+          !
+        } @else {
+          <span [class.spinner]="item.state === 'running'"></span>
+        }
+      </span>
+      <div class="content">
+        <strong>{{ item.label | message }}</strong>
+        @if (item.state === 'running' || (item.state === 'done' && item.retainProgress)) {
+          <progress
+            max="100"
+            [attr.value]="item.state === 'done' ? 100 : (item.progress ?? null)"
+            [attr.aria-label]="item.label | message"
+          ></progress>
+        }
+        <span class="caption">{{ item.detail | message }}</span>
+      </div>
+    </div>
+  }
+</div>

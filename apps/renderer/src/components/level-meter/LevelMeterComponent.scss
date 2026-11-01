@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  width: 100%;
+}
+div {
+  width: 100%;
+  height: var(--level-meter-height, 44px);
+  display: flex;
+  align-items: center;
+  gap: var(--level-meter-gap, 3px);
+}
+span {
+  flex: 1;
+  border-radius: 2px;
+  background: var(--level-meter-color, var(--mosaik-color-danger-500));
+  transition: height 80ms linear;
+}
+.paused span {
+  background: var(--mosaik-scheme-middlelight);
+}
+@media (prefers-reduced-motion: reduce) {
+  span {
+    transition: none;
+  }
+}

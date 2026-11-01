@@ -10,7 +10,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { AudioRecorder, PcmAudioCapture } from '@resonanz/audio';
-import type { Subscription } from 'rxjs';
+import { Subject, type Subscription } from 'rxjs';
 import { AUDIO_HOST } from './AUDIO_HOST';
 import { AudioBrowserRuntime } from './AudioBrowserRuntime';
 import { AudioCaptureLease } from './AudioCaptureLease';
@@ -21,6 +21,8 @@ import { MicrophoneVoiceGate } from './MicrophoneVoiceGate';
 import { OrderedAudioChunkWriter } from './OrderedAudioChunkWriter';
 import { SpokenSentenceBuffer } from './SpokenSentenceBuffer';
 import { TranscriptCommitQueue } from './TranscriptCommitQueue';
+import { CapturePauseTracker } from './CapturePauseTracker';
+import type { IInputActivityEvent } from './IInputActivityEvent';
 
 // #endregion
 
@@ -53,6 +55,10 @@ export class LiveConversationCoordinator {
   private readonly _capture = inject(PcmAudioCapture);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _owner = Symbol('live-conversation');
+  private readonly _pauseTracker = new CapturePauseTracker();
+  private readonly _inputActivity = new Subject<IInputActivityEvent>();
+  public readonly pauseEvents = this._pauseTracker.events;
+  public readonly inputActivity = this._inputActivity.asObservable();
   private readonly _voiceGate = new MicrophoneVoiceGate();
   private readonly _state = signal<ILiveConversationSnapshot['state']>('idle');
   private readonly _sessionId = signal<string | null>(null);
@@ -153,7 +159,7 @@ export class LiveConversationCoordinator {
     options: { readonly title?: string; readonly voice?: string } = {},
   ): Promise<void> {
     if (!['idle', 'error'].includes(this._state())) {
-      throw new Error('Die Live-Unterhaltung kann in diesem Zustand nicht gestartet werden.');
+      throw new Error('loc.resonanz.error.conversationStart');
     }
     this._lease.acquire(this._owner);
     const generation = ++this._generation;
@@ -161,6 +167,7 @@ export class LiveConversationCoordinator {
     this._sessionId.set(null);
     this._error.set(null);
     this._durationMs.set(0);
+    this._pauseTracker.reset();
     this._pendingBytes.set(0);
     this._microphoneLevel.set(0);
     this._assistantLevel.set(0);
@@ -211,7 +218,7 @@ export class LiveConversationCoordinator {
       await this.startMicrophone(generation);
       if (generation !== this._generation) return;
       const stream = this._recorder.mediaStream();
-      if (stream === null) throw new Error('Das Mikrofon hat keinen Audiostream bereitgestellt.');
+      if (stream === null) throw new Error('loc.resonanz.error.noMicStream');
       const writer = this._writer;
       this._mixer = new ConversationAudioRecorder(
         this._runtime,
@@ -243,7 +250,7 @@ export class LiveConversationCoordinator {
   public async sendText(text: string): Promise<void> {
     const normalized = text.trim();
     if (normalized.length === 0) return;
-    if (normalized.length > 4_000) throw new Error('Die Live-Nachricht ist zu lang.');
+    if (normalized.length > 4_000) throw new Error('loc.resonanz.error.liveMessageSize');
     const sessionId = this.requireLiveSession();
     const generation = this._generation;
     const elapsedMs = this._mixer?.durationMs ?? this._durationMs();
@@ -338,6 +345,7 @@ export class LiveConversationCoordinator {
     this.clearEchoTimer();
     this._mixer?.pause();
     this._durationMs.set(this._mixer?.durationMs ?? this._durationMs());
+    this._pauseTracker.begin(sessionId, this._durationMs(), this._runtime.now());
     this._pausePromise = this.suspendCapture(sessionId, old);
     try {
       await this._pausePromise;
@@ -367,9 +375,10 @@ export class LiveConversationCoordinator {
       await this.startMicrophone(generation);
       if (generation !== this._generation) return;
       const stream = this._recorder.mediaStream();
-      if (stream === null) throw new Error('Das Mikrofon hat keinen Audiostream bereitgestellt.');
+      if (stream === null) throw new Error('loc.resonanz.error.noMicStream');
       this._mixer?.setMicrophoneStream(stream);
       this._mixer?.resume();
+      this._pauseTracker.end(this._runtime.now());
       await this._host.speechStart({ sessionId });
       if (generation !== this._generation) return;
       this._state.set('live');
@@ -394,6 +403,7 @@ export class LiveConversationCoordinator {
     ++this._turnRevision;
     const sessionId = this._sessionId();
     this._state.set('stopping');
+    this._pauseTracker.end(this._runtime.now());
     const old = this.detachTurn();
     this._listening.set(false);
     this.unsubscribeEvents();
@@ -420,6 +430,8 @@ export class LiveConversationCoordinator {
       await this.stop();
     } finally {
       this._state.set('disposed');
+      this._pauseTracker.dispose();
+      this._inputActivity.complete();
       this._lease.release(this._owner);
     }
   }
@@ -514,10 +526,7 @@ export class LiveConversationCoordinator {
   private enqueueSentence(turn: IResponseTurn, text: string): void {
     if (!this.isCurrentTurn(turn) || this._assistantMuted() || text.length === 0) return;
     if (turn.queuedSentences >= 64 || turn.queuedCharacters + text.length > 16_000) {
-      void this.failLive(
-        new Error('Die Sprachausgabe kann mit der Antwort nicht Schritt halten.'),
-        turn.sessionId,
-      );
+      void this.failLive(new Error('loc.resonanz.error.liveSpeechBackpressure'), turn.sessionId);
       return;
     }
     ++turn.queuedSentences;
@@ -540,8 +549,7 @@ export class LiveConversationCoordinator {
         });
         if (!isCurrentOutput()) return;
         const expectedUrl = `resonanz-voice://session/${turn.sessionId}/${speechId}`;
-        if (result.audioUrl !== expectedUrl)
-          throw new Error('Die native Sprachausgabe hat keine gültige Audiodatei geliefert.');
+        if (result.audioUrl !== expectedUrl) throw new Error('loc.resonanz.error.nativeSpeechFile');
         await this.setRecognition(false, turn.generation, turn.revision);
         if (!isCurrentOutput()) return;
         const played = await this.playClip(result.audioUrl, isCurrentOutput);
@@ -605,7 +613,7 @@ export class LiveConversationCoordinator {
       const armTimeout = (durationMs: number): void => {
         globalThis.clearTimeout(timeout);
         timeout = globalThis.setTimeout(
-          () => finish(false, new Error('Die native Sprachausgabe hat zu lange gedauert.')),
+          () => finish(false, new Error('loc.resonanz.error.speechTimeout')),
           durationMs,
         );
       };
@@ -618,8 +626,7 @@ export class LiveConversationCoordinator {
         this._speaking.set(true);
       };
       const onEnded = (): void => finish(isCurrent());
-      const onError = (): void =>
-        finish(false, new Error('Die native Sprachausgabe konnte nicht abgespielt werden.'));
+      const onError = (): void => finish(false, new Error('loc.resonanz.error.speechPlayback'));
       const onMetadata = (): void => {
         if (Number.isFinite(audio.duration))
           armTimeout(Math.min(600_000, Math.max(15_000, audio.duration * 1_000 + 10_000)));
@@ -706,8 +713,8 @@ export class LiveConversationCoordinator {
         if (desired !== result.listening)
           throw new Error(
             desired
-              ? 'Die native Spracherkennung konnte nicht fortgesetzt werden.'
-              : 'Die native Spracherkennung konnte für die Ausgabe nicht pausiert werden.',
+              ? 'loc.resonanz.error.recognitionResume'
+              : 'loc.resonanz.error.recognitionPause',
           );
         this._voiceGate.reset();
       });
@@ -733,7 +740,7 @@ export class LiveConversationCoordinator {
     if (generation !== this._generation) return;
     this._recorder.setMuted(this._microphoneMuted());
     const stream = this._recorder.mediaStream();
-    if (stream === null) throw new Error('Das Mikrofon hat keinen Audiostream bereitgestellt.');
+    if (stream === null) throw new Error('loc.resonanz.error.noMicStream');
     this._frameSubscription?.unsubscribe();
     this._frameSubscription = this._capture.frameAvailable.subscribe((frame) => {
       if (generation !== this._generation) return;
@@ -742,6 +749,9 @@ export class LiveConversationCoordinator {
       for (const sample of samples) energy += (sample / 32_768) ** 2;
       const rms = Math.sqrt(energy / Math.max(1, samples.length));
       this._microphoneLevel.set(Math.min(1, rms * 5));
+      const sessionId = this._sessionId();
+      if (sessionId !== null && samples.length > 0)
+        this._inputActivity.next({ sessionId, atMs: this._runtime.now(), rms });
       const suppressed =
         this._state() === 'live' &&
         !this._listening() &&
@@ -852,7 +862,7 @@ export class LiveConversationCoordinator {
   private requireLiveSession(): string {
     const sessionId = this._sessionId();
     if (this._state() !== 'live' || sessionId === null)
-      throw new Error('Die Live-Unterhaltung ist noch nicht bereit.');
+      throw new Error('loc.resonanz.error.conversationReady');
     return sessionId;
   }
 

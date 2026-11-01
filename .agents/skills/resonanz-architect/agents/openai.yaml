@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Resonanz Architect'
+  short_description: 'Architecture, implementation and native Resonanz checks'
+  default_prompt: 'Use $resonanz-architect for this task and apply the shared Architecture foundations with the relevant Resonanz project rules.'
+policy:
+  allow_implicit_invocation: true

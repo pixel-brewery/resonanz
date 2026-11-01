@@ -1,0 +1,80 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.gap-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px dashed var(--mosaik-scheme-middlelight);
+  border-radius: 12px;
+}
+header {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+}
+header svg {
+  flex: 0 0 16px;
+  margin-top: 3px;
+}
+h3 {
+  margin: 0;
+  font: var(--mosaik-typography-body2);
+  font-weight: 600;
+  line-height: 1.5;
+}
+p {
+  margin: 0;
+  color: var(--mosaik-scheme-lowlight);
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.related {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.related > span {
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+.related button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 6px;
+  background: var(--mosaik-scheme-surface);
+  color: inherit;
+  font: 500 12px/1 var(--mosaik-font-family, Georgia, serif);
+  cursor: pointer;
+}
+.related button.selected {
+  border-color: var(--mosaik-color-info-500);
+}
+.related button > span:first-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+}

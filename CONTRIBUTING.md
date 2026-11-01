@@ -1,110 +1,103 @@
-# An Resonanz mitarbeiten
+# Contributing to Resonanz
 
-Beiträge, Fehlerberichte und Ideen sind willkommen. Verwende die
-[Issue-Vorlagen](https://github.com/pixel-brewery/resonanz/issues/new/choose) und
-beachte den [Verhaltenskodex](CODE_OF_CONDUCT.md). Sicherheitslücken haben einen
-[eigenen privaten Meldeweg](SECURITY.md).
+Use the [issue templates](https://github.com/pixel-brewery/resonanz/issues/new/choose)
+for reproducible reports and ideas. Follow the [code of conduct](CODE_OF_CONDUCT.md).
+Report security vulnerabilities through the [private channel](SECURITY.md).
 
-## Arbeitsumgebung
+## Workspace and startup
 
-Verwende den festgelegten lokalen Git-Checkout außerhalb synchronisierter
-Dokumenten-/iCloud-Verzeichnisse. Persönliche absolute Entwicklungs- oder
-Installationspfade gehören nicht in Konfiguration, Quellcode oder Dokumentation.
-Vorhandene Nutzerarbeit bleibt erhalten.
+Use the owner-designated local Git checkout outside synced Documents/iCloud folders.
+Preserve existing work. Personal absolute paths, recordings, account profiles and
+credentials do not belong in tracked source, documentation or test artifacts.
+Scratch work belongs in the ignored `.codex-work/` directory. Reference repositories
+remain read-only unless a coordinated change is explicitly authorized.
 
-Erforderlich sind Node.js **24 LTS** ab `24.15.0` und Yarn `4.10.3`, wie in `package.json`
-festgelegt. Die gepinnten `vendor/`-Archive gehören zum Checkout. Sie ersetzen
-einen persönlichen Registry-Zugang für die ausgewählten Mosaik-/Synapse-Pakete,
-aber weder native Assistenteninstallationen noch deren Anmeldung.
+Use Node **24 LTS**, at least `24.15.0`, and Yarn **4.10.3** from package.json.
+Pinned vendor archives avoid an additional private registry login; they do not
+replace native assistant installation or account sign-in.
 
 ```sh
 yarn install --immutable
 yarn start
 ```
 
-`yarn start` baut Renderer und nativen Host, bevor Electron startet.
-`yarn start:built` öffnet einen vorhandenen Build. Es wird kein zusätzlicher
-Produkt-HTTP-Server und keine separate Datenbank benötigt.
+`yarn start` builds the renderer/native host before launching Electron.
+`yarn start:built` opens an existing build. No product HTTP server or database service
+is required. See [architecture](docs/architecture/README.md) for source owners.
 
-## Quellbesitzer und Referenzen
+## Implementation
 
-- Oberfläche in `apps/renderer` mit Angular und öffentlichen Mosaik-Komponenten
-  umsetzen. Fachliche Sessionlogik bleibt außerhalb der View.
-- Native Operationen nur über `libs/contracts` und die begrenzte Preload-API
-  anbinden. Den Renderer ohne Node-Integration halten.
-- Sessionfälle und dauerhafte Schreibvorgänge im Utility Process halten;
-  lokale KI ausschließlich über `@resonanz/assistant`/Synapse ausführen.
-- Kopierte Audioquellen nicht für Produktanpassungen verändern. Komposition und
-  Desktopanpassungen gehören in die Hostadapter außerhalb dieses Dateisatzes.
-- Vor einer bewussten Audioquellenaktualisierung Originalrevision, Dateipfade,
-  Hashes und relevante Verhaltensspezifikationen gemeinsam prüfen und aktualisieren.
-- Paketarchive und deren Herkunftsdateien zusammen aktualisieren. Keine
-  Workarounds über benachbarte persönliche Checkoutpfade einführen.
+Agents apply the repository's [Resonanz Architect](.agents/skills/resonanz-architect/SKILL.md)
+and the shared Architecture base pinned in `skills-lock.json`. Keep project guidance
+in the derived skill; update the imported base through the Skills CLI rather than
+editing it. `yarn verify:skills` checks the lock, inherited content and references
+offline. It requires Python 3 and Node, with no third-party Python packages.
 
-Die [Architekturübersicht](docs/architecture/README.md) benennt die konkreten
-Symphony-, Synapse-, Flamox- und Mosaik-Referenzen sowie bewusste Anpassungen.
+Use standalone OnPush Angular views, Signals, focused presenters and public Mosaik
+APIs. Keep markup, TypeScript and SCSS separate. Keep typed IPC/Zod validation
+consistent and native persistence/AI outside the renderer. Synapse is the sole
+installed-assistant adapter. The product uses system speech and native account
+sign-in without additional API keys.
 
-## Prüfungen
+Visual components accept presentation data and emit actions; they do not own media,
+AI or storage. Add interface text to both [translation tables](docs/architecture/frontend/internationalization.md).
+English is the UI default. Documentation and original repository prose are English;
+German catalog entries, intentional test speech and user content keep their language.
 
-Schwere Installations-/Build-/Testläufe werden auf dem Entwicklungsrechner
-koordiniert nacheinander ausgeführt. Relevante schmale Prüfungen kommen vor dem
-integrierten Gesamtlauf.
+The provenance manifest records one intentional PCM processor identifier rename
+with separate upstream/downstream hashes. Do not edit copied upstream files for
+product changes. An intentional upstream update
+must update revision, paths, hashes and relevant tests together. Update vendor
+archives, manifests, dependencies/resolutions and lockfile coherently. Never bypass
+package resolution using a personal peer-checkout alias. Preserve complete notices.
 
-| Befehl                | Aussage                                                                                                  |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| `yarn verify:vendor`  | Gepinnte Mosaik-/Synapse-Archivbytes stimmen mit ihren Digests überein                                   |
-| `yarn verify:audio`   | Kopierte Flamox-Audiodateien stimmen mit ihrer dokumentierten Herkunft überein                           |
-| `yarn typecheck`      | Native TypeScript-Grenzen und Angular-Templates kompilieren am aktuellen Stand                           |
-| `yarn test`           | Vorhandene Verhaltensspezifikationen laufen mit einem Worker                                             |
-| `yarn build`          | Renderer und native Prozesse werden gebaut                                                               |
-| `yarn test:e2e`       | Gebautes Electron mit synthetischem Mikrofon, echten UI-/IPC-/Dateipfaden und isoliertem Profil bedienen |
-| `yarn verify`         | Konfigurierter Herkunfts-, Typ-, Test- und Build-Gesamtlauf                                              |
-| `yarn package`        | Electron-Programmpaket für das ausführende Hostsystem erzeugen                                           |
-| `yarn verify:package` | Erzeugtes Paket gegen aktuelle Bundles, Ressourcen, Metadaten und native Abhängigkeiten prüfen           |
-| `yarn make`           | Für das Hostsystem unterstützte Installer-/Archivmaker ausführen                                         |
+## Verification
 
-Ein konfigurierter Befehl ist kein Nachweis, dass er bereits erfolgreich lief.
-Tatsächliche Ergebnisse und Laufzeitprüfungen stehen in der
-[Abnahme](docs/project/abnahme.md). Echte Accounts, Mikrofon und Sprachdialog werden
-separat geprüft; normale accountfreie Tests starten keine persönliche Anmeldung
-oder bezahlte Inferenz. Eine macOS-Prüfung ersetzt keinen Windows-Lauf.
+Run focused checks before integrated gates and coordinate one heavy job at a time.
 
-Unter Windows prüft `node tools/verify-windows-speech.mjs` die mitgelieferte
-System.Speech-Brücke unmittelbar: native Kompilierung, verfügbare Stimmen und
-eine tatsächlich erzeugte WAV-Datei. Mit einem installierten passenden
-en-US-/de-DE-Erkennungspaket folgt die native Dateitranskription. Fehlt dieses
-Paket, hält der Bericht die fehlende Prüfung ausdrücklich fest. Der Lauf verwendet
-künstlichen Sprachtext und kein physisches Mikrofon oder Assistentenkonto.
+| Command                    | Scope                                                      |
+| -------------------------- | ---------------------------------------------------------- |
+| `yarn verify:skills`       | Pinned Architecture base, derivation and reference links   |
+| `yarn verify:vendor`       | Pinned distribution hashes                                 |
+| `yarn verify:audio`        | Copied/adapted audio integrity and generated worklet       |
+| `yarn typecheck`           | Native TypeScript and Angular templates                    |
+| `yarn test`                | Behavior specifications and packaging-tool tests           |
+| `yarn build`               | Renderer and native bundles                                |
+| `yarn test:e2e`            | Built Electron, isolated profile and synthetic media       |
+| `yarn verify`              | Configured provenance/type/test/build gates                |
+| `yarn package`             | Host-specific native application bundle                    |
+| `yarn verify:package`      | Actual artifact against current bundles/resources/licenses |
+| `yarn test:e2e --packaged` | The native artifact's actual executable                    |
+| `yarn make`                | Host-supported installer/archive makers                    |
 
-Benötigte Testdaten und temporäre Profile bleiben test-eigen. Keine Nutzerprofile,
-Aufzeichnungen oder fremden Prozesse für einen Test zurücksetzen oder löschen.
-Neue Verhaltenstests liegen neben dem tatsächlichen Produktionsbesitzer;
-Kopier-/Format-/Stylesheetänderungen benötigen keine Tests, die nur ihren Text
-nachbilden.
+`--speech` adds an intentional audible reading check with an installed system voice.
+`node tools/verify-windows-speech.mjs` directly compiles the supplied Windows bridge,
+synthesizes a WAV and, when a matching language is installed, transcribes it. Missing
+recognition capability is recorded explicitly.
 
-`yarn test:e2e --packaged` bedient das erzeugte native Paket. Die optionale
-Ergänzung `--speech` prüft hörbares Vorlesen mit einer tatsächlich verfügbaren
-Systemstimme und ausdrücklich manuell vorgegebenen Testdaten. Alle Prüfartefakte
-bleiben unter `.codex-work/`; weder persönliche Anmeldung noch reale KI-Anfragen
-sind Teil dieses Laufs.
+Use controlled, task-owned data and profiles. Stop and clean up only task-owned
+helpers. Account-free checks do not initiate personal login/inference. Physical
+microphone, native speech, account inference and each OS need separate evidence in
+[verification](docs/project/verification.md). Add meaningful specs beside their
+production owners; avoid tests that merely repeat source/style text.
 
-## Pull Requests und Übergabe
+## Pull requests and distribution
 
-Vor jeder Pull-Request-Erstellung den lokalen Ship-it-Review ausführen, sofern
-im Repository vorhanden, und seine blockierenden Befunde zuerst beheben. Einen
-nicht ausgeführten Review nicht als bestanden melden. Das ist eine stehende
-Vorgabe des Repository-Owners.
+Before creating a PR, run the repository's local Ship-it review when available and
+resolve blocking findings first. Never claim a review that did not run. The PR
+should lead with the final user-visible behavior, relevant validation and material
+remaining limits. Keep implemented behavior, target scope and pending verification
+distinct in documentation.
 
-Die Beschreibung führt mit dem veränderten Nutzerverhalten und nennt konkrete
-Prüfungen sowie verbleibende Laufzeit-/Plattformgrenzen. Dokumentation muss
-implementiertes Verhalten, verbindlichen Zielumfang und offene Abnahme trennen.
-Native Paketierung bedeutet keine öffentliche Veröffentlichung und keine
-automatische Freigabe eines Releases.
+Original contributions use [MIT](LICENSE). Upstream sources retain full attribution.
+The root workspace stays `private: true`; public GitHub visibility does not authorize
+npm publication, deployment or a release. See [distribution](docs/project/distribution.md).
 
-## Öffentlicher Quellcode und Lizenz
+## Repository planning and quality
 
-Eigene Beiträge folgen der [MIT-Lizenz](LICENSE). Übernommene Quellen und
-Paketarchive behalten ihre vollständigen Hinweise. Der Root-Workspace bleibt
-`private: true`, damit eine GitHub-Quellcodefreigabe keine npm-Publikation auslöst.
-Installer und automatische Updates folgen einem eigenen
-[Auslieferungsablauf](docs/project/veroeffentlichung.md).
+Track repository work on the [Resonanz board](https://github.com/orgs/pixel-brewery/projects/9).
+Pull requests must pass the complete macOS/Windows desktop verification. The
+stable `Quality Gate` rejects failed, cancelled or skipped verification; its
+remote activation follows the [repository-quality contract](docs/architecture/repository-quality/README.md).
+Run `yarn verify:public-content` when changing examples, documentation, source or
+vendor archives; the complete `yarn verify` command includes it.

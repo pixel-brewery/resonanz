@@ -6,12 +6,15 @@ Unmodified distribution archives keep their own complete `LICENSE` files, except
 where an upstream archive did not supply one as noted below. Other installed
 third-party dependencies retain their respective package notices.
 
-## Copied FLAMOX365 audio source
+## Copied private-upstream audio source
 
-Source: [RueDeRennes/flamox](https://github.com/RueDeRennes/flamox), snapshot
+Source: private upstream repository (identity withheld), snapshot
 `b4a9eb8099d968c87c0d6aa20f3dfc037ee86127`, original subtree
 `libs/frontend/core/src/audio/`. The copied files and exact SHA-256 digests are
-listed in [the audio provenance manifest](libs/audio/provenance.json).
+listed in [the audio provenance manifest](libs/audio/provenance.json). The private
+repository identity is intentionally withheld. The PCM worklet processor class and
+registration identifiers were renamed for Resonanz; its original and downstream
+hashes are both recorded. All other copied files retain their original bytes.
 
 The source repository manifest declares `MIT`. The supplied audio subtree and
 repository root did not contain a separate copyright/license notice for these
@@ -142,8 +145,11 @@ Packages, version `0.1.183`: `@pixel-brewery/mosaik-elements`,
 `@pixel-brewery/mosaik-elements-angular`,
 `@pixel-brewery/mosaik-elements-foundation`, `@pixel-brewery/mosaik-icons`,
 `@pixel-brewery/mosaik-themes` and `@pixel-brewery/markdowner-core`.
-[The Mosaik provenance manifest](vendor/mosaik/provenance.json) records the unchanged
-published file contents and original registry-cache digests.
+[The Mosaik provenance manifest](vendor/mosaik/provenance.json) records original
+registry-cache digests and current archive integrity. The themes archive has one
+explicit privacy adaptation in a documentation-generator comment; its original
+archive digest and original/current member hashes are recorded. All executable
+behavior and complete license notices are unchanged.
 
 The supplied Mosaik/Markdowner archives include the following notice. The icons
 archive declares `MIT` and Pixel Brewery as author in `package.json`, but omits a

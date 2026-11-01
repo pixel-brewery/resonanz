@@ -1,20 +1,20 @@
-name: Frage stellen
-description: Eine Frage zur Bedienung, Einrichtung oder Entwicklung stellen.
-title: '[Frage]: '
+name: Ask a question
+description: Ask about usage, setup or development.
+title: '[Question]: '
 body:
   - type: markdown
     attributes:
       value: |
-        Die Produktdokumentation unter docs/project und CONTRIBUTING.md enthalten Einrichtung und Entwicklerstart. Bitte keine Zugangsdaten oder privaten Transkripte teilen.
+        See docs/project and CONTRIBUTING.md for setup and development. Do not share credentials or private transcripts.
   - type: textarea
     id: question
     attributes:
-      label: Deine Frage
-      description: Was möchtest du tun und wo kommst du nicht weiter?
+      label: Your question
+      description: What are you trying to do, and where are you stuck?
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Umgebung
-      description: 'Falls relevant: Version, Betriebssystem, Sprache und gewählte CLI.'
+      label: Environment
+      description: If relevant, include version, OS, language and selected CLI.

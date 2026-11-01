@@ -1,0 +1,202 @@
+:host {
+  display: block;
+  height: 100%;
+}
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.sidebar {
+  flex: 0 0 236px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 12px 14px;
+  border-right: 1px solid var(--mosaik-scheme-highlight);
+  background: color-mix(
+    in oklab,
+    var(--mosaik-scheme-highlight) 40%,
+    var(--mosaik-scheme-background)
+  );
+  overflow-y: auto;
+}
+.window-drag-region {
+  // Spans the sidebar's padding so its whole top edge moves the window.
+  margin: 0 -12px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px 8px;
+  text-decoration: none;
+  color: inherit;
+  font: var(--mosaik-typography-subtitle1);
+  font-weight: 600;
+}
+.new-session {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  min-height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: var(--mosaik-color-danger-500);
+  color: var(--mosaik-color-danger-0);
+  font-weight: 600;
+  cursor: pointer;
+}
+.new-session > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.primary-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+}
+.nav-active {
+  background: transparent;
+  border-radius: 8px;
+}
+.sidebar-spacer {
+  flex: 1;
+  min-height: 12px;
+}
+.assistant-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  background: var(--mosaik-scheme-surface);
+}
+.assistant-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+.assistant-row > span:nth-child(2) {
+  flex: 1;
+  white-space: nowrap;
+}
+.assistant-row .caption {
+  font-size: 10px;
+}
+.workspace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.window-toolbar {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  padding: 0 16px 0 8px;
+  border-bottom: 1px solid var(--mosaik-scheme-highlight);
+}
+.window-history {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+.window-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.window-title h1 {
+  margin: 0;
+  font: var(--mosaik-typography-subtitle2);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.window-title .caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.window-toolbar-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+.workspace-outlet {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.organization {
+  margin: 12px 4px;
+  font: var(--mosaik-typography-caption);
+}
+.organization summary {
+  color: var(--mosaik-scheme-lowlight);
+  cursor: pointer;
+  padding-bottom: 8px;
+}
+.collection-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.collection-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+// The silence reminder asks for a decision without covering the screen's header: it floats above
+// the status bar at the trailing edge, like a notification.
+.workspace-reminder {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  width: min(380px, calc(100% - 32px));
+  box-shadow: var(--mosaik-elevation-bold);
+  border-radius: 12px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 3px;
+}
+
+.focus-mode .sidebar {
+  display: none;
+}
+:host.tray-mode .app-shell {
+  display: none;
+}

@@ -2,6 +2,7 @@ name: Desktop quality
 
 on:
   pull_request:
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -84,3 +85,20 @@ jobs:
           if-no-files-found: ignore
           include-hidden-files: true
           retention-days: 7
+
+  quality-gate:
+    name: Quality Gate
+    if: always()
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require successful desktop verification on every platform
+        env:
+          VERIFY_RESULT: ${{ needs.verify.result }}
+        run: |
+          if [[ "$VERIFY_RESULT" != "success" ]]; then
+            echo "Desktop verification failed, was cancelled or was skipped."
+            exit 1
+          fi

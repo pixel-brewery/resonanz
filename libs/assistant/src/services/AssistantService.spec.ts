@@ -13,9 +13,8 @@ import {
   type IAiInstance,
 } from '@pixel-brewery/synapse-core';
 import { afterEach, describe, expect, it } from 'vitest';
-import { access, mkdtemp, realpath, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { access, mkdir, mkdtemp, realpath, rm } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import type { AssistantRunEvent } from '../models/AssistantRunEvent.js';
 import type { IAssistantLoginEvent } from '../interfaces/IAssistantLoginEvent.js';
 import { AssistantService } from './AssistantService.js';
@@ -205,6 +204,7 @@ describe('AssistantService', () => {
     expect(status.authMethods[0]?.id).toBe('test-native');
     expect(status.models).toEqual([]);
     expect(status.message).toBe('Native metadata is temporarily unavailable.');
+    expect(status.inspectionComplete).toBe(false);
     expect(driver.invocations).toHaveLength(0);
     expect(driver.auth.loginCount).toBe(0);
   });
@@ -246,7 +246,8 @@ async function setup(installed = true): Promise<{
   driver: NativeReplayDriver;
   root: string;
 }> {
-  const root = await mkdtemp(join(tmpdir(), 'resonanz-assistant-'));
+  await mkdir('.codex-work/assistant-tests', { recursive: true });
+  const root = await mkdtemp(resolve('.codex-work/assistant-tests/run-'));
   const driver = new NativeReplayDriver();
   const service = new AssistantService(
     {

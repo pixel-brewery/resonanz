@@ -1,0 +1,13 @@
+<span><resonanz-marker kind="decision" />{{ 'loc.resonanz.marker.decision' | translate }}</span
+><span><resonanz-marker kind="task" />{{ 'loc.resonanz.marker.task' | translate }}</span
+><span><resonanz-marker kind="question" />{{ 'loc.resonanz.marker.question' | translate }}</span>
+@if (includeUser()) {
+  <span
+    ><resonanz-marker kind="moment" [marked]="true" />{{
+      'loc.resonanz.marker.user' | translate
+    }}</span
+  >
+}
+@if (circular()) {
+  <span>{{ 'loc.resonanz.session.ringHint' | translate }}</span>
+}

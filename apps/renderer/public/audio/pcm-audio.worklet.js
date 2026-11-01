@@ -1,5 +1,5 @@
 
-class FlamoxPcmCaptureProcessor extends AudioWorkletProcessor {
+class ResonanzPcmCaptureProcessor extends AudioWorkletProcessor {
     constructor(options) {
         super();
         const configuration = options.processorOptions || {};
@@ -85,7 +85,7 @@ class FlamoxPcmCaptureProcessor extends AudioWorkletProcessor {
     }
 }
 
-class FlamoxPcmPlaybackProcessor extends AudioWorkletProcessor {
+class ResonanzPcmPlaybackProcessor extends AudioWorkletProcessor {
     constructor(options) {
         super();
         const configuration = options.processorOptions || {};
@@ -273,5 +273,5 @@ class FlamoxPcmPlaybackProcessor extends AudioWorkletProcessor {
     }
 }
 
-registerProcessor('flamox-pcm-capture', FlamoxPcmCaptureProcessor);
-registerProcessor('flamox-pcm-playback', FlamoxPcmPlaybackProcessor);
+registerProcessor('resonanz-pcm-capture', ResonanzPcmCaptureProcessor);
+registerProcessor('resonanz-pcm-playback', ResonanzPcmPlaybackProcessor);

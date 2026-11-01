@@ -1,0 +1,13 @@
+<div class="task-row" [class.completed]="completed()">
+  <mosaik-checkbox
+    [attr.aria-label]="label()"
+    [isChecked]="completed()"
+    [disabled]="disabled()"
+    (checked)="change(true)"
+    (unchecked)="change(false)"
+  />
+  <button class="task-label" [title]="label()" (click)="selected.emit()">{{ label() }}</button>
+  @if (secondary()) {
+    <span class="secondary" [class.warning]="warning()">{{ secondary() }}</span>
+  }
+</div>

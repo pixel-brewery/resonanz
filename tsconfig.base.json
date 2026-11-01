@@ -18,7 +18,8 @@
       "@resonanz/assistant": ["./libs/assistant/src/index.ts"],
       "@resonanz/audio": ["./libs/audio/src/index.ts"],
       "@resonanz/contracts": ["./libs/contracts/src/index.ts"],
-      "@resonanz/sessions": ["./libs/sessions/src/index.ts"]
+      "@resonanz/sessions": ["./libs/sessions/src/index.ts"],
+      "@resonanz/intl": ["./libs/intl/src/index.ts"]
     }
   }
 }

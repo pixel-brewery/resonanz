@@ -1,23 +1,23 @@
-name: Funktion vorschlagen
-description: Einen konkreten Nutzerweg verbessern oder ergänzen.
-title: '[Idee]: '
+name: Suggest a feature
+description: Improve or add a concrete user workflow.
+title: '[Feature]: '
 body:
   - type: textarea
     id: problem
     attributes:
-      label: Was möchtest du erreichen?
-      description: Beschreibe die Aufgabe und den aktuellen Ablauf.
+      label: What are you trying to do?
+      description: Describe the task and current workflow.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Wie soll Resonanz dabei helfen?
-      description: Ein konkretes Beispiel ist hilfreicher als eine reine Liste von Steuerelementen.
+      label: How should Resonanz help?
+      description: A concrete example is more useful than a list of controls.
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Kontext und Alternativen
-      description: Optional. Bitte nur künstliche Gesprächsinhalte verwenden.
+      label: Context and alternatives
+      description: Optional. Use synthetic conversation content only.

@@ -1,0 +1,46 @@
+<section class="gap-card" test-id="answer-gap">
+  <header>
+    <svg
+      aria-hidden="true"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5M8 11h6" />
+    </svg>
+    <h3>{{ title() }}</h3>
+  </header>
+  <p>{{ description() }}</p>
+  @if (related(); as passage) {
+    <div class="related">
+      <span>{{ relatedLabel() }}</span>
+      <button
+        type="button"
+        test-id="answer-gap-related"
+        [class.selected]="passage.selected"
+        [attr.aria-pressed]="passage.selected"
+        [title]="passage.title"
+        (click)="relatedSelected.emit(passage)"
+      >
+        <span>{{ passage.title }}</span
+        ><span aria-hidden="true">·</span><time>{{ passage.atMs | duration }}</time>
+      </button>
+    </div>
+  }
+  <div class="actions">
+    <mosaik-button
+      [attr.test-id]="saveTestId() || null"
+      [label]="saveLabel()"
+      icon="add"
+      size="small"
+      appearance="outline"
+      [disabled]="saveDisabled()"
+      (click)="saveRequested.emit()"
+    />
+  </div>
+</section>

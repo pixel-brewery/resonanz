@@ -1,0 +1,44 @@
+<div class="backdrop" (click)="cancel()"></div>
+<section
+  role="alertdialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="titleId"
+  [attr.aria-describedby]="descriptionId"
+  resonanzModal
+  (modalDismiss)="cancel()"
+  [attr.aria-busy]="busy()"
+>
+  <span class="warning-icon" aria-hidden="true">!</span>
+  <h2 [id]="titleId">{{ title() | message }}</h2>
+  <p [id]="descriptionId">{{ description() | message }}</p>
+  @if (details().length) {
+    <ul>
+      @for (detail of details(); track $index) {
+        <li>{{ detail | message }}</li>
+      }
+    </ul>
+  }
+  @if (warning()) {
+    <p class="caption">{{ warning() | message }}</p>
+  }
+  @if (blockedReason()) {
+    <p class="blocked" role="status">{{ blockedReason() | message }}</p>
+  }
+  <footer>
+    <mosaik-button
+      test-id="cancel-confirmation"
+      [label]="'loc.resonanz.common.cancel' | translate"
+      appearance="outline"
+      [disabled]="busy()"
+      (click)="cancel()"
+    /><mosaik-button
+      [attr.test-id]="confirmTestId()"
+      [label]="confirmLabel() | message"
+      appearance="solid"
+      variant="danger"
+      [disabled]="busy() || !!blockedReason()"
+      [isBusy]="busy()"
+      (click)="confirm()"
+    />
+  </footer>
+</section>

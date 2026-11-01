@@ -1,4 +1,5 @@
 export { AssistantService } from './services/AssistantService.js';
+export { assistantRetryDelay } from './assistantRetryDelay.js';
 export { resolveAssistantExecutable } from './resolveAssistantExecutable.js';
 export type { AssistantProvider } from './models/AssistantProvider.js';
 export type { AssistantRunEvent } from './models/AssistantRunEvent.js';

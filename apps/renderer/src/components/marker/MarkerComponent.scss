@@ -1,0 +1,33 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+}
+.marker {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--mosaik-scheme-foreground);
+}
+.decision {
+  transform: rotate(45deg);
+  background: var(--mosaik-color-info-500);
+}
+.task {
+  background: var(--mosaik-color-warning-500);
+}
+.question {
+  border-radius: 50%;
+  background: var(--mosaik-color-highlight-500);
+}
+.moment {
+  border-radius: 50%;
+}
+.marked {
+  outline: 1.5px solid var(--mosaik-scheme-foreground);
+  outline-offset: 3px;
+}

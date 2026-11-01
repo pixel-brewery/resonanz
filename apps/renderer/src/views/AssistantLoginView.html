@@ -1,0 +1,78 @@
+@if (presenter.login(); as login) {
+  <mosaik-card appearance="soft" test-id="assistant-login">
+    <div slot="content" class="login-content" role="status">
+      @switch (login.state) {
+        @case ('starting') {
+          <mosaik-text [text]="'loc.resonanz.auth.starting' | translate" />
+        }
+        @case ('waiting') {
+          <mosaik-text
+            [text]="'loc.resonanz.auth.finish' | translate"
+            mosaikTypography="subtitle2"
+          />
+        }
+        @case ('verifying') {
+          <mosaik-text [text]="'loc.resonanz.auth.verifying' | translate" />
+        }
+        @case ('succeeded') {
+          <mosaik-text [text]="'loc.resonanz.auth.success' | translate" variant="success" />
+        }
+        @case ('cancelled') {
+          <mosaik-text [text]="'loc.resonanz.auth.cancelled' | translate" />
+        }
+        @case ('failed') {
+          <mosaik-text [text]="'loc.resonanz.auth.failed' | translate" variant="warning" />
+        }
+      }
+      @if (login.message) {
+        <mosaik-text [text]="login.message | message" [wrap]="true" />
+      }
+      @if (login.interaction; as interaction) {
+        @if (interaction.message) {
+          <mosaik-text [text]="interaction.message | message" [wrap]="true" />
+        }
+        @if (interaction.code) {
+          <mosaik-text
+            [text]="interaction.code"
+            mosaikTypography="subtitle1"
+            test-id="login-code"
+          />
+        }
+        @if (interaction.url) {
+          <mosaik-button
+            test-id="open-login"
+            [label]="'loc.resonanz.auth.browser' | translate"
+            appearance="solid"
+            (click)="presenter.openLogin()"
+          />
+        }
+        @for (field of interaction.fields; track field.id) {
+          @if (presenter.loginForm[field.id]; as loginField) {
+            @if (field.secret) {
+              <mosaik-passwordbox
+                [label]="field.label"
+                [formField]="loginField"
+                [autocomplete]="false"
+              />
+            } @else {
+              <mosaik-textbox [label]="field.label" [formField]="loginField" />
+            }
+          }
+        }
+        @if (interaction.fields?.length) {
+          <mosaik-button
+            [label]="'loc.resonanz.common.continue' | translate"
+            (click)="presenter.respondLogin()"
+          />
+        }
+      }
+      @if (login.state === 'starting' || login.state === 'waiting' || login.state === 'verifying') {
+        <mosaik-button
+          [label]="'loc.resonanz.auth.cancel' | translate"
+          appearance="plain"
+          (click)="presenter.cancelLogin()"
+        />
+      }
+    </div>
+  </mosaik-card>
+}

@@ -12,7 +12,13 @@ for (const file of provenance.files) {
     const bytes = await readFile(new URL(file.destination, repositoryRoot));
     const actual = createHash('sha256').update(bytes).digest('hex');
 
-    if (actual !== file.sha256) {
+    if (file.downstreamSha256 && !file.modification?.trim()) {
+      failures.push(`${file.destination}: adapted source requires a modification description`);
+    }
+
+    const expected = file.downstreamSha256 ?? file.sha256;
+
+    if (actual !== expected) {
       failures.push(`${file.destination}: content differs from ${provenance.commit}`);
     }
   } catch (error) {
@@ -25,6 +31,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `Verified ${provenance.files.length} unchanged audio files from ${provenance.commit}.\n`,
+    `Verified ${provenance.files.length} audio files against provenance from ${provenance.commit}.\n`,
   );
 }

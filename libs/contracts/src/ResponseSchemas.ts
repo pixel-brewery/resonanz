@@ -1,6 +1,8 @@
 // #region Imports
 import { z } from 'zod';
 import { dataSchemas } from './DataSchemas.js';
+import { miniRecorderSchema } from './MiniRecorderSchema.js';
+import { updateStateSchema } from './UpdateStateSchema.js';
 // #endregion
 
 const done = z.object({ ok: z.literal(true) });
@@ -19,6 +21,15 @@ export const responseSchemas = {
   }),
   'sessions.create': dataSchemas.session,
   'sessions.get': dataSchemas.session,
+  'sessions.search': z.array(dataSchemas.identifier).max(5000),
+  'sessions.mark': dataSchemas.session,
+  'sessions.pause': dataSchemas.session,
+  'sessions.clear': z.strictObject({ deletedSessionCount: z.number().int().min(0).max(5000) }),
+  'sessions.unmark': dataSchemas.session,
+  'sessions.pipeline': dataSchemas.session,
+  'sessions.retry.cancel': dataSchemas.session,
+  'sessions.task': dataSchemas.session,
+  'sessions.waveform': dataSchemas.session,
   'sessions.update': dataSchemas.session,
   'sessions.delete': done,
   'sessions.finish': dataSchemas.session,
@@ -37,6 +48,7 @@ export const responseSchemas = {
   'transcript.replace': dataSchemas.session,
   'transcription.run': dataSchemas.session,
   'assistant.status': dataSchemas.assistantStatus,
+  'assistant.test': z.object({ text: z.string().max(4000), latencyMs: z.number().min(0) }),
   'assistant.detect': z.array(
     z
       .object({
@@ -55,6 +67,8 @@ export const responseSchemas = {
   'assistant.cancel': done,
   'settings.save': dataSchemas.settings,
   'speech.start': z.object({ started: z.literal(true) }),
+  'dictation.start': z.object({ started: z.literal(true) }),
+  'dictation.stop': z.object({ stopped: z.literal(true) }),
   'speech.stop': z.object({ stopped: z.literal(true) }),
   'speech.listen': z.object({ listening: z.boolean() }),
   'speech.synthesize': z.object({ audioUrl: z.string().max(400) }),
@@ -62,6 +76,26 @@ export const responseSchemas = {
   'live.respond': z.object({ runId: dataSchemas.identifier }),
   'external.open': done,
   'window.show': done,
+  'window.present': done,
+  'capture.reminder': done,
+  'mini.update': done,
+  'mini.get': miniRecorderSchema,
+  'mini.action': done,
+  'mini.resize': done,
+  'window.tray': done,
+  'window.tray.resize': done,
+  'storage.reveal': done,
+  'storage.usage': dataSchemas.storageUsage,
+  'storage.cleanup': z.strictObject({
+    removedAudioCount: z.number().int().min(0).max(5000),
+    freedBytes: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+  }),
   'window.hide': done,
   'app.quit': done,
+  'updates.get': updateStateSchema,
+  'updates.check': updateStateSchema,
+  'updates.download': z.strictObject({ outcome: z.enum(['started', 'unavailable']) }),
+  'updates.install': z.strictObject({
+    outcome: z.enum(['started', 'not-ready', 'capture-active']),
+  }),
 } as const;

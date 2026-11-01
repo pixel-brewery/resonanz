@@ -120,7 +120,9 @@ describe('ConversationAudioRecorder', () => {
     expect(recorder.readAssistantLevel()).toBeCloseTo(0.5);
     recorder.setAssistantAudible(false);
     expect(media.gain.gain.value).toBe(0);
-    expect(() => recorder.setAssistantElement({} as HTMLAudioElement)).toThrow('bereits');
+    expect(() => recorder.setAssistantElement({} as HTMLAudioElement)).toThrow(
+      'loc.resonanz.error.liveSpeechBound',
+    );
     await recorder.stop();
     expect(media.remoteSource.disconnect).toHaveBeenCalledOnce();
   });

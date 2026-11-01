@@ -1,0 +1,54 @@
+<div class="index">
+  <h2>
+    {{ 'loc.resonanz.landscape.threads' | translate }}
+    <span class="badge">{{ 'loc.resonanz.session.outlook' | translate }}</span>
+  </h2>
+  <p class="caption">{{ description() | message }}</p>
+  @for (thread of index(); track thread.id) {
+    <button
+      [class.active]="selected()?.id === thread.id"
+      [attr.aria-pressed]="selected()?.id === thread.id"
+      [style.--thread-color]="thread.color"
+      (click)="threadSelected.emit(thread.id)"
+    >
+      <span class="thread-swatch"></span
+      ><span
+        ><strong>{{ thread.title }}</strong
+        ><small>{{
+          intl.t('loc.resonanz.landscape.pointsSessions', thread.points.length, thread.sessionCount)
+        }}</small></span
+      >
+    </button>
+  }
+</div>
+<div class="story">
+  @if (selected(); as thread) {
+    <header>
+      <h3>{{ thread.title }}</h3>
+      <span class="caption">{{ thread.status | message }}</span>
+    </header>
+    <div class="story-points">
+      @for (point of thread.points; track point.itemId + ':' + point.atMs; let last = $last) {
+        <button class="story-card" (click)="pointSelected.emit(point)">
+          <span class="caption">{{ point.when }}</span
+          ><strong>{{ point.title }}</strong>
+          <blockquote>„{{ point.quote }}“</blockquote>
+          <span class="point-meta"
+            ><resonanz-marker [kind]="point.kind" />{{
+              'loc.resonanz.marker.' + point.kind | message
+            }}
+            · {{ point.atMs | duration }}</span
+          >
+        </button>
+        @if (!last) {
+          <span class="arrow" aria-hidden="true">→</span>
+        }
+      }
+    </div>
+  } @else {
+    <div class="no-threads">
+      <strong>{{ 'loc.resonanz.landscape.shared' | translate }}</strong>
+      <p class="caption">{{ 'loc.resonanz.landscape.tagEmpty' | translate }}</p>
+    </div>
+  }
+</div>

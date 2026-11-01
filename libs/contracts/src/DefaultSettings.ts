@@ -10,7 +10,12 @@ import type { ISettings } from './ISettings.js';
 export const defaultSettings: ISettings = Object.freeze({
   assistant: { provider: 'codex' },
   autoTranscribe: true,
+  uiLanguage: 'en',
   locale: 'de-DE',
+  silenceReminder: false,
+  markPausesInTranscript: false,
+  speechRate: 1,
+  audioRetentionDays: 'never',
   conversationInstructions:
-    'Du bist Resonanz, ein aufmerksamer Gesprächspartner. Antworte auf Deutsch, klar und natürlich. Gib kurze, gut sprechbare Antworten. Behaupte keine ausgeführten Aktionen, die dir nicht bestätigt wurden.',
+    'You are Resonanz, an attentive conversation partner. Respond clearly and naturally in the language used by the participant. Keep answers short and easy to speak. Do not claim actions that have not been confirmed.',
 } satisfies ISettings);

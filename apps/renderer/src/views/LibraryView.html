@@ -1,222 +1,458 @@
-<div class="mx-auto flex w-full max-w-[1320px] flex-1 flex-col gap-3 p-4" test-id="library-view">
-  <header class="flex flex-wrap items-center justify-between gap-2">
-    <div class="flex min-w-0 flex-col gap-0.5">
-      @if (presenter.collection(); as collection) {
-      <mosaik-text
-        role="heading"
-        aria-level="1"
-        [text]="collection.name"
-        mosaikTypography="headline5"
-      />
-      } @else if (presenter.scope() === 'favorites') {
-      <mosaik-text role="heading" aria-level="1" text="Favoriten" mosaikTypography="headline5" />
-      } @else if (presenter.scope() === 'conversations') {
-      <mosaik-text
-        role="heading"
-        aria-level="1"
-        text="Live-Gespräche"
-        mosaikTypography="headline5"
-      />
-      } @else {
-      <mosaik-text
-        role="heading"
-        aria-level="1"
-        text="Aufzeichnungen"
-        mosaikTypography="headline5"
-      />
-      }
-      <mosaik-text
-        text="Gespräche festhalten. Gedanken wiederfinden."
-        mosaikTypography="body2"
-        variant="neutral"
-      />
-    </div>
-    <div class="flex items-center gap-1">
-      @if (presenter.collection()) {
+<div class="library" test-id="library-view">
+  <ng-template
+    resonanzWindowToolbar
+    [toolbarTitle]="
+      presenter.collection()?.name ??
+      (presenter.scope() === 'favorites'
+        ? ('loc.resonanz.nav.favorites' | translate)
+        : presenter.scope() === 'moments'
+          ? ('loc.resonanz.nav.moments' | translate)
+          : presenter.scope() === 'conversations'
+            ? ('loc.resonanz.nav.conversations' | translate)
+            : presenter.view() === 'landscape'
+              ? ((presenter.weekOffset() === 0
+                  ? 'loc.resonanz.landscape.thisWeek'
+                  : 'loc.resonanz.landscape.week'
+                ) | translate)
+              : ('loc.resonanz.nav.sessions' | translate))
+    "
+    [toolbarSubtitle]="
+      presenter.view() === 'landscape'
+        ? presenter.weekCaption()
+        : intl.t(
+            'loc.resonanz.library.total',
+            presenter.library.sessions().length,
+            intl.durationLabel(presenter.totalDuration())
+          )
+    "
+  >
+    @if (presenter.view() === 'landscape') {
+      <nav
+        class="week-navigation"
+        [attr.aria-label]="'loc.resonanz.landscape.thisWeek' | translate"
+      >
+        <mosaik-button
+          size="small"
+          icon="chevronLeft"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.landscape.previous' | translate"
+          (click)="presenter.weekOffset.set(presenter.weekOffset() - 1)"
+        />
+        <mosaik-button
+          size="small"
+          [label]="'loc.resonanz.common.today' | translate"
+          appearance="plain"
+          [disabled]="presenter.weekOffset() === 0"
+          (click)="presenter.weekOffset.set(0)"
+        />
+        <mosaik-button
+          size="small"
+          icon="chevronRight"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.landscape.next' | translate"
+          (click)="presenter.weekOffset.set(presenter.weekOffset() + 1)"
+        />
+      </nav>
+    }
+    <resonanz-segmented-tabs
+      [tabs]="viewTabs"
+      [value]="presenter.view()"
+      (valueChange)="presenter.view.set($event)"
+      [label]="'loc.resonanz.library.viewLabel' | translate"
+    /><mosaik-searchbox
+      class="library-search"
+      test-id="session-search"
+      [placeholder]="'loc.resonanz.library.searchTitles' | translate"
+      [attr.aria-label]="'loc.resonanz.library.search' | translate"
+      [formField]="presenter.filterForm.query"
+    /><mosaik-button
+      test-id="import-session"
+      icon="import"
+      appearance="plain"
+      [attr.aria-label]="'loc.resonanz.library.import' | translate"
+      (click)="presenter.shell.importSession()"
+    />
+  </ng-template>
+  @if (presenter.collection()) {
+    <div class="collection-tools">
       <mosaik-button
         test-id="rename-collection"
-        label="Umbenennen"
+        [label]="'loc.resonanz.session.rename' | translate"
         appearance="plain"
         (click)="presenter.beginRename()"
-      />
-      <mosaik-button
+      /><mosaik-button
         test-id="delete-collection"
-        label="Sammlung entfernen"
+        [label]="'loc.resonanz.nav.removeCollection' | translate"
         appearance="plain"
         (click)="presenter.confirmCollectionDeletion.set(true)"
       />
-      }
-      <mosaik-button
-        test-id="import-session"
-        label="Importieren"
-        icon="import"
-        appearance="outline"
-        (click)="presenter.shell.importSession()"
+    </div>
+  }
+  @if (presenter.editingCollection()) {
+    <div class="collection-tools" test-id="collection-rename-editor">
+      <mosaik-textbox
+        test-id="rename-collection-input"
+        [label]="'loc.resonanz.nav.collection' | translate"
+        [formField]="presenter.collectionForm.name"
+      /><mosaik-button
+        test-id="save-collection-name"
+        [label]="'loc.resonanz.common.save' | translate"
+        [disabled]="presenter.collectionForm().invalid() || presenter.mutating()"
+        (click)="presenter.renameCollection()"
       />
     </div>
-  </header>
-  @if (presenter.editingCollection()) {
-  <div class="flex items-center gap-1" test-id="collection-rename-editor">
-    <mosaik-textbox
-      test-id="rename-collection-input"
-      label="Sammlung"
-      [formField]="presenter.collectionForm.name"
-    />
-    <mosaik-button
-      test-id="save-collection-name"
-      label="Speichern"
-      [disabled]="presenter.collectionForm().invalid() || presenter.mutating()"
-      (click)="presenter.renameCollection()"
-    />
-    <mosaik-button
-      label="Abbrechen"
-      appearance="plain"
-      (click)="presenter.editingCollection.set(false)"
-    />
-  </div>
-  } @if (presenter.confirmCollectionDeletion()) {
-  <mosaik-card appearance="soft" variant="warning">
-    <div slot="content" class="flex flex-wrap items-center gap-2 p-2">
-      <mosaik-text
-        class="flex-1"
-        text="Sammlung entfernen? Die Aufzeichnungen bleiben erhalten."
-        [wrap]="true"
-      />
-      <mosaik-button
+  }
+  @if (presenter.confirmCollectionDeletion()) {
+    <div class="collection-tools">
+      <span>{{ 'loc.resonanz.nav.confirmCollection' | translate }}</span
+      ><mosaik-button
         test-id="confirm-delete-collection"
-        label="Entfernen"
+        [label]="'loc.resonanz.common.remove' | translate"
         variant="danger"
-        [disabled]="presenter.mutating()"
         (click)="presenter.deleteCollection()"
-      />
-      <mosaik-button
-        label="Abbrechen"
+      /><mosaik-button
+        [label]="'loc.resonanz.common.cancel' | translate"
         appearance="plain"
         (click)="presenter.confirmCollectionDeletion.set(false)"
       />
     </div>
-  </mosaik-card>
   }
-  <mosaik-searchbox
-    class="w-full max-w-[520px]"
-    test-id="session-search"
-    placeholder="Titel und Tags durchsuchen"
-    aria-label="Aufzeichnungen durchsuchen"
-    [formField]="presenter.filterForm.query"
-  />
   @if (presenter.library.loading()) {
-  <mosaik-text text="Aufzeichnungen werden geladen …" role="status" variant="neutral" />
-  } @else if (presenter.library.sessions().length === 0) {
-  <div
-    class="flex min-h-[380px] flex-1 flex-col items-center justify-center gap-3 py-5"
-    test-id="empty-library"
-  >
-    <img src="assets/resonanz-mark.svg" width="100" height="100" alt="" />
-    <div class="flex max-w-[560px] flex-col items-center gap-1">
-      <mosaik-text
-        text="Dein nächstes Gespräch beginnt hier."
-        mosaikTypography="headline5"
-        alignment="center"
-        [wrap]="true"
-      />
-      <mosaik-text
-        text="Nimm auf, was wichtig ist. Sprich live mit deiner KI und stelle später Fragen zu deinen Sessions."
-        alignment="center"
-        variant="neutral"
-        [wrap]="true"
-      />
-    </div>
-    <div class="flex flex-wrap justify-center gap-1.5">
-      <mosaik-button
-        test-id="empty-start-recording"
-        label="Aufnahme starten"
-        icon="mic"
-        appearance="solid"
-        variant="primary"
-        [disabled]="presenter.capture.active() || presenter.capture.busy()"
-        (click)="presenter.capture.startRecording()"
-      />
-      <mosaik-button
-        label="Live-Unterhaltung starten"
-        icon="live"
-        appearance="outline"
-        [disabled]="presenter.capture.active() || presenter.capture.busy()"
-        (click)="presenter.capture.startLive()"
-      />
-    </div>
-  </div>
-  } @else if (presenter.sessions().length === 0) {
-  <div class="flex flex-col gap-1 py-5" test-id="no-search-results">
-    <mosaik-text
-      text="Hier gibt es noch keine passenden Aufzeichnungen."
-      mosaikTypography="subtitle1"
-    />
-    <mosaik-text
-      text="Passe die Suche an oder ordne eine Session dieser Sammlung zu."
-      variant="neutral"
-    />
-  </div>
-  } @else {
-  <div class="flex flex-col gap-1.5" test-id="session-list">
-    @for (session of presenter.sessions(); track session.id) {
-    <mosaik-card appearance="outline" [attr.test-id]="'session-row-' + session.id">
-      <div slot="content" class="flex items-center gap-2 px-2 py-1.5">
-        <mosaik-icon
-          [icon]="session.kind === 'conversation' ? 'live' : 'mic'"
-          size="large"
-          variant="primary"
-        />
-        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-          <mosaik-button
-            class="min-w-0"
-            [routerLink]="['/session', session.id]"
-            [label]="session.title"
-            appearance="plain"
-            fit="width"
-            horizontalContentAlignment="left"
-          />
-          <div class="flex flex-wrap items-center gap-1 px-1">
-            <mosaik-text
-              [text]="session.createdAt | date:'dd. MMM yyyy, HH:mm'"
-              mosaikTypography="caption"
-              variant="neutral"
-            />
-            <mosaik-text
-              [text]="session.durationMs | duration"
-              mosaikTypography="caption"
-              variant="neutral"
-            />
-            @if (session.status === 'recording') {
-            <mosaik-badge label="Aufnahme läuft" appearance="soft" variant="danger" size="small" />
-            } @if (session.status === 'paused') {
-            <mosaik-badge label="Pausiert" appearance="soft" size="small" /> } @if (session.status
-            === 'processing') {
-            <mosaik-badge label="Wird verarbeitet" appearance="soft" size="small" /> } @if
-            (session.status === 'interrupted') {
-            <mosaik-badge label="Unterbrochen" appearance="soft" variant="warning" size="small" /> }
-            @if (session.status === 'error') {
-            <mosaik-badge
-              label="Bearbeitung prüfen"
-              appearance="soft"
-              variant="warning"
-              size="small"
-            />
-            } @for (tag of session.tags; track tag) {
-            <mosaik-badge [label]="tag" appearance="soft" size="small" /> }
-          </div>
-        </div>
+    <div class="empty-state" role="status">{{ 'loc.resonanz.library.loading' | translate }}</div>
+  } @else if (!presenter.library.sessions().length) {
+    <div class="empty-state" test-id="empty-library">
+      <resonanz-glyph [tile]="true" />
+      <h2>{{ 'loc.resonanz.library.welcome' | translate }}</h2>
+      <p>{{ 'loc.resonanz.library.intro' | translate }}</p>
+      <div class="empty-actions">
         <mosaik-button
-          [attr.test-id]="'star-' + session.id"
-          icon="star"
-          [appearance]="session.starred ? 'soft' : 'plain'"
-          [variant]="session.starred ? 'primary' : 'neutral'"
-          [attr.aria-label]="session.starred ? 'Favorit entfernen' : 'Als Favorit markieren'"
-          [disabled]="presenter.mutating()"
-          (click)="presenter.toggleStar(session)"
+          test-id="empty-start-recording"
+          [label]="'loc.resonanz.capture.start' | translate"
+          icon="mic"
+          appearance="solid"
+          (click)="presenter.shell.openCapture()"
+        /><mosaik-button
+          test-id="new-conversation"
+          [label]="'loc.resonanz.capture.startLive' | translate"
+          appearance="outline"
+          (click)="presenter.capture.startLive()"
         />
       </div>
-    </mosaik-card>
-    }
-  </div>
+    </div>
+  } @else if (presenter.view() === 'landscape') {
+    <div class="landscape">
+      <resonanz-week-landscape
+        [items]="presenter.landscapeItems()"
+        [week]="presenter.week()"
+        [threads]="presenter.topicThreads()"
+        [selectedThreadId]="presenter.selectedThreadId()"
+        (itemSelected)="presenter.open($event.id)"
+      />
+      <resonanz-topic-threads
+        [threads]="presenter.topicThreads()"
+        [selectedId]="presenter.selectedThreadId()"
+        [description]="presenter.threadDescription()"
+        (threadSelected)="presenter.selectedThreadId.set($event)"
+        (pointSelected)="presenter.openPoint($event.itemId, $event.atMs)"
+      />
+    </div>
+  } @else {
+    <div class="library-columns">
+      <section class="session-list-pane">
+        <div class="filters" [attr.aria-label]="'loc.resonanz.library.filter' | translate">
+          @for (filter of filters; track filter.id) {
+            <button
+              [attr.test-id]="'filter-' + filter.id"
+              [class.active]="presenter.filter() === filter.id"
+              [attr.aria-pressed]="presenter.filter() === filter.id"
+              (click)="presenter.filter.set(filter.id)"
+            >
+              {{ filter.label | message }}
+            </button>
+          }
+        </div>
+        @if (!presenter.sessions().length) {
+          <div class="empty-state" test-id="no-search-results">
+            <h2>{{ 'loc.resonanz.library.noMatch' | translate }}</h2>
+            <p>{{ 'loc.resonanz.library.adjustSearch' | translate }}</p>
+          </div>
+        }
+        <div class="groups" test-id="session-list">
+          @for (group of presenter.groups(); track group.title) {
+            <section>
+              <h2>{{ group.title | message }}</h2>
+              <div class="group-rows">
+                @for (session of group.sessions; track session.id) {
+                  <article
+                    class="session-row"
+                    [class.selected]="presenter.selectedId() === session.id"
+                    [attr.test-id]="'session-row-' + session.id"
+                    (click)="presenter.select(session.id)"
+                    (keydown.enter)="presenter.select(session.id)"
+                    tabindex="0"
+                    role="button"
+                    [attr.aria-pressed]="presenter.selectedId() === session.id"
+                    (keydown.space)="$event.preventDefault(); presenter.select(session.id)"
+                    [attr.aria-label]="
+                      session.title + ('loc.resonanz.library.previewSuffix' | translate)
+                    "
+                  >
+                    <resonanz-waveform
+                      class="fingerprint"
+                      [values]="presenter.waveform(session.id)"
+                      [markers]="presenter.rowMarkers(session.id)"
+                      [durationMs]="session.durationMs"
+                      [count]="36"
+                    />
+                    <div class="row-text">
+                      <strong>{{ session.title }}</strong
+                      ><span class="caption"
+                        >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
+                        {{
+                          session.kind === 'conversation'
+                            ? ('loc.resonanz.capture.live' | translate)
+                            : ('loc.resonanz.capture.microphone' | translate)
+                        }}
+                        @if (session.insightCounts?.decisions) {
+                          ·
+                          {{
+                            intl.t(
+                              'loc.resonanz.marker.decisionCount',
+                              session.insightCounts.decisions
+                            )
+                          }}
+                        }
+                      </span>
+                    </div>
+                    <span
+                      class="row-status"
+                      [class.failed]="presenter.displayState(session) === 'error'"
+                      [class.processing]="
+                        presenter.displayState(session) === 'transcribing' ||
+                        presenter.displayState(session) === 'analyzing'
+                      "
+                      [class.attention]="
+                        presenter.displayState(session) === 'error' ||
+                        presenter.displayState(session) === 'interrupted' ||
+                        presenter.displayState(session) === 'analysisWaiting'
+                      "
+                      ><span
+                        class="status-dot"
+                        [class.success]="
+                          presenter.displayState(session) === 'ready' ||
+                          presenter.displayState(session) === 'saved'
+                        "
+                        [class.recording]="session.status === 'recording'"
+                      ></span
+                      >{{ presenter.status(session) | message }}</span
+                    ><span class="row-duration">{{ session.durationMs | duration }}</span
+                    ><mosaik-button
+                      class="row-star"
+                      [attr.test-id]="'star-' + session.id"
+                      icon="star"
+                      [appearance]="session.starred ? 'soft' : 'plain'"
+                      size="small"
+                      [attr.aria-label]="
+                        session.starred
+                          ? ('loc.resonanz.nav.removeFavorite' | translate)
+                          : ('loc.resonanz.nav.addFavorite' | translate)
+                      "
+                      (click)="$event.stopPropagation(); presenter.toggleStar(session)"
+                    />
+                  </article>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </section>
+      @if (presenter.selected(); as selected) {
+        <aside
+          class="session-preview"
+          [attr.aria-label]="'loc.resonanz.library.preview' | translate"
+        >
+          <h2>{{ selected.title }}</h2>
+          <p class="preview-meta">
+            {{ selected.createdAt | date: 'EEEE, dd. MMMM, HH:mm' : undefined : intl.locale() }} ·
+            {{ selected.durationMs | duration }} ·
+            {{
+              selected.kind === 'conversation'
+                ? ('loc.resonanz.capture.live' | translate)
+                : ('loc.resonanz.capture.microphone' | translate)
+            }}
+            · {{ intl.languageName(presenter.library.settings().locale) }}
+          </p>
+          <div class="preview-wave outline-card">
+            <resonanz-waveform
+              [values]="presenter.previewWaveform()"
+              [markers]="presenter.markers()"
+              [durationMs]="selected.durationMs"
+              [count]="64"
+              [showTimes]="true"
+            />
+          </div>
+          @if (
+            presenter.previewState() === 'transcribing' ||
+            presenter.previewState() === 'analyzing' ||
+            presenter.previewState() === 'busy'
+          ) {
+            <section class="processing-card" role="status" test-id="preview-processing">
+              <strong>{{
+                (presenter.previewState() === 'transcribing'
+                  ? 'loc.resonanz.library.transcriptCreating'
+                  : 'loc.resonanz.pipeline.analysisRunning'
+                ) | translate
+              }}</strong>
+              <progress
+                max="100"
+                [attr.value]="
+                  selected.pipeline?.transcription?.state === 'running'
+                    ? (selected.pipeline?.transcription?.progress ?? null)
+                    : null
+                "
+                [attr.aria-label]="presenter.status(selected)"
+              ></progress>
+              <span class="caption"
+                >{{ presenter.status(selected) }} ·
+                {{ 'loc.resonanz.library.processingSaved' | translate }}</span
+              >
+            </section>
+          } @else if (presenter.previewState() === 'analysisWaiting') {
+            <mosaik-message
+              test-id="preview-analysis-waiting"
+              variant="warning"
+              appearance="soft"
+              icon="warning"
+              [header]="intl.t('loc.resonanz.library.waitingFor', presenter.previewAssistant())"
+              [content]="'loc.resonanz.library.waitingDescription' | translate"
+            />
+            <div class="preview-recovery-actions">
+              <mosaik-button
+                test-id="preview-processing-details"
+                [label]="'loc.resonanz.library.details' | translate"
+                appearance="solid"
+                fit="width"
+                (click)="presenter.open(selected.id, 'processing')"
+              /><mosaik-button
+                [label]="'loc.resonanz.library.readTranscript' | translate"
+                appearance="outline"
+                fit="width"
+                (click)="presenter.open(selected.id, 'analysis')"
+              />
+            </div>
+          } @else if (
+            presenter.previewState() === 'error' || presenter.previewState() === 'interrupted'
+          ) {
+            <mosaik-message
+              test-id="preview-transcription-error"
+              variant="danger"
+              appearance="soft"
+              icon="warning"
+              [header]="'loc.resonanz.library.transcriptionFailed' | translate"
+              [content]="
+                (presenter.previewError() | message) ||
+                ('loc.resonanz.library.recordingPreserved' | translate)
+              "
+            />
+            <mosaik-button
+              test-id="preview-retry-transcription"
+              [label]="'loc.resonanz.library.retryTranscription' | translate"
+              icon="refresh"
+              appearance="solid"
+              fit="width"
+              [disabled]="!selected.audioAvailable || presenter.mutating()"
+              (click)="presenter.retryTranscription(selected.id)"
+            />
+          } @else {
+            @if (selected.analysis; as analysis) {
+              <p class="preview-summary">
+                @for (claim of analysis.summary; track claim.id) {
+                  {{ claim.text }}
+                }
+              </p>
+              <resonanz-insight-statistics
+                [decisions]="analysis.decisions.length"
+                [tasks]="analysis.tasks.length"
+                [questions]="analysis.openQuestions.length"
+              />
+              @if (presenter.myTasks().length) {
+                <h3 class="caption for-you-heading">
+                  {{ 'loc.resonanz.marker.forYou' | translate }}
+                </h3>
+                <div class="my-tasks">
+                  @for (task of presenter.myTasks(); track task.id) {
+                    <resonanz-task-row
+                      [label]="task.text"
+                      [secondary]="task.due ? intl.dueLabel(task.due) : ''"
+                      [completed]="task.completed ?? false"
+                      [disabled]="presenter.mutating()"
+                      (completedChange)="presenter.setTaskCompleted(task.id, $event)"
+                      (selected)="presenter.open(selected.id, 'analysis')"
+                    />
+                  }
+                </div>
+              }
+            } @else if (selected.summary) {
+              <p class="preview-summary">{{ selected.summary }}</p>
+            } @else {
+              <p class="caption preview-hint">
+                {{
+                  (selected.transcript.length
+                    ? 'loc.resonanz.capture.transcriptReady'
+                    : 'loc.resonanz.capture.audioSaved'
+                  ) | translate
+                }}
+              </p>
+            }
+            <div class="preview-actions">
+              <mosaik-button
+                [label]="'loc.resonanz.common.open' | translate"
+                test-id="preview-open"
+                appearance="solid"
+                fit="width"
+                (click)="presenter.open(selected.id)"
+              /><mosaik-button
+                [label]="'loc.resonanz.question.questions' | translate"
+                appearance="outline"
+                fit="width"
+                (click)="presenter.open(selected.id, 'questions')"
+              /><mosaik-button
+                [label]="'loc.resonanz.nav.voice' | translate"
+                appearance="outline"
+                fit="width"
+                [routerLink]="['/voice', selected.id]"
+              />
+            </div>
+          }
+          <div class="preview-footer">
+            <mosaik-button
+              [label]="'loc.resonanz.session.rename' | translate"
+              icon="edit"
+              appearance="plain"
+              (click)="presenter.open(selected.id, 'ring', true)"
+            /><mosaik-button
+              [label]="'loc.resonanz.common.delete' | translate"
+              icon="trash"
+              appearance="plain"
+              variant="danger"
+              [disabled]="selected.status === 'recording' || selected.status === 'paused'"
+              (click)="presenter.deleting.set(true)"
+            />
+          </div>
+        </aside>
+      }
+    </div>
   }
 </div>
+@if (presenter.deleting() && presenter.selected(); as selected) {
+  <resonanz-delete-dialog
+    [title]="selected.title"
+    [durationMs]="selected.durationMs"
+    [audioBytes]="selected.audioBytes"
+    [audioAvailable]="selected.audioAvailable"
+    [details]="presenter.deletionDetails()"
+    [busy]="presenter.mutating()"
+    (cancelled)="presenter.deleting.set(false)"
+    (confirmed)="presenter.deleteSelected()"
+  />
+}

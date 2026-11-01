@@ -15,12 +15,14 @@ import {
   PcmAudioCapture,
   type IAudioInputDevice,
 } from '@resonanz/audio';
-import type { Subscription } from 'rxjs';
+import { Subject, type Subscription } from 'rxjs';
 import { AUDIO_HOST } from './AUDIO_HOST';
 import { AudioBrowserRuntime } from './AudioBrowserRuntime';
 import { AudioCaptureLease } from './AudioCaptureLease';
 import type { IRecordingSnapshot } from './IRecordingSnapshot';
 import { OrderedAudioChunkWriter } from './OrderedAudioChunkWriter';
+import { CapturePauseTracker } from './CapturePauseTracker';
+import type { IInputActivityEvent } from './IInputActivityEvent';
 
 // #endregion
 
@@ -41,6 +43,10 @@ export class RecordingCoordinator {
   private readonly _devices = inject(AudioInputDeviceService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _owner = Symbol('recording');
+  private readonly _pauseTracker = new CapturePauseTracker();
+  private readonly _inputActivity = new Subject<IInputActivityEvent>();
+  public readonly pauseEvents = this._pauseTracker.events;
+  public readonly inputActivity = this._inputActivity.asObservable();
   private readonly _state = signal<IRecordingSnapshot['state']>('idle');
   private readonly _sessionId = signal<string | null>(null);
   private readonly _pendingBytes = signal(0);
@@ -126,7 +132,7 @@ export class RecordingCoordinator {
     options: { readonly title?: string; readonly deviceId?: string | null } = {},
   ): Promise<void> {
     if (!['idle', 'error'].includes(this._state())) {
-      throw new Error('Die Aufnahme kann in diesem Zustand nicht gestartet werden.');
+      throw new Error('loc.resonanz.error.captureNotReady');
     }
 
     this._lease.acquire(this._owner);
@@ -136,6 +142,7 @@ export class RecordingCoordinator {
     this._error.set(null);
     this._microphoneLevel.set(0);
     this._durationMs.set(0);
+    this._pauseTracker.reset();
 
     try {
       const mimeType = this._runtime.recordingMimeType();
@@ -185,10 +192,11 @@ export class RecordingCoordinator {
       const mediaStream = this._recorder.mediaStream();
 
       if (mediaStream === null) {
-        throw new Error('Das Mikrofon hat keinen Audiostream bereitgestellt.');
+        throw new Error('loc.resonanz.error.noMicStream');
       }
 
       this._frameSubscription = this._capture.frameAvailable.subscribe((frame) => {
+        if (generation !== this._generation) return;
         this._durationMs.set(this._recorder.durationMs());
         const samples = new Int16Array(frame.data);
         let energy = 0;
@@ -197,7 +205,10 @@ export class RecordingCoordinator {
           energy += (sample / 32_768) ** 2;
         }
 
-        this._microphoneLevel.set(Math.min(1, Math.sqrt(energy / Math.max(1, samples.length)) * 5));
+        const rms = Math.sqrt(energy / Math.max(1, samples.length));
+        this._microphoneLevel.set(Math.min(1, rms * 5));
+        if (samples.length > 0)
+          this._inputActivity.next({ sessionId: session.id, atMs: this._runtime.now(), rms });
       });
       await this._capture.start(mediaStream, { frameDurationMs: 20 });
 
@@ -227,9 +238,12 @@ export class RecordingCoordinator {
     const generation = this._generation;
     try {
       this._recorder.pause();
+      this._durationMs.set(this._recorder.durationMs());
+      const sessionId = this._sessionId();
+      if (sessionId !== null)
+        this._pauseTracker.begin(sessionId, this._durationMs(), this._runtime.now());
       await this._capture.pause();
       if (generation !== this._generation) return;
-      const sessionId = this._sessionId();
       if (sessionId !== null) await this._host.setCaptureStatus?.({ sessionId, status: 'paused' });
       if (generation !== this._generation) return;
       this._microphoneLevel.set(0);
@@ -259,6 +273,7 @@ export class RecordingCoordinator {
       await this._capture.resume();
       if (generation !== this._generation) return;
       this._recorder.resume();
+      this._pauseTracker.end(this._runtime.now());
       this._state.set('recording');
     } catch (error: unknown) {
       await this.failCapture(error, generation);
@@ -285,6 +300,7 @@ export class RecordingCoordinator {
     }
 
     ++this._generation;
+    this._pauseTracker.end(this._runtime.now());
     this._state.set('stopping');
     this._stopPromise = this.finishCapture();
 
@@ -312,6 +328,8 @@ export class RecordingCoordinator {
       await this.stop();
     } finally {
       this._state.set('disposed');
+      this._pauseTracker.dispose();
+      this._inputActivity.complete();
       this._lease.release(this._owner);
     }
   }

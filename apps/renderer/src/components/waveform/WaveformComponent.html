@@ -1,0 +1,57 @@
+<div
+  class="wave"
+  [class.interactive]="interactive()"
+  [class.above]="markerPlacement() === 'above'"
+  [class.strong]="tone() === 'strong'"
+  [class.danger]="tone() === 'danger'"
+  [class.missing]="!values().length"
+>
+  <div class="bars" aria-hidden="true">
+    @for (value of bins(); track $index) {
+      <span
+        [style.height.%]="5 + value * 95"
+        [class.played]="$index / bins().length <= position() / 100 && positionMs() > 0"
+        [class.pending]="progress() !== null && $index / bins().length >= progress()! / 100"
+      ></span>
+    }
+  </div>
+  @if (interactive()) {
+    <input
+      type="range"
+      [attr.aria-label]="'loc.resonanz.session.position' | translate"
+      min="0"
+      [max]="durationMs()"
+      step="100"
+      [value]="positionMs()"
+      (input)="seekInput($event)"
+    />
+    <span class="playhead" [style.left.%]="position()" aria-hidden="true"></span>
+  }
+  @for (marker of markers(); track marker.id) {
+    @if (interactive()) {
+      <button
+        class="mark"
+        [class.selected]="selectedMarkerId() === marker.id"
+        [style.left.%]="ratio(marker.atMs)"
+        [attr.aria-label]="
+          intl.t('loc.resonanz.marker.at', intl.message(marker.label), marker.atMs | duration)
+        "
+        (click)="markerSelected.emit(marker)"
+      >
+        <resonanz-marker [kind]="marker.kind" [marked]="marker.markedByUser ?? false" />
+      </button>
+    } @else {
+      <span
+        [class]="'mark decorative ' + marker.kind"
+        [style.left.%]="ratio(marker.atMs)"
+        aria-hidden="true"
+        ><resonanz-marker [kind]="marker.kind"
+      /></span>
+    }
+  }
+</div>
+@if (showTimes()) {
+  <div class="times">
+    <span>0:00</span><span>{{ durationMs() | duration }}</span>
+  </div>
+}

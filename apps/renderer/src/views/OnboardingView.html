@@ -1,0 +1,322 @@
+<div class="setup" test-id="onboarding-view">
+  <header class="setup-titlebar" part="window-drag-region">
+    <h1>{{ 'loc.resonanz.onboarding.setup' | translate }}</h1>
+    <mosaik-button
+      routerLink="/settings"
+      icon="settings"
+      appearance="plain"
+      [attr.aria-label]="'loc.resonanz.onboarding.openSettings' | translate"
+    />
+  </header>
+  <div class="setup-body">
+    <aside>
+      <resonanz-setup-steps
+        [steps]="steps"
+        [activeIndex]="step()"
+        [availableThrough]="availableThrough()"
+        [disabled]="transitioning() || presenter.saving()"
+        (selected)="goToStep($event)"
+      />
+      <div class="setup-later">
+        <p class="caption">{{ 'loc.resonanz.onboarding.editLater' | translate }}</p>
+        <mosaik-button
+          routerLink="/"
+          [label]="'loc.resonanz.common.later' | translate"
+          appearance="plain"
+        />
+      </div>
+    </aside>
+    <main class="setup-main">
+      <div class="setup-content">
+        @switch (step()) {
+          @case (0) {
+            <div class="step-intro">
+              <h2>{{ 'loc.resonanz.onboarding.audioTitle' | translate }}</h2>
+              <p>{{ 'loc.resonanz.onboarding.microphoneHint' | translate }}</p>
+            </div>
+            <section class="setup-card">
+              <div class="card-title">
+                <span class="status-icon" [class.success]="preview.tested()" aria-hidden="true"
+                  ><mosaik-icon [icon]="preview.tested() ? 'check' : 'mic'" size="small"
+                /></span>
+                <h3>{{ 'loc.resonanz.capture.microphone' | translate }}</h3>
+                <span class="caption" [class.success]="preview.tested()">{{
+                  (preview.tested()
+                    ? 'loc.resonanz.onboarding.allowed'
+                    : 'loc.resonanz.onboarding.askOnTest'
+                  ) | translate
+                }}</span>
+                <mosaik-button
+                  test-id="onboarding-test-microphone"
+                  [label]="
+                    (preview.active()
+                      ? 'loc.resonanz.onboarding.stopTest'
+                      : 'loc.resonanz.onboarding.test'
+                    ) | translate
+                  "
+                  size="small"
+                  icon="mic"
+                  appearance="outline"
+                  [disabled]="preview.busy() || presenter.capture.active()"
+                  [isBusy]="preview.busy()"
+                  (click)="testMicrophone()"
+                />
+              </div>
+              <div class="device-choice">
+                <mosaik-select
+                  test-id="onboarding-microphone"
+                  [attr.aria-label]="'loc.resonanz.capture.microphone' | translate"
+                  [formField]="presenter.capture.deviceForm.id"
+                  [disabled]="preview.active() || preview.busy() || presenter.capture.active()"
+                  ><mosaik-select-item
+                    value="default"
+                    [label]="'loc.resonanz.capture.defaultDevice' | translate"
+                  />
+                  @for (device of presenter.capture.devices(); track device.deviceId) {
+                    <mosaik-select-item [value]="device.deviceId" [label]="device.label" />
+                  }</mosaik-select
+                ><mosaik-button
+                  icon="refresh"
+                  appearance="plain"
+                  [attr.aria-label]="'loc.resonanz.settings.devices' | translate"
+                  [disabled]="preview.active() || preview.busy() || presenter.capture.active()"
+                  (click)="presenter.capture.loadDevices()"
+                />
+              </div>
+              <div class="probe">
+                <resonanz-level-meter [level]="preview.level()" [paused]="!preview.active()" /><span
+                  class="caption"
+                  >{{ 'loc.resonanz.onboarding.say' | translate }}</span
+                >
+              </div>
+            </section>
+            <section class="setup-card">
+              <div class="card-title">
+                <span class="status-icon warning" aria-hidden="true">!</span>
+                <h3>{{ 'loc.resonanz.capture.systemAudio' | translate }}</h3>
+                <span class="caption warning">{{
+                  'loc.resonanz.common.unavailable' | translate
+                }}</span>
+              </div>
+              <p class="muted">{{ 'loc.resonanz.capture.systemExplain' | translate }}</p>
+              <div class="system-option">
+                <span class="caption">{{
+                  'loc.resonanz.onboarding.systemDefault' | translate
+                }}</span
+                ><mosaik-toggle-switch
+                  [disabled]="true"
+                  [attr.aria-label]="'loc.resonanz.capture.systemUnavailable' | translate"
+                />
+              </div>
+            </section>
+          }
+          @case (1) {
+            <div class="step-intro">
+              <h2>{{ 'loc.resonanz.onboarding.assistantTitle' | translate }}</h2>
+              <p>{{ 'loc.resonanz.settings.assistantExplain' | translate }}</p>
+            </div>
+            <div class="assistant-choices">
+              @for (assistant of assistants(); track assistant.id) {
+                <button
+                  type="button"
+                  [attr.test-id]="'setup-provider-' + assistant.id"
+                  [class.active]="assistant.selected"
+                  [attr.aria-pressed]="assistant.selected"
+                  [disabled]="presenter.saving() || presenter.capture.active()"
+                  (click)="presenter.selectProvider(assistant.id)"
+                >
+                  <span class="assistant-title"
+                    ><mosaik-icon [icon]="assistant.icon" /><strong>{{ assistant.name }}</strong>
+                    @if (assistant.selected) {
+                      <span class="selection-check" aria-hidden="true"
+                        ><mosaik-icon icon="check" size="small"
+                      /></span>
+                    }
+                  </span>
+                  <span class="assistant-checks">
+                    <span
+                      ><i
+                        [class.success]="assistant.installed === true"
+                        [class.warning]="assistant.installed === false"
+                      ></i
+                      ><span>{{ 'loc.resonanz.onboarding.installation' | translate }}</span
+                      ><span>{{ assistant.installation | message }}</span></span
+                    >
+                    <span
+                      ><i
+                        [class.success]="assistant.authenticated === true"
+                        [class.warning]="assistant.authenticated === false"
+                      ></i
+                      ><span>{{ 'loc.resonanz.onboarding.account' | translate }}</span
+                      ><span>{{ assistant.account | message }}</span></span
+                    >
+                    <span
+                      ><i [class.success]="assistant.tested"></i
+                      ><span>{{ 'loc.resonanz.onboarding.testRequest' | translate }}</span
+                      ><span>{{ assistant.test | message }}</span></span
+                    >
+                  </span>
+                </button>
+              }
+            </div>
+            @if (!presenter.status()?.authenticated) {
+              <div class="connect-actions" test-id="setup-sign-in">
+                @for (method of presenter.authMethods(); track method.id) {
+                  <mosaik-button
+                    [attr.test-id]="'assistant-login-' + method.id"
+                    [label]="method.label"
+                    appearance="outline"
+                    [disabled]="presenter.saving()"
+                    (click)="presenter.connect(method.id)"
+                  />
+                }
+                <mosaik-button
+                  [label]="'loc.resonanz.settings.checkConnection' | translate"
+                  icon="refresh"
+                  appearance="plain"
+                  [disabled]="presenter.checking() || presenter.saving()"
+                  (click)="presenter.saveAndCheck()"
+                />
+              </div>
+            }
+            <resonanz-assistant-login />
+            <section class="setup-card">
+              <h3>{{ 'loc.resonanz.settings.context' | translate }}</h3>
+              <mosaik-segment
+                appearance="soft"
+                [attr.aria-label]="'loc.resonanz.settings.contextLabel' | translate"
+                ><mosaik-segment-item
+                  value="transcript"
+                  fit="width"
+                  [isChecked]="presenter.form.context().value() === 'transcript'"
+                  (checked)="presenter.form.context().value.set('transcript')"
+                  ><span slot="label">{{
+                    'loc.resonanz.question.transcriptOnly' | translate
+                  }}</span></mosaik-segment-item
+                ><mosaik-segment-item
+                  value="transcriptAndMoments"
+                  fit="width"
+                  [isChecked]="presenter.form.context().value() === 'transcriptAndMoments'"
+                  (checked)="presenter.form.context().value.set('transcriptAndMoments')"
+                  ><span slot="label">{{
+                    'loc.resonanz.settings.contextMarkers' | translate
+                  }}</span></mosaik-segment-item
+                ></mosaik-segment
+              >
+              <p class="caption">{{ 'loc.resonanz.settings.contextHint' | translate }}</p>
+            </section>
+            <div class="connection-test">
+              <mosaik-button
+                test-id="setup-test-assistant"
+                [label]="'loc.resonanz.settings.test' | translate"
+                icon="refresh"
+                appearance="outline"
+                [disabled]="!presenter.status()?.authenticated || presenter.testing()"
+                [isBusy]="presenter.testing()"
+                (click)="presenter.testAssistant()"
+              /><span class="caption" [class.success]="presenter.testResult()" role="status">{{
+                presenter.testResult() ?? ('loc.resonanz.settings.testHint' | translate)
+              }}</span>
+            </div>
+          }
+          @case (2) {
+            <div class="step-intro">
+              <h2>{{ 'loc.resonanz.onboarding.startTitle' | translate }}</h2>
+              <p>{{ 'loc.resonanz.onboarding.readyHint' | translate }}</p>
+            </div>
+            <div class="start-choices">
+              <div class="start-choice active">
+                <div>
+                  <strong>{{ 'loc.resonanz.settings.clickOnly' | translate }}</strong
+                  ><span class="recommended">{{
+                    'loc.resonanz.common.recommended' | translate
+                  }}</span>
+                </div>
+                <p class="caption">{{ 'loc.resonanz.capture.explicit' | translate }}</p>
+              </div>
+              <div class="start-choice unavailable" aria-disabled="true">
+                <strong>{{ 'loc.resonanz.onboarding.automaticStart' | translate }}</strong>
+                <p class="caption">{{ 'loc.resonanz.settings.explicit' | translate }}</p>
+              </div>
+            </div>
+            <section class="setup-card profile-fields">
+              <mosaik-textbox
+                test-id="setup-user-name"
+                [label]="'loc.resonanz.settings.name' | translate"
+                [placeholder]="'loc.resonanz.settings.namePlaceholder' | translate"
+                [formField]="presenter.form.userName"
+              /><mosaik-textbox
+                test-id="setup-user-aliases"
+                [label]="'loc.resonanz.settings.aliases' | translate"
+                [placeholder]="'loc.resonanz.settings.aliasesPlaceholder' | translate"
+                [formField]="presenter.form.addressedAs"
+              /><mosaik-select
+                [label]="'loc.resonanz.settings.conversationLanguage' | translate"
+                [formField]="presenter.form.locale"
+                ><mosaik-select-item
+                  value="de-DE"
+                  [label]="'loc.resonanz.common.german' | translate"
+                /><mosaik-select-item
+                  value="en-US"
+                  [label]="'loc.resonanz.common.english' | translate"
+                />
+                @for (
+                  locale of presenter.library.capabilities()?.speechLocales ?? [];
+                  track locale
+                ) {
+                  @if (locale !== 'de-DE' && locale !== 'en-US') {
+                    <mosaik-select-item [value]="locale" [label]="intl.languageName(locale)" />
+                  }
+                }</mosaik-select
+              ><mosaik-select
+                [label]="'loc.resonanz.settings.deleteAuto' | translate"
+                test-id="setup-audio-retention"
+                [formField]="presenter.form.audioRetentionDays"
+                [disabled]="presenter.capture.active()"
+                ><mosaik-select-item
+                  value="never"
+                  [label]="'loc.resonanz.settings.neverShort' | translate"
+                />
+                <mosaik-select-item
+                  value="30"
+                  [label]="'loc.resonanz.settings.after30Days' | translate"
+                />
+                <mosaik-select-item
+                  value="90"
+                  [label]="'loc.resonanz.settings.after90Days' | translate"
+                />
+              </mosaik-select>
+            </section>
+            <p class="caption">
+              {{ 'loc.resonanz.settings.nameHint' | translate }}
+              {{ 'loc.resonanz.library.local' | translate }}
+            </p>
+          }
+        }
+      </div>
+      <footer>
+        <span class="caption">{{ intl.t('loc.resonanz.onboarding.step', step() + 1) }}</span>
+        <div>
+          @if (step() > 0) {
+            <mosaik-button
+              [label]="'loc.resonanz.common.back' | translate"
+              appearance="plain"
+              [disabled]="transitioning() || presenter.saving()"
+              (click)="goToStep(step() - 1)"
+            />
+          }
+          <mosaik-button
+            test-id="onboarding-next"
+            [label]="
+              (step() === 2 ? 'loc.resonanz.onboarding.finish' : 'loc.resonanz.common.next')
+                | translate
+            "
+            appearance="solid"
+            [disabled]="transitioning() || presenter.saving() || presenter.form().invalid()"
+            (click)="next()"
+          />
+        </div>
+      </footer>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<div
+  class="pill"
+  [class.collapsed]="collapsed() && !feedback()"
+  [class.feedback]="feedback()"
+  role="group"
+  [attr.aria-label]="'loc.resonanz.settings.mini' | translate"
+  (pointerenter)="entered()"
+  (pointerleave)="left()"
+  (focusin)="focused()"
+  (focusout)="blurred($event)"
+>
+  @if (feedback(); as marker) {
+    <resonanz-marker [kind]="marker.kind" />
+    <span class="confirmation" role="status">{{
+      intl.t(feedbackKey(), marker.atMs | duration)
+    }}</span>
+    <button class="undo" test-id="mini-undo" (click)="undo.emit()" [disabled]="busy()">
+      {{ 'loc.resonanz.capture.undo' | translate }}
+    </button>
+  } @else {
+    <button
+      class="time"
+      [attr.aria-label]="'loc.resonanz.capture.open' | translate"
+      (click)="expand.emit()"
+    >
+      <span class="status-dot" [class.recording]="!paused()"></span
+      ><time aria-live="off">{{ durationMs() | duration }}</time>
+    </button>
+    @if (!collapsed()) {
+      <resonanz-level-meter [level]="level()" [paused]="paused()" [count]="14" />
+      <span class="divider" aria-hidden="true"></span>
+      <mosaik-button
+        test-id="mini-mark"
+        size="small"
+        appearance="plain"
+        [attr.aria-label]="'loc.resonanz.capture.mark' | translate"
+        [disabled]="busy()"
+        (click)="mark.emit()"
+      >
+        <svg
+          slot="icon"
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M5 21V4M5 4h12l-2.5 4.5L17 13H5" />
+        </svg>
+      </mosaik-button>
+      <mosaik-button
+        test-id="mini-pause"
+        [icon]="paused() ? 'play' : 'pause'"
+        size="small"
+        appearance="plain"
+        [attr.aria-label]="
+          (paused() ? 'loc.resonanz.common.resume' : 'loc.resonanz.common.pause') | translate
+        "
+        [disabled]="busy()"
+        (click)="togglePause.emit()"
+      />
+      <button
+        class="stop"
+        test-id="mini-stop"
+        [attr.aria-label]="'loc.resonanz.common.stop' | translate"
+        [disabled]="busy()"
+        (click)="stop.emit()"
+      >
+        <span aria-hidden="true"></span>
+      </button>
+    }
+  }
+</div>

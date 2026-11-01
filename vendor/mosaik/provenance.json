@@ -1,6 +1,6 @@
 {
-  "format": 1,
-  "description": "Unmodified published Mosaik distributions repacked deterministically from their original Yarn cache archives.",
+  "format": 2,
+  "description": "Published Mosaik distributions repacked deterministically from original Yarn cache archives; the themes documentation-generator comment has one explicit privacy adaptation.",
   "packages": [
     {
       "name": "@pixel-brewery/mosaik-elements",
@@ -46,11 +46,20 @@
       "name": "@pixel-brewery/mosaik-themes",
       "version": "0.1.183",
       "file": "mosaik-themes-0.1.183.tgz",
-      "sha256": "e2fbeae276c88fc39d20fc7faea8d1b1d1865a23e41e267b46b430be63d8772e",
+      "sha256": "8a257a66ceba0a20caccbd644cf0766f3f736f6a7ea981c0521c28323354cbb5",
       "sourceRegistry": "https://npm.pkg.github.com",
       "sourceCacheArchive": "@pixel-brewery-mosaik-themes-npm-0.1.183-c669e27788-10c0.zip",
       "sourceCacheSha256": "af016a3acb8515917bc8faad63193b02dbd4c3b269dd4c13a418b09376c3703c",
-      "files": 36
+      "files": 36,
+      "sourceRepackedArchiveSha256": "e2fbeae276c88fc39d20fc7faea8d1b1d1865a23e41e267b46b430be63d8772e",
+      "modifications": [
+        {
+          "file": "package/bin/design-md.mjs",
+          "description": "Removed a private product name from a documentation-generator comment; executable behavior and license notices are unchanged.",
+          "sourceSha256": "b29f5d48f28a21a1aa52822e54d33ad6f3890659c546c0b16c58e1a0c511a7a5",
+          "downstreamSha256": "86742b0c37bb5bb08cc0db6f469fd369e4f405d37a82b4084bad43724a34b9e4"
+        }
+      ]
     },
     {
       "name": "@pixel-brewery/markdowner-core",

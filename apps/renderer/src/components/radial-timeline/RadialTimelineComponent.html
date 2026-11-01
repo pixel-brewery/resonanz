@@ -1,0 +1,115 @@
+<div
+  class="radial"
+  [class]="'radial ' + state()"
+  [class.missing]="!values().length"
+  [class.evidence-focused]="focusEvidence()"
+  [class.subtle]="waveformTone() === 'subtle'"
+>
+  <div class="beam" aria-hidden="true"></div>
+  <svg viewBox="-55 -55 710 710" [attr.aria-label]="label() | message" role="group">
+    @if (!chapters().length) {
+      <circle cx="300" cy="300" r="295" class="empty-ring" />
+    }
+    @for (chapter of chapterArcs(); track chapter.id) {
+      <g
+        role="button"
+        tabindex="0"
+        class="chapter"
+        [class.selected]="chapter.selected"
+        [class.highlighted]="chapter.highlighted"
+        [class.faded]="chapter.faded"
+        [attr.aria-label]="chapter.title + ', ' + (chapter.startMs | duration)"
+        [attr.aria-pressed]="chapter.selected"
+        (click)="chapterSelected.emit(chapter)"
+        (keydown)="selectChapter($event, chapter)"
+      >
+        <path
+          [attr.d]="chapter.path"
+          [style.stroke]="chapter.faded ? 'var(--mosaik-scheme-highlight)' : chapter.color"
+          class="chapter-arc"
+        />
+        <path [attr.d]="chapter.path" class="chapter-hit" />
+        <foreignObject
+          [attr.x]="chapter.x - 355"
+          [attr.y]="chapter.y - 16"
+          width="710"
+          height="32"
+          class="chapter-label-box"
+          aria-hidden="true"
+        >
+          <div xmlns="http://www.w3.org/1999/xhtml" class="chapter-label-container">
+            <span class="chapter-label">{{ chapter.title }}</span>
+          </div>
+        </foreignObject>
+      </g>
+    }
+    <g aria-hidden="true" class="audio-bars">
+      @for (bar of bars(); track $index) {
+        <line
+          [attr.x1]="bar.x"
+          [attr.y1]="bar.y"
+          [attr.x2]="bar.x2"
+          [attr.y2]="bar.y2"
+          [class.faded]="!bar.focused"
+        />
+      }
+    </g>
+    @if (showPlayhead() && durationMs() > 0) {
+      <line
+        class="playhead"
+        [attr.x1]="innerHead().x"
+        [attr.y1]="innerHead().y"
+        [attr.x2]="head().x"
+        [attr.y2]="head().y"
+        aria-hidden="true"
+      />
+    }
+    <g class="evidence-lines" aria-hidden="true">
+      @for (point of evidence(); track $index) {
+        <line x1="300" y1="300" [attr.x2]="point.x" [attr.y2]="point.y" />
+        <circle [attr.cx]="point.x" [attr.cy]="point.y" r="7" />
+      }
+    </g>
+    @if (clipArc()) {
+      <path class="clip-arc" [attr.d]="clipArc()" aria-hidden="true" />
+    }
+    @for (marker of ringMarkers(); track marker.id) {
+      <g
+        role="button"
+        tabindex="0"
+        [attr.transform]="'translate(' + marker.x + ',' + marker.y + ')'"
+        class="marker"
+        [class]="'marker ' + marker.kind"
+        [class.selected]="marker.selected"
+        [class.evidenced]="marker.evidenced"
+        [class.faded]="marker.faded"
+        [attr.aria-label]="(marker.label | message) + ', ' + (marker.atMs | duration)"
+        [attr.aria-pressed]="marker.selected"
+        (click)="markerSelected.emit(marker)"
+        (keydown)="selectMarker($event, marker)"
+      >
+        <circle r="14" class="hit" />
+        @if (marker.evidenced) {
+          <circle r="11" class="evidence-halo" aria-hidden="true" />
+        }
+        @if (marker.kind === 'question' || marker.kind === 'moment') {
+          <circle r="5.5" class="shape" />
+        } @else {
+          <rect
+            x="-5.5"
+            y="-5.5"
+            width="11"
+            height="11"
+            rx="1.5"
+            class="shape"
+            [attr.transform]="marker.kind === 'decision' ? 'rotate(45)' : null"
+          />
+        }
+        @if (marker.markedByUser) {
+          <circle r="9" class="user-mark" />
+        }
+      </g>
+    }
+  </svg>
+  <div class="centre"><ng-content /></div>
+</div>

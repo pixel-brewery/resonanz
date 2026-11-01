@@ -1,21 +1,15 @@
-# Miteinander an Resonanz arbeiten
+# Working together on Resonanz
 
-In Issues, Pull Requests, Reviews und allen anderen Projektbereichen gilt:
+In issues, pull requests, reviews and other project spaces:
 
-- Begegne anderen respektvoll, unabhängig von Herkunft, Identität, Erfahrung oder
-  persönlichen Merkmalen.
-- Diskutiere Änderungen und konkrete Probleme sachlich. Gib konstruktives
-  Feedback und respektiere unterschiedliche Perspektiven.
-- Unterlasse Belästigung, Drohungen, diskriminierende Aussagen und persönliche
-  Angriffe.
-- Veröffentliche keine persönlichen Informationen, Zugangsdaten oder privaten
-  Gesprächsinhalte anderer Personen.
-- Achte bei Beispielen und Fehlerberichten auf künstliche, nachvollziehbare Daten.
+- Treat people respectfully regardless of background, identity, experience or personal traits.
+- Discuss concrete changes and problems constructively and respect different perspectives.
+- Do not harass, threaten, discriminate or make personal attacks.
+- Do not publish another person's private information, credentials or conversation content.
+- Use synthetic, reproducible data for examples and reports.
 
-Die Maintainer moderieren die Projektbereiche und können unpassende Inhalte
-entfernen, Beiträge schließen oder den Zugriff bei wiederholten beziehungsweise
-schweren Verstößen begrenzen. Projektinhalte lassen sich über GitHubs jeweilige
-Funktion **Report content** melden. Bitte vermeide öffentliche Streitgespräche
-über persönliche Vorfälle.
+Maintainers may remove inappropriate content, close contributions or restrict access
+for repeated or serious violations. Use GitHub's **Report content** action for project
+content. Avoid public disputes about personal incidents.
 
-Sicherheitslücken haben einen eigenen [privaten Meldeweg](SECURITY.md).
+Security vulnerabilities have a separate [private reporting channel](SECURITY.md).

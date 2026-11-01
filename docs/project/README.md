@@ -1,47 +1,57 @@
-# Produkt und Bedienung
+# Product workflows
 
-**Resonanz bewahrt Gespräche und macht sie erneut nutzbar.** Eine Session bündelt
-Aufnahme, Transkript, Zusammenfassung sowie spätere Fragen und Antworten. Eine
-Live-Unterhaltung ist ebenfalls eine Session: Die eigene Stimme und die
-Audioantwort des KI-Gesprächspartners gehören zum selben Gesprächsverlauf.
+Resonanz turns explicitly started conversations into durable sessions. It stays
+available in the system tray, records microphone audio, creates a transcript with
+system speech recognition and sends requested text analysis to an installed,
+authenticated assistant through Synapse. It also supports native spoken turns.
 
-## Kernabläufe
+The library offers a list with a session preview and a weekly audio landscape.
+Real recording amplitudes form waveforms and circular session timelines. Analysis
+adds chapters, decisions, tasks and open questions. Evidence timestamps connect
+claims, questions, the ring, transcript and original audio.
 
-- [Aufzeichnungen verwalten](aufzeichnungen.md): aufnehmen, pausieren,
-  wiedergeben, transkribieren, ordnen, importieren und exportieren.
-- [Live mit KI sprechen](live-unterhaltung.md): eine echte Audioverbindung
-  starten, sprechen, unterbrechen und die Unterhaltung später wiederfinden.
-- [KI verbinden und einrichten](ki-und-einrichtung.md): lokale Assistenten
-  anmelden, ein Modell auswählen und Audiofähigkeiten konfigurieren.
-- [Abnahme und Nachweise](abnahme.md): nachgewiesenes Verhalten und noch zu
-  prüfende Nutzerwege.
+## Main workflows
 
-## Bedienungsprinzipien
+1. Choose a microphone, start a session and mark useful moments while recording.
+   Pause, resume and stop without losing acknowledged audio blocks.
+2. Open the saved session. Transcribe its audio or edit/import a transcript.
+3. Ask your local assistant for an analysis. Inspect each claim's original passage.
+4. Ask follow-up questions using the transcript alone or the transcript with markers.
+   Missing information is shown as a gap rather than a supported answer.
+5. Speak a question about a saved session, or start an actual live conversation.
+6. Organize sessions with titles, tags, collections and favorites. Export audio,
+   structured session data or Markdown notes; delete sessions explicitly.
 
-Aufnahme und Live-Unterhaltung beginnen durch eine bewusste Startaktion.
-Mikrofonwahl, laufender Zustand, Pause und Beenden müssen dabei erkennbar sein.
-Das Schließen des Fensters lässt die Tray-Anwendung weiterlaufen. Über Menüleiste
-beziehungsweise Systemtray sollen sich Bibliothek, neue Aufnahme und neue
-Live-Unterhaltung wieder öffnen lassen.
+The window's top bar shows where you are, goes back and forward, and holds the
+screen's actions; drag the window by any part of it that is not a control. The
+status bar at the bottom shows a running capture, a mini player whenever a recording
+or read-aloud text plays (pause, stop, open its session; playback continues while
+you navigate), today's notifications behind the bell and the app version. Problems
+and confirmations appear briefly at the bottom left instead of above the workspace.
+When a newer installed version is published, the status bar offers to download it
+and then to restart; Settings → Updates checks on request. A running capture is
+never interrupted by an update.
 
-Die Anwendung verwendet Angular und Mosaik für Oberfläche und Steuerelemente.
-Die Audio-Grundfunktionen einschließlich Vorlesen stammen unverändert aus
-FLAMOX365. Die folgenden Seiten definieren den fachlichen Prototypumfang; ob ein
-Nutzerweg bereits in der laufenden Anwendung geprüft wurde, steht ausdrücklich
-in der Abnahme.
+## Language and appearance
 
-## Inhalt einer Session
+Settings offers English and German interface languages. English is the default,
+including for existing profiles without a saved interface preference. The choice
+persists and updates the interface and native menus without restarting the app.
+Conversation language, installed recognition languages, voice and editable
+conversation instructions remain separate settings. Existing session content is
+never rewritten when the interface language changes.
 
-| Bestandteil                | Zweck                                                                |
-| -------------------------- | -------------------------------------------------------------------- |
-| Titel, Zeit und Dauer      | Gespräch wiedererkennen                                              |
-| Sammlung, Favorit und Tags | Aufzeichnungen organisieren                                          |
-| Aufnahme                   | Original hören und Aussagen erneut prüfen                            |
-| Transkript mit Zeitmarken  | Gesprochenes lesen und gezielt wiederfinden                          |
-| Zusammenfassung            | Kernaussagen, Entscheidungen, Aufgaben und offene Fragen überblicken |
-| Fragen und Antworten       | Später anhand des konkreten Gesprächs weiterarbeiten                 |
+Soho light and dark modes can follow the system. The onboarding flow tests the
+microphone and assistant only after explicit actions. Recording never starts
+merely because Resonanz launches.
 
-Eine KI-Antwort soll bei einer Aussage aus dem Gespräch auf Zeitmarken verweisen.
-Fehlt eine Information im Transkript, soll die Antwort diese Lücke kenntlich
-machen. Automatisch vorgeschlagene Aufgaben sind Gesprächsauswertungen; daraus
-folgt noch keine ausgeführte externe Aktion.
+## Current boundaries
+
+Native system audio capture is pending. Topic threads connect original passages
+from per-session analyses; older analyses can use exact shared tags. Whole-library
+inference and larger catalogs remain follow-up work. The optional floating mini
+recorder controls the existing capture above other windows. Public signing,
+installers, updates and broader device testing remain separate work.
+
+See [recordings](recordings.md), [assistant setup](assistant-setup.md),
+[live conversation](live-conversation.md) and the [verification record](verification.md).

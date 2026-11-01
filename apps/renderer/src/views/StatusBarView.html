@@ -1,0 +1,176 @@
+@let capture = shell.capture;
+<footer
+  class="status-bar"
+  test-id="status-bar"
+  [attr.aria-label]="'loc.resonanz.status.label' | translate"
+>
+  @if (capture.active() && !shell.capturePanelOpen()) {
+    <div class="capture" test-id="active-capture" role="status">
+      <span class="status-dot" [class.recording]="capture.state() !== 'paused'"></span
+      ><button class="text-button capture-label" type="button" (click)="shell.openCapture()">
+        <span>{{
+          capture.mode() === 'conversation'
+            ? ('loc.resonanz.capture.liveConversation' | translate)
+            : ('loc.resonanz.capture.running' | translate)
+        }}</span>
+        <span class="clock">{{ capture.durationMs() | duration }}</span>
+        @if (capture.mode() === 'conversation') {
+          <span class="caption" test-id="live-conversation-state">{{
+            capture.state() === 'paused'
+              ? ('loc.resonanz.error.conversationPaused' | translate)
+              : capture.live().microphoneMuted
+                ? ('loc.resonanz.error.micMuted' | translate)
+                : capture.live().stage === 'speaking'
+                  ? ('loc.resonanz.voice.speaking' | translate)
+                  : capture.live().stage === 'thinking'
+                    ? ('loc.resonanz.question.thinking' | translate)
+                    : ('loc.resonanz.voice.listening' | translate)
+          }}</span>
+        }
+      </button>
+      @if (capture.mode() === 'conversation') {
+        <mosaik-button
+          test-id="live-interrupt"
+          size="small"
+          appearance="plain"
+          [label]="'loc.resonanz.capture.interrupt' | translate"
+          (click)="capture.interrupt()"
+        /><mosaik-button
+          size="small"
+          icon="mic"
+          appearance="plain"
+          [attr.aria-label]="
+            (capture.live().microphoneMuted
+              ? 'loc.resonanz.capture.unmute'
+              : 'loc.resonanz.capture.mute'
+            ) | translate
+          "
+          [attr.title]="
+            (capture.live().microphoneMuted
+              ? 'loc.resonanz.capture.unmute'
+              : 'loc.resonanz.capture.mute'
+            ) | translate
+          "
+          (click)="capture.muteMicrophone()"
+        />
+      }
+      @if (capture.state() === 'paused') {
+        <mosaik-button
+          test-id="capture-resume"
+          size="small"
+          icon="play"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.common.resume' | translate"
+          [attr.title]="'loc.resonanz.common.resume' | translate"
+          (click)="capture.resume()"
+        />
+      } @else {
+        <mosaik-button
+          test-id="capture-pause"
+          size="small"
+          icon="pause"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.common.pause' | translate"
+          [attr.title]="'loc.resonanz.common.pause' | translate"
+          [disabled]="capture.busy()"
+          (click)="capture.pause()"
+        />
+      }
+      <mosaik-button
+        test-id="capture-stop"
+        size="small"
+        icon="stop"
+        appearance="plain"
+        variant="danger"
+        [attr.aria-label]="'loc.resonanz.common.stop' | translate"
+        [attr.title]="'loc.resonanz.common.stop' | translate"
+        [disabled]="capture.busy()"
+        (click)="capture.stop()"
+      />
+    </div>
+  }
+  @if (playback.nowPlaying(); as playing) {
+    <resonanz-mini-player
+      [playback]="playing"
+      (toggled)="playback.toggle()"
+      (stopped)="playback.stop()"
+      (opened)="playback.open()"
+    />
+  }
+  <span class="flex-spacer"></span>
+  <resonanz-notification-bell
+    [notices]="notifications.notices()"
+    [unreadCount]="notifications.unreadCount()"
+    [readCount]="notifications.readCount()"
+    (opened)="notifications.prune()"
+    (markedAllRead)="notifications.markAllAsRead()"
+    (clearedRead)="notifications.clearRead()"
+  />
+  @if (updates.state(); as update) {
+    <span class="version" test-id="app-version">{{
+      intl.t('loc.resonanz.update.version', update.currentVersion)
+    }}</span>
+    @if (update.kind === 'available' || update.kind === 'downloading') {
+      <span class="update-download">
+        <mosaik-button
+          iconSize="small"
+          icon="download"
+          appearance="plain"
+          [attr.test-id]="update.kind === 'available' ? 'download-update' : 'update-downloading'"
+          [disabled]="update.kind === 'downloading' || updates.busy()"
+          [attr.aria-label]="
+            update.kind === 'available'
+              ? intl.t('loc.resonanz.update.downloadVersion', update.targetVersion)
+              : ('loc.resonanz.update.downloading' | translate)
+          "
+          [attr.title]="
+            update.kind === 'available'
+              ? intl.t('loc.resonanz.update.downloadVersion', update.targetVersion)
+              : ('loc.resonanz.update.downloading' | translate)
+          "
+          (click)="updates.download()"
+        />
+        @if (update.kind === 'downloading') {
+          <span
+            class="update-progress"
+            test-id="update-progress"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="
+              update.progress === undefined ? null : (update.progress * 100 | number: '1.0-0')
+            "
+            [attr.aria-label]="'loc.resonanz.update.downloading' | translate"
+          >
+            <mosaik-progress-ring
+              variant="primary"
+              [radius]="11"
+              [thickness]="2"
+              [min]="0"
+              [max]="100"
+              [value]="(update.progress ?? 0) * 100"
+              [isIndeterminate]="update.progress === undefined"
+            />
+          </span>
+        }
+      </span>
+    } @else if (update.kind === 'ready') {
+      <mosaik-button
+        test-id="install-update"
+        size="small"
+        icon="refresh"
+        iconSize="small"
+        appearance="soft"
+        [label]="'loc.resonanz.update.restart' | translate"
+        [disabled]="updates.busy() || capture.active()"
+        [attr.aria-label]="intl.t('loc.resonanz.update.installVersion', update.targetVersion)"
+        [attr.title]="
+          capture.active()
+            ? ('loc.resonanz.update.captureActive' | translate)
+            : intl.t('loc.resonanz.update.installVersion', update.targetVersion)
+        "
+        (click)="updates.install()"
+      />
+    }
+  }
+</footer>

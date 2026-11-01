@@ -1,63 +1,44 @@
 # Resonanz audio
 
-Browserseitige Audiofunktionen aus dem FLAMOX365-Frontend. Die in
-[`provenance.json`](provenance.json) erfassten 51 Produktionsdateien und 12
-Verhaltensspezifikationen sind unveränderte Kopien der dort genannten Quellen.
-Der Renderer konsumiert das private Workspace-Paket als `@resonanz/audio`.
+Browser audio primitives copied from the upstream frontend. The 51 production files
+and 12 supplied behavior specifications listed in [provenance.json](provenance.json)
+retain their original upstream hashes. All are byte-identical except the PCM
+worklet definition, whose processor class and registration identifiers use the
+Resonanz name. The original `sha256`, a separate `downstreamSha256` and a precise
+modification description record that adaptation. The renderer consumes this
+private workspace through `@resonanz/audio`.
 
-## Enthaltene Funktionen
+## Included primitives
 
-- Mikrofone erkennen, Berechtigung anfragen und den Signalpegel prüfen.
-- Audio in geordneten MediaRecorder-Chunks aufnehmen, pausieren und beenden.
-- Bestehende Aufnahmen abspielen.
-- Text mit den verfügbaren Browser-/Betriebssystemstimmen vorlesen.
-- PCM-Audio über AudioWorklets aufnehmen, umwandeln und gepuffert abspielen.
-- Audio-Chunks in einer IndexedDB-Outbox bis zur bestätigten Übertragung halten.
-- Vorhandene Strategien für browserseitige oder HTTP-basierte Transkription.
+Microphone discovery/permission, MediaRecorder recording and ordered chunks,
+playback, browser/system TTS, PCM capture/conversion/playback, an IndexedDB audio
+outbox and upstream browser/HTTP transcription strategies are retained. The product
+uses native system transcription; retaining an upstream strategy does not enable a
+cloud speech fallback.
 
-## Angular-Komposition
+`provideAudioServices()` registers the recorder, player, device service, PCM capture,
+PCM player and default worklet loader. An optional IVoiceTranscriber can be provided
+or registered through VOICE_TRANSCRIBER. TTS, the durable outbox and checksum service
+retain their original root Angular registration.
 
-`provideAudioServices()` registriert `AudioRecorder`, `AudioPlayer`,
-`AudioInputDeviceService`, `PcmAudioCapture`, `PcmAudioStreamPlayer` und den
-standardmäßigen Worklet-Lader. Ein optionaler `IVoiceTranscriber` kann übergeben
-oder separat über `VOICE_TRANSCRIBER` registriert werden.
+The host replaces the worklet loader for a static asset under the desktop script
+policy. Recording, DSP and playback implementations remain unchanged. New exports,
+providers, test setup and provenance tooling are identified Resonanz composition.
 
-`TextToSpeechService`, `DurableAudioChunkOutbox` und
-`AudioChunkChecksumService` verwenden die unveränderte Angular-Registrierung
-`providedIn: 'root'`.
-
-Der Host kann `RealtimeAudioWorkletModuleLoader` ersetzen, wenn seine
-Content-Security-Policy einen statischen Worklet anstelle einer kurzlebigen
-Blob-URL verlangt. Aufnahme, DSP und Wiedergabe bleiben dabei unverändert.
-
-## Herkunft und Gleichheit prüfen
+## Verification
 
 ```sh
 node libs/audio/verify-provenance.mjs
 ```
 
-Die Prüfung benötigt keinen Zugriff auf das private Quellrepository. Sie
-vergleicht jede kopierte Datei mit ihrem gespeicherten SHA-256-Wert. Eine
-bewusste Quellenaktualisierung muss Commit, Herkunftspfade und Hashes gemeinsam
-aktualisieren. Produktanpassungen gehören in Hostadapter außerhalb der
-kopierten Implementierungen.
+This compares every file to its stored SHA-256 without accessing the private
+source repository. It checks the downstream hash for the documented identifier
+adaptation and the original hash for every other file. The private repository
+identity is withheld; the original revision, paths and hashes remain recorded. Intentional upstream updates change revision, paths, hashes and
+relevant specs together. Other host adaptations stay outside the copied set.
 
-Die neuen Exportdateien, `provideAudioServices`, die Testumgebung und der
-Prüfer sind Resonanz-eigene Komposition und stehen deshalb nicht in der Liste
-unveränderter Quelldateien.
-
-## Prüfung des Verhaltens
-
-`vitest.config.mts` führt die übernommenen Spezifikationen mit einer
-Angular-Testumgebung in jsdom und einem Worker aus. Dafür werden neben Angular
-und RxJS die Entwicklungsabhängigkeiten `vitest`, `jsdom`,
-`@angular/compiler`, `@angular/platform-browser` und `fake-indexeddb` benötigt.
-Die Tests prüfen unter anderem Chunk-Reihenfolge, Abbruch, Ressourcenfreigabe,
-PCM-Konvertierung, Puffergrenzen und persistente Wiederholungen.
-
-Diese Tests ersetzen weder eine echte Mikrofonaufnahme noch die Prüfung der
-ausgelieferten Electron-Anwendung und ihrer Berechtigungen.
-
-Siehe [Audioarchitektur](../../docs/architecture/audio/README.md) für
-Verantwortlichkeiten, Hostadapter und die Unterscheidung zwischen Vorlesen,
-lokaler Assistentenunterhaltung und duplexer Provider-Verbindung.
+The supplied specs use Angular/jsdom with one worker, testing ordering, cancellation,
+cleanup, PCM conversion, buffer bounds and persistent retries. They do not prove a
+physical microphone or packaged app permissions. See
+[audio architecture](../../docs/architecture/audio/README.md) and
+[complete attribution](../../THIRD_PARTY_NOTICES.md).

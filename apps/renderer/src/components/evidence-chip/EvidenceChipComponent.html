@@ -1,0 +1,10 @@
+<button
+  [class.selected]="selected()"
+  [attr.aria-label]="intl.t('loc.resonanz.question.evidenceAt', atMs() | duration)"
+  (click)="selectedChange.emit()"
+>
+  @if (marked()) {
+    <span aria-hidden="true">◦</span>
+  }
+  {{ atMs() | duration }}
+</button>

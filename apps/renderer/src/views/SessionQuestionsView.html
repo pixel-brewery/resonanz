@@ -1,0 +1,256 @@
+@if (presenter.session(); as session) {
+  <div class="question-layout" test-id="session-questions">
+    <section class="question-pane">
+      <div class="context-bar">
+        <span class="context-icon" aria-hidden="true">◎</span>
+        <p>
+          {{
+            intl.t(
+              presenter.context() === 'transcript'
+                ? 'loc.resonanz.question.assistantTranscriptContext'
+                : 'loc.resonanz.question.assistantMarkedContext',
+              presenter.library.settings().assistant.provider === 'claude'
+                ? 'Claude Code'
+                : 'Codex',
+              session.moments?.length ?? 0
+            )
+          }}
+        </p>
+        <resonanz-segmented-tabs
+          [tabs]="contextTabs"
+          [value]="presenter.context()"
+          [label]="'loc.resonanz.settings.contextLabel' | translate"
+          (valueChange)="setContext($event)"
+        />
+      </div>
+      <div class="question-scroll" test-id="question-messages" aria-live="polite">
+        @for (message of session.messages; track message.id) {
+          <div
+            class="message"
+            [class.user]="message.role === 'user'"
+            [class.assistant]="message.role === 'assistant'"
+          >
+            @if (message.role === 'assistant') {
+              <span class="assistant-avatar" aria-hidden="true"
+                ><mosaik-icon [icon]="answerIcon(message)"
+              /></span>
+            }
+            @if (message.role === 'user') {
+              <div class="question-bubble">{{ message.text }}</div>
+            } @else if (message.state === 'streaming') {
+              <div class="working" role="status">
+                {{ 'loc.resonanz.voice.searchTranscript' | translate }} <span>···</span>
+              </div>
+            } @else if (message.answer; as answer) {
+              <div class="answer-body" [class.gap]="answer.kind === 'gap'">
+                @if (answer.kind === 'gap') {
+                  <resonanz-answer-gap
+                    [title]="'loc.resonanz.question.gap' | translate"
+                    [description]="gapDescription(message)"
+                    [relatedLabel]="'loc.resonanz.question.related' | translate"
+                    [related]="gapRelated(message)"
+                    [saveLabel]="
+                      (presenter.gapSaved(message)
+                        ? 'loc.resonanz.question.openQuestionSaved'
+                        : 'loc.resonanz.question.saveOpenQuestion'
+                      ) | translate
+                    "
+                    [saveDisabled]="
+                      presenter.gapSaved(message) ||
+                      presenter.savingQuestion() !== null ||
+                      presenter.capture.active() ||
+                      !presenter.gapQuestion(message).trim()
+                    "
+                    [saveTestId]="'save-open-question-' + message.id"
+                    (relatedSelected)="selectGapRelated(message)"
+                    (saveRequested)="presenter.saveGap(message)"
+                  />
+                } @else {
+                  @for (claim of answer.claims; track claim.id) {
+                    <p class="answer-claim">
+                      <resonanz-marker [kind]="claimKind(claim)" />
+                      <span
+                        >{{ claim.text }}
+                        @for (evidence of claim.evidence; track evidence.segmentId) {
+                          <resonanz-evidence-chip
+                            [atMs]="evidence.atMs"
+                            [selected]="
+                              presenter.selectedEvidence()?.segmentId === evidence.segmentId
+                            "
+                            (selectedChange)="presenter.selectEvidence(evidence)"
+                          />
+                        }
+                      </span>
+                    </p>
+                  }
+                  @if (answer.related.length) {
+                    <div class="related-passages">
+                      <span class="caption">{{ 'loc.resonanz.question.related' | translate }}</span>
+                      @for (evidence of answer.related; track evidence.segmentId) {
+                        <span class="related-passage"
+                          ><span>{{ relatedTitle(evidence) }}</span>
+                          <resonanz-evidence-chip
+                            [atMs]="evidence.atMs"
+                            (selectedChange)="presenter.selectEvidence(evidence)"
+                        /></span>
+                      }
+                    </div>
+                  }
+                }
+                @if (assignedName(message); as name) {
+                  <p class="caption assigned-explanation">
+                    {{ intl.t('loc.resonanz.question.assigneeRecognized', name) }}
+                  </p>
+                }
+                <div class="answer-source">
+                  <span
+                    class="coverage"
+                    [class.gap-badge]="answer.kind === 'gap'"
+                    [class.incomplete]="
+                      answer.kind !== 'gap' && proofCount(answer.claims) < answer.claims.length
+                    "
+                    >{{
+                      answer.kind === 'gap'
+                        ? ('loc.resonanz.question.notDiscussed' | translate)
+                        : intl.t(
+                            'loc.resonanz.question.claimsCount',
+                            proofCount(answer.claims),
+                            answer.claims.length
+                          )
+                    }}</span
+                  ><span class="caption">
+                    @if (answer.kind === 'gap') {
+                      {{
+                        intl.t(
+                          'loc.resonanz.question.searchedWords',
+                          intl.number(presenter.wordCount())
+                        )
+                      }}
+                    } @else {
+                      {{ answerProvider(message) }} ·
+                      {{ 'loc.resonanz.question.sourceTranscript' | translate }}
+                    }</span
+                  ><mosaik-button
+                    icon="copy"
+                    size="small"
+                    appearance="plain"
+                    [attr.aria-label]="'loc.resonanz.question.copy' | translate"
+                    (click)="presenter.copy(message.text)"
+                  /><mosaik-button
+                    [label]="'loc.resonanz.session.read' | translate"
+                    icon="speaker"
+                    size="small"
+                    appearance="plain"
+                    [disabled]="presenter.capture.active() || !presenter.speech.isSupported()"
+                    (click)="presenter.speak(message.text)"
+                  />
+                </div>
+              </div>
+            } @else {
+              <div class="answer-body">
+                <mosaik-text
+                  [text]="message.text | message"
+                  mosaikTextFormatter="markdown"
+                  [wrap]="true"
+                />
+                @if (message.state !== 'complete') {
+                  <span class="caption">{{
+                    message.state === 'cancelled'
+                      ? ('loc.resonanz.common.cancelled' | translate)
+                      : ('loc.resonanz.question.failed' | translate)
+                  }}</span>
+                }
+                <mosaik-button
+                  [label]="'loc.resonanz.session.read' | translate"
+                  icon="speaker"
+                  appearance="plain"
+                  (click)="presenter.speak(message.text)"
+                />
+              </div>
+            }
+          </div>
+        }
+        @if (!session.messages.length) {
+          <div class="question-welcome">
+            <h2>{{ 'loc.resonanz.question.hero' | translate }}</h2>
+            <p>{{ 'loc.resonanz.question.intro' | translate }}</p>
+          </div>
+        }
+        <div class="suggestions">
+          <span class="caption">{{ 'loc.resonanz.question.followUp' | translate }}</span>
+          <div>
+            @for (question of suggestions; track question) {
+              <button
+                [disabled]="!presenter.hasTranscript() || presenter.running()"
+                (click)="presenter.askSuggested(intl.message(question))"
+              >
+                {{ question | translate }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="question-composer">
+        <div class="composer-field">
+          <mosaik-prompt-box
+            test-id="session-question"
+            [attr.aria-label]="'loc.resonanz.question.label' | translate"
+            [placeholder]="'loc.resonanz.question.placeholder' | translate"
+            [minRows]="1"
+            [maxRows]="4"
+            [maxlength]="12000"
+            [isBusy]="presenter.running()"
+            [queueOnBusy]="false"
+            [disabled]="!presenter.hasTranscript()"
+            [intl]="{
+              submitLabel: ('loc.resonanz.question.send' | translate),
+              stopLabel: ('loc.resonanz.common.cancel' | translate),
+            }"
+            [formField]="presenter.questionForm.text"
+            (promptSubmitted)="submitQuestion($event.value)"
+            (stopRequested)="presenter.cancelRun()"
+          />
+        </div>
+        <mosaik-button
+          [routerLink]="['/voice', session.id]"
+          icon="mic"
+          appearance="outline"
+          [attr.aria-label]="'loc.resonanz.question.audio' | translate"
+        /><span class="caption">{{ 'loc.resonanz.question.hint' | translate }}</span>
+        @if (presenter.pendingRunId()) {
+          <mosaik-button
+            test-id="cancel-answer"
+            [label]="'loc.resonanz.common.cancel' | translate"
+            appearance="plain"
+            (click)="presenter.cancelRun()"
+          />
+        }
+      </div>
+    </section>
+    <aside class="evidence-sidebar">
+      <h2>{{ 'loc.resonanz.question.evidence' | translate }}</h2>
+      <p class="caption">{{ 'loc.resonanz.question.quoteContext' | translate }}</p>
+      @if (presenter.selectedEvidence(); as evidence) {
+        <resonanz-evidence-panel
+          [quote]="evidence.quote"
+          [before]="presenter.transcriptContext().before"
+          [after]="presenter.transcriptContext().after"
+          [atMs]="evidence.atMs"
+          [durationMs]="session.durationMs"
+          [audioAvailable]="session.audioAvailable && !presenter.capturing()"
+          [kind]="presenter.selectedMarker()?.kind ?? 'moment'"
+          (play)="presenter.playExcerpt(evidence)"
+          (transcript)="presenter.selectTab('analysis')"
+        />
+      } @else {
+        <div class="outline-card evidence-empty">
+          <p class="caption">{{ 'loc.resonanz.question.chooseEvidence' | translate }}</p>
+        </div>
+      }
+      <div class="outline-card explanation">
+        <h3>{{ 'loc.resonanz.question.how' | translate }}</h3>
+        <p class="caption">{{ 'loc.resonanz.analysis.evidencePolicy' | translate }}</p>
+      </div>
+    </aside>
+  </div>
+}

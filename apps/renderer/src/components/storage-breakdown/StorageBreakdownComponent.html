@@ -1,0 +1,31 @@
+<div class="heading">
+  <span>{{ label() | message }}</span
+  ><span class="caption" test-id="storage-total">{{ formattedTotal() }}</span>
+</div>
+<mosaik-segment-bar
+  [min]="0"
+  [max]="totalBytes() > 0 ? totalBytes() : 1"
+  thickness="8px"
+  [segmentGap]="2"
+  [attr.aria-label]="label() | message"
+  [attr.aria-busy]="busy()"
+>
+  @for (segment of rows(); track segment.id) {
+    <mosaik-segment-bar-item
+      [value]="segment.bytes"
+      [variant]="segment.variant"
+      [label]="segment.label | message"
+    />
+  }
+</mosaik-segment-bar>
+<div class="legend">
+  @for (segment of rows(); track segment.id) {
+    <span [attr.test-id]="'storage-category-' + segment.id"
+      ><span class="caption">{{ segment.label | message }}</span
+      ><span class="caption">{{ segment.formatted }}</span></span
+    >
+  }
+</div>
+@if (busy() && busyLabel()) {
+  <span class="caption" role="status">{{ busyLabel() | message }}</span>
+}

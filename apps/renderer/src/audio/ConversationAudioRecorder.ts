@@ -78,7 +78,7 @@ export class ConversationAudioRecorder {
    */
   public async start(microphone: MediaStream, mimeType: string): Promise<void> {
     if (this._context !== null) {
-      throw new Error('Die Gesprächsaufzeichnung wurde bereits gestartet.');
+      throw new Error('loc.resonanz.error.liveRecorderStarted');
     }
 
     const context = this._runtime.createAudioContext();
@@ -127,7 +127,7 @@ export class ConversationAudioRecorder {
       };
       recorder.onerror = (event): void => {
         const detail = event as Event & { readonly error?: DOMException };
-        this._onFailure(detail.error ?? new Error('Die Gesprächsaufzeichnung ist fehlgeschlagen.'));
+        this._onFailure(detail.error ?? new Error('loc.resonanz.error.liveRecording'));
       };
       recorder.start(1_000);
     } catch (error: unknown) {
@@ -158,10 +158,9 @@ export class ConversationAudioRecorder {
    */
   public setAssistantElement(element: HTMLMediaElement): void {
     if (this._assistantElement === element) return;
-    if (this._assistantElement !== null)
-      throw new Error('Die Sprachausgabe ist bereits mit der Aufnahme verbunden.');
+    if (this._assistantElement !== null) throw new Error('loc.resonanz.error.liveSpeechBound');
     if (this._context === null || this._remoteAnalyser === null || this._remoteGain === null)
-      throw new Error('Die Gesprächsaufzeichnung ist noch nicht bereit.');
+      throw new Error('loc.resonanz.error.liveRecorderReady');
 
     this._assistantElement = element;
     this._remoteSource = this._context.createMediaElementSource(element);
@@ -249,7 +248,7 @@ export class ConversationAudioRecorder {
 
     this._stopPromise = new Promise<void>((resolve, reject) => {
       const timeout = globalThis.setTimeout(
-        () => reject(new Error('Der Audioabschluss hat zu lange gedauert.')),
+        () => reject(new Error('loc.resonanz.error.captureFinalize')),
         5_000,
       );
       recorder.onstop = (): void => {

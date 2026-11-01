@@ -1,5 +1,5 @@
 // #region Imports
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { spawn, fork, type ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -40,6 +40,82 @@ function killOwnedGroup(pid: number | undefined): void {
 
 // Actual process-group semantics are verified only on the available POSIX host.
 describe.skipIf(process.platform === 'win32')('OwnedProcessSupervisor', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('waits for a terminating group to disappear when existence probes temporarily report EPERM', async () => {
+    // arrange
+    const pid = 999_991;
+    const ownerPid = 999_990;
+    const supervisor = new OwnedProcessSupervisor(
+      () => ownerPid,
+      async () => ({ pid, parentPid: ownerPid, groupId: pid, startedAt: 'fixture-start' }),
+    );
+    let killed = false;
+    let probesAfterKill = 0;
+    const kill = vi.spyOn(process, 'kill').mockImplementation((_pid, signal) => {
+      if (signal === 'SIGKILL') killed = true;
+      if (signal === 0 && killed) {
+        probesAfterKill += 1;
+        throw Object.assign(new Error('The group is terminating.'), {
+          code: probesAfterKill === 1 ? 'EPERM' : 'ESRCH',
+        });
+      }
+      return true;
+    });
+    await supervisor.observe({
+      type: 'process.spawned',
+      token: '00000000-0000-4000-8000-000000000001',
+      pid,
+      detached: true,
+    });
+    // act
+    await supervisor.cleanup();
+    await supervisor.cleanup();
+    // assert
+    expect(kill.mock.calls.filter(([, signal]) => signal !== 0)).toEqual([
+      [-pid, 'SIGTERM'],
+      [-pid, 'SIGKILL'],
+    ]);
+    expect(probesAfterKill).toBe(2);
+  });
+
+  it('keeps a group registered when termination is denied and allows cleanup to be retried', async () => {
+    // arrange
+    const pid = 999_991;
+    const ownerPid = 999_990;
+    const supervisor = new OwnedProcessSupervisor(
+      () => ownerPid,
+      async () => ({ pid, parentPid: ownerPid, groupId: pid, startedAt: 'fixture-start' }),
+    );
+    let permitted = false;
+    let running = true;
+    const kill = vi.spyOn(process, 'kill').mockImplementation((_pid, signal) => {
+      if (!running) throw Object.assign(new Error('The group is absent.'), { code: 'ESRCH' });
+      if (signal === 0 || !permitted)
+        throw Object.assign(new Error('Permission denied.'), { code: 'EPERM' });
+      running = false;
+      return true;
+    });
+    await supervisor.observe({
+      type: 'process.spawned',
+      token: '00000000-0000-4000-8000-000000000002',
+      pid,
+      detached: true,
+    });
+    // act
+    await expect(supervisor.cleanup()).rejects.toThrow('loc.resonanz.error.nativeCleanup');
+    permitted = true;
+    await supervisor.cleanup();
+    // assert
+    expect(kill.mock.calls.filter(([, signal]) => signal !== 0)).toEqual([
+      [-pid, 'SIGTERM'],
+      [-pid, 'SIGTERM'],
+    ]);
+    expect(running).toBe(false);
+  });
+
   it('observes a silent detached tree, proves it survives owner crash, then reaps it without touching an unrelated sentinel', async () => {
     // arrange
     await mkdir('.codex-work', { recursive: true });
@@ -128,14 +204,17 @@ describe.skipIf(process.platform === 'win32')('OwnedProcessSupervisor', () => {
       }
       // Never signal a historical process group after its absence was proved.
       // The unrelated sentinel has no descendants and keeps its own child handle.
-      if (!treeReaped) killOwnedGroup(ownedRoot);
-      sentinel?.kill('SIGKILL');
-      owner?.kill('SIGKILL');
-      if (owner?.connected) owner.disconnect();
-      await waitUntil(
-        () => (!sentinel?.pid || !alive(sentinel.pid)) && (!owner?.pid || !alive(owner.pid)),
-      );
-      await rm(directory, { recursive: true, force: true });
+      try {
+        if (!treeReaped) killOwnedGroup(ownedRoot);
+      } finally {
+        sentinel?.kill('SIGKILL');
+        owner?.kill('SIGKILL');
+        if (owner?.connected) owner.disconnect();
+        await waitUntil(
+          () => (!sentinel?.pid || !alive(sentinel.pid)) && (!owner?.pid || !alive(owner.pid)),
+        );
+        await rm(directory, { recursive: true, force: true });
+      }
     }
   }, 15_000);
 });

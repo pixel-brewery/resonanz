@@ -62,7 +62,7 @@ export class OrderedAudioChunkWriter {
    */
   public enqueue(blob: Blob, mimeType: string, elapsedMs: number): void {
     if (this._closed) {
-      throw new Error('Die Audioablage wurde bereits beendet.');
+      throw new Error('loc.resonanz.error.audioWriterClosed');
     }
 
     if (this._failure !== null) {
@@ -74,7 +74,7 @@ export class OrderedAudioChunkWriter {
     }
 
     if (this._pendingBytes + blob.size > this._maximumPendingBytes) {
-      const error = new Error('Die Audioablage ist zu langsam. Die Aufnahme wurde angehalten.');
+      const error = new Error('loc.resonanz.error.captureBackpressure');
       this.fail(error);
       throw error;
     }

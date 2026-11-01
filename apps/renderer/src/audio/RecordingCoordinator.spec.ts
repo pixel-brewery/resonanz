@@ -7,6 +7,7 @@ import {
   AudioRecorder,
   PcmAudioCapture,
   type IAudioRecorderChunk,
+  type IPcmAudioFrame,
 } from '@resonanz/audio';
 import { Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -15,11 +16,15 @@ import { AudioBrowserRuntime } from './AudioBrowserRuntime';
 import { AudioCaptureLease } from './AudioCaptureLease';
 import type { IAudioHost } from './IAudioHost';
 import { RecordingCoordinator } from './RecordingCoordinator';
+import type { ICapturePauseEvent } from './ICapturePauseEvent';
+import type { IInputActivityEvent } from './IInputActivityEvent';
 
 // #endregion
 
 function recordingScope(createSession?: IAudioHost['createSession']) {
   const chunks = new Subject<IAudioRecorderChunk>();
+  const frames = new Subject<IPcmAudioFrame>();
+  const clock = { now: 0 };
   const durationMs = signal(0);
   const recorder = {
     chunkAvailable: chunks.asObservable(),
@@ -33,7 +38,7 @@ function recordingScope(createSession?: IAudioHost['createSession']) {
     setMuted: vi.fn(),
   };
   const capture = {
-    frameAvailable: new Subject().asObservable(),
+    frameAvailable: frames.asObservable(),
     error: signal(null),
     start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn().mockResolvedValue(undefined),
@@ -64,7 +69,10 @@ function recordingScope(createSession?: IAudioHost['createSession']) {
       { provide: AudioRecorder, useValue: recorder },
       { provide: PcmAudioCapture, useValue: capture },
       { provide: AudioInputDeviceService, useValue: { devices: signal([]), initialize: vi.fn() } },
-      { provide: AudioBrowserRuntime, useValue: { recordingMimeType: () => 'audio/webm' } },
+      {
+        provide: AudioBrowserRuntime,
+        useValue: { recordingMimeType: () => 'audio/webm', now: () => clock.now },
+      },
     ],
   });
   return {
@@ -74,6 +82,8 @@ function recordingScope(createSession?: IAudioHost['createSession']) {
     capture,
     chunks,
     durationMs,
+    frames,
+    clock,
   };
 }
 
@@ -147,10 +157,15 @@ describe('RecordingCoordinator', () => {
     // Arrange
     const scope = recordingScope();
     await scope.coordinator.start();
+    const pauses: ICapturePauseEvent[] = [];
+    scope.coordinator.pauseEvents.subscribe((event) => pauses.push(event));
+    scope.durationMs.set(12000);
+    scope.clock.now = 50000;
 
     // Act
     await scope.coordinator.pause();
     expect(scope.coordinator.snapshot().state).toBe('paused');
+    scope.clock.now = 230000;
     await scope.coordinator.resume();
 
     // Assert
@@ -159,6 +174,32 @@ describe('RecordingCoordinator', () => {
       'recording',
     ]);
     expect(scope.coordinator.snapshot().state).toBe('recording');
+    expect(pauses).toHaveLength(2);
+    expect(pauses[0]?.pause).toMatchObject({ atMs: 12000 });
+    expect(pauses[0]?.pause.durationMs).toBeUndefined();
+    expect(pauses[1]?.pause).toEqual({ id: pauses[0]?.pause.id, atMs: 12000, durationMs: 180000 });
+    await scope.coordinator.stop();
+  });
+
+  it('publishes activity from actual nonempty PCM frames with the current capture identity', async () => {
+    const scope = recordingScope();
+    const activity: IInputActivityEvent[] = [];
+    scope.coordinator.inputActivity.subscribe((event) => activity.push(event));
+    await scope.coordinator.start();
+    scope.clock.now = 1000;
+    const frame: IPcmAudioFrame = {
+      data: new Int16Array([3276, 3276]).buffer,
+      durationMs: 20,
+      format: { encoding: 'pcm-s16le', channelCount: 1, sampleRateHz: 16000 },
+      sequence: 0,
+      timestampMs: 0,
+    };
+    scope.frames.next(frame);
+    scope.frames.next({ ...frame, data: new ArrayBuffer(0) });
+    expect(activity).toHaveLength(1);
+    expect(activity[0]?.sessionId).toBe('session');
+    expect(activity[0]?.atMs).toBe(1000);
+    expect(activity[0]?.rms).toBeCloseTo(3276 / 32768);
     await scope.coordinator.stop();
   });
 

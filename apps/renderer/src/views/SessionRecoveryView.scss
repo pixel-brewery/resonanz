@@ -1,0 +1,163 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.recovery {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+main {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.recovery-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+}
+h2 {
+  margin: 0 0 4px;
+  font: var(--mosaik-typography-subtitle1);
+  font-weight: 600;
+}
+p {
+  margin: 0;
+  color: var(--mosaik-scheme-lowlight);
+  line-height: 1.5;
+}
+.diagnostics {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--mosaik-scheme-surface);
+}
+.diagnostics > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+.diagnostics > div + div {
+  border-top: 1px solid var(--mosaik-scheme-highlight);
+}
+.diagnostics > div > span:nth-child(2) {
+  flex: 1;
+}
+small {
+  max-width: 55%;
+  overflow-wrap: anywhere;
+  color: var(--mosaik-scheme-lowlight);
+  font: var(--mosaik-typography-caption);
+  text-align: right;
+}
+.status-circle {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--mosaik-color-warning-600);
+  font: 600 10px/1 var(--mosaik-font-family, Georgia, serif);
+}
+.success {
+  color: var(--mosaik-color-success-600);
+}
+.error {
+  color: var(--mosaik-color-warning-700);
+}
+.account-action {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.account-action > span {
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+.account-action > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--mosaik-scheme-highlight) 45%, var(--mosaik-scheme-surface));
+}
+.account-action > div > span {
+  flex: 1;
+  font: 500 13px/1.2 var(--mosaik-font-family, Georgia, serif);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+h3 {
+  margin: 0 0 10px;
+  font: var(--mosaik-typography-subtitle2);
+  font-weight: 600;
+}
+.available-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.available-action {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 12px;
+  color: inherit;
+  background: var(--mosaik-scheme-surface);
+  text-align: left;
+  cursor: pointer;
+}
+.available-action strong {
+  font: var(--mosaik-typography-body2);
+  font-weight: 500;
+}
+.available-action > span {
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+}
+.available-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.available-action:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+}
+.transcript {
+  flex: 0 0 420px;
+  border-left: 1px solid var(--mosaik-scheme-highlight);
+}
+@media (max-width: 1300px) {
+  .transcript {
+    flex-basis: 360px;
+  }
+}
+@media (max-width: 1050px) {
+  .transcript {
+    flex-basis: 300px;
+  }
+}
