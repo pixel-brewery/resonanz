@@ -10,7 +10,7 @@ import { resolve } from 'node:path';
  * Verifies that a GitHub release exposes every artifact advertised by a version manifest.
  *
  * @param {unknown} manifest Version manifest generated for the update origin.
- * @param {unknown} release GitHub Releases API response for the published tag.
+ * @param {unknown} release GitHub Releases API response for the stable tag or its unfinished draft.
  * @param {{ allowMissing?: boolean }} options Permit missing assets only while resuming an unfinished draft.
  * @returns {string[]} Human-readable verification failures.
  * @public
@@ -28,6 +28,7 @@ export function verifyReleaseAssets(manifest, release, { allowMissing = false } 
   const version = isRecord(manifest) ? manifest['version'] : undefined;
   const files = isRecord(manifest) && Array.isArray(manifest['files']) ? manifest['files'] : [];
   const tagName = isRecord(release) ? release['tag_name'] : undefined;
+  const draftAssetBaseUrl = draftReleaseAssetBaseUrl(release);
   if (allowMissing && release?.draft !== true)
     failures.push('Missing assets are permitted only in an unpublished draft.');
   const assets = isRecord(release) && Array.isArray(release['assets']) ? release['assets'] : [];
@@ -90,7 +91,11 @@ export function verifyReleaseAssets(manifest, release, { allowMissing = false } 
     if (asset['digest'] !== `sha256:${String(candidate['sha256'])}`) {
       failures.push(`GitHub release asset ${name} has an unexpected SHA-256 digest.`);
     }
-    if (asset['browser_download_url'] !== candidate['url']) {
+    if (
+      asset['browser_download_url'] !== candidate['url'] &&
+      (draftAssetBaseUrl === undefined ||
+        asset['browser_download_url'] !== `${draftAssetBaseUrl}/${encodeURIComponent(name)}`)
+    ) {
       failures.push(`GitHub release asset ${name} does not match its advertised URL.`);
     }
   }
@@ -129,4 +134,16 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
 
 function isRecord(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Resolves only GitHub's exact same-repository draft slug, never a published alias. */
+function draftReleaseAssetBaseUrl(release) {
+  if (!isRecord(release) || release.draft !== true || typeof release.html_url !== 'string')
+    return undefined;
+  const match =
+    /^https:\/\/github\.com\/pixel-brewery\/resonanz\/releases\/tag\/(untagged-[a-f0-9]{20})$/u.exec(
+      release.html_url,
+    );
+  if (match?.[0] !== release.html_url) return undefined;
+  return `https://github.com/pixel-brewery/resonanz/releases/download/${match[1]}`;
 }
