@@ -7939,7 +7939,7 @@ __metadata:
   resolution: "marked@npm:18.0.14"
   bin:
     marked: bin/marked.js
-  checksum: 10c0/1214c7553fdcb1db6c5adad29a7d019f9350f861bc9783ed41a2d177f021551fb22884de012ea26be446af8650d8abbf76d822b9ad5b0c5d592628f66663c42e
+  checksum: 10c0/0e7312138d6cf866f59a28d2d97ab332ef1b6d1d09263306375a8e9c0e5a4ee892ff1e6ecb668a4959fab0c5f1008c3ddec16c861396fe7cce8f7810521484c9
   languageName: node
   linkType: hard
 
