@@ -115,8 +115,11 @@ export class OwnedProcessSupervisor {
       process.kill(this.target(record), 0);
       return true;
     } catch (cause) {
-      if (cause && typeof cause === 'object' && 'code' in cause && cause.code === 'ESRCH')
-        return false;
+      if (cause && typeof cause === 'object' && 'code' in cause) {
+        if (cause.code === 'ESRCH') return false;
+        // EPERM still means present; macOS can report it while a killed group is being reaped.
+        if (cause.code === 'EPERM') return true;
+      }
       throw cause;
     }
   }
