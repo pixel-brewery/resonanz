@@ -18,7 +18,7 @@ if (args.includes('--check')) {
   }
 
   process.stdout.write(
-    'The static PCM worklet matches the unchanged shared processor definition.\n',
+    'The static PCM worklet matches the provenance-verified shared processor definition.\n',
   );
 } else {
   await mkdir(new URL('./', output), { recursive: true });

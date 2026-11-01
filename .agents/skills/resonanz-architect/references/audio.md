@@ -8,8 +8,11 @@ or font changes.
 
 ## Immutable primitives and host composition
 
-The manifest's Flamox production files and supplied specs are byte-identical
-upstream copies. Do not edit or reformat them for a product change, including a
+The manifest's production files and supplied specs are byte-identical upstream
+copies except the explicitly documented PCM processor identifier rename. That file
+retains its original `sha256` and has a separate `downstreamSha256` plus a precise
+modification description. No private upstream repository identity is published.
+Do not edit or reformat copied primitives for a product change, including a
 seemingly small cancellation or playback fix. Adapt through host-owned files
 outside the copied set. A deliberate upstream update changes revision, original
 paths, hashes and relevant tests coherently and preserves all notices.
@@ -25,7 +28,7 @@ Extend them instead of adding a feature-local recorder, queue or native owner.
 
 The static worklet loader and
 [generator](../../../../tools/generate-audio-worklet.mjs) satisfy desktop script
-policy without changing the copied implementation. Regenerate through its owner;
+policy using the provenance-verified processor definition. Regenerate through its owner;
 do not hand-edit the generated renderer asset. Retained upstream transcription
 strategies do not enable a cloud fallback.
 

@@ -1,8 +1,11 @@
 # Resonanz audio
 
-Browser audio primitives copied from the Flamox frontend. The 51 production files
+Browser audio primitives copied from the upstream frontend. The 51 production files
 and 12 supplied behavior specifications listed in [provenance.json](provenance.json)
-remain byte-identical to their documented originals. The renderer consumes this
+retain their original upstream hashes. All are byte-identical except the PCM
+worklet definition, whose processor class and registration identifiers use the
+Resonanz name. The original `sha256`, a separate `downstreamSha256` and a precise
+modification description record that adaptation. The renderer consumes this
 private workspace through `@resonanz/audio`.
 
 ## Included primitives
@@ -28,9 +31,11 @@ providers, test setup and provenance tooling are identified Resonanz composition
 node libs/audio/verify-provenance.mjs
 ```
 
-This compares every copied file to its stored SHA-256 without accessing the private
-source repository. Intentional upstream updates change revision, paths, hashes and
-relevant specs together. Host adaptations stay outside the copied set.
+This compares every file to its stored SHA-256 without accessing the private
+source repository. It checks the downstream hash for the documented identifier
+adaptation and the original hash for every other file. The private repository
+identity is withheld; the original revision, paths and hashes remain recorded. Intentional upstream updates change revision, paths, hashes and
+relevant specs together. Other host adaptations stay outside the copied set.
 
 The supplied specs use Angular/jsdom with one worker, testing ordering, cancellation,
 cleanup, PCM conversion, buffer bounds and persistent retries. They do not prove a

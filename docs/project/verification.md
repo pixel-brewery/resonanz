@@ -1,9 +1,85 @@
 # Verification and evidence
 
 Updated 2026-11-01. Resonanz uses native Codex/Claude account sign-in, system speech
-and the unchanged Flamox audio core. An additional API key or cloud speech provider
+and the provenance-verified upstream audio core. An additional API key or cloud speech provider
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
+
+## Repository privacy maintenance: 2026-11-01
+
+Repository source, guidance and documentation now use neutral upstream references.
+The private upstream identity is withheld while its revision, original paths,
+original hashes and complete supplied license text remain recorded. One PCM
+worklet processor identifier adaptation and one vendored documentation-generator
+comment adaptation have explicit original/downstream provenance.
+
+Checks passed: current tracked/unignored file names and contents plus all 12 decoded
+vendor archives contained no prohibited project reference; audio provenance verified
+63 files; the generated static worklet matched; the seven existing PCM worklet
+behavior specs passed; the pinned architecture skill and relative links validated.
+The existing README application screenshot was also inspected and contains no
+private project label. These maintenance checks do not establish native recording,
+speech, packaging or account inference. Older ignored local package artifacts
+predate this maintenance and are not evidence for the current source state.
+
+After the vendor lockfile refresh, an immutable installation and the complete
+`yarn verify` passed under Node 24: **411 behavior tests in 49 files**, **17 tooling
+tests**, native/Angular type checks and both production builds (two executed Nx
+tasks). The guard's ten cases also passed after diagnostic path redaction;
+repository formatting, source provenance and the final skill/link checks passed.
+The integrated log is `.codex-work/verify-2026-11-01.log`. Packaging, desktop E2E
+and Windows were not rerun locally for this maintenance revision.
+
+The integrated distribution-source revision subsequently passed the complete
+`yarn verify`: **413 behavior tests in 49 files**, **51 single-worker tooling
+tests**, native/Angular type checks and both builds. The tooling suites cover
+release request recovery, exact installer/feed receipts and optional signing
+configuration. Workflow YAML, shell syntax, Nx release configuration discovery,
+formatting and source-content checks also passed. The final integrated log is
+`.codex-work/repository-alignment-verify-2026-11-01.log`. No release, tag, signing
+operation or native installer publication was executed during local validation.
+
+Integration on the existing updater/window-chrome head
+`f27071f32b7315dbeda12786a6a2cffb283985d4` passed an immutable installation,
+**22 focused updater/process-supervision tests in three files**, and the full
+verification with **448 behavior tests in 55 files**, **51 tooling tests**,
+native/Angular types and both builds. Formatting and the final skill/link drift
+check passed. Logs are in `.codex-work/ci-alignment/integration/`; this evidence
+does not replace the native installer/E2E matrix executed by GitHub CI.
+
+[Desktop CI run 41291030041](https://github.com/pixel-brewery/resonanz/actions/runs/41291030041)
+then passed both macOS and Windows jobs for commit
+`4053700d960bc0b7c74448603b0af0d60347cd61`, followed by `Quality Gate`.
+Both platforms passed immutable installation, formatting, complete source
+verification, built-app E2E, native packaging, package verification and the
+packaged-executable E2E. The Windows speech-runtime check also passed. These are
+controlled CI checks; a published update feed, real update installation and
+personal-account/device coverage still need separate evidence. Certificate
+signing and notarization are outside the permanent distribution policy.
+
+## Permanent unsigned distribution: 2026-11-01
+
+Certificate signing and Apple notarization have been removed from Forge and the
+release workflow. macOS always uses certificate-free ad-hoc sealing without
+Hardened Runtime; Windows remains unsigned. The release App key still authenticates
+metadata/tag publication. Installer sizes, SHA-256 hashes, package checks and
+update-feed verification remain required. Earlier optional-signing test counts
+above describe the superseded source revision.
+
+The complete local `yarn verify` passed under Node 24: **448 behavior tests in
+55 files**, **50 tooling tests**, native/Angular types and both production builds
+(two Nx cache hits). The actual Forge configuration was evaluated for each
+platform with synthetic legacy signing variables present and retained the fixed
+policy. Workflow YAML parsed, all 26 Bash blocks passed syntax checks, formatting
+and skill/public-content checks passed.
+
+On macOS ARM64, `yarn make` produced a fresh DMG and ZIP in the isolated task output.
+Strict recursive bundle verification, ad-hoc/no-Hardened-Runtime checks and
+`hdiutil verify` passed. Package verification compared **187 files**, and that
+artifact's executable passed all **ten controlled E2E groups** with synthetic
+media and an isolated unauthenticated profile. Logs are under
+`.codex-work/ci-alignment/unsigned-only-resonanz-*`. This local pass did not test
+Windows, publish a release or exercise a real update installation.
 
 ## Earlier prototype: actual macOS execution
 
@@ -86,8 +162,9 @@ the local signature. The new bundle is under `out/design-handoff/`.
 Current evidence is in `i18n/verify-final-3.log`, `i18n/e2e-source-3.log`,
 `i18n/package.log`, `i18n/verify-package.log` and `i18n/e2e-packaged.log` under
 `.codex-work/`. New question dictation and structured model output still need separate
-physical speech/real-account evidence. The current redesign has not yet run through
-the Windows CI matrix.
+physical speech/real-account evidence. That local redesign pass did not include
+the Windows CI matrix; the later integrated revision passed both native CI
+platforms as recorded above.
 
 The subsequent local preview in `out/design-refinement/` packages the later task,
 transcript and processing-state refinements. Its macOS arm64 build and package
@@ -371,19 +448,19 @@ were not exercised here. No release with an update manifest exists yet.
 
 ## Remaining requirements
 
-| Area                  | Verified scope                                                               | Remaining                                                    |
-| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| macOS app             | Earlier real prototype plus current redesigned source/native bundle          | More devices/OS versions                                     |
-| Tray                  | Confirmed macOS states, actual tray opening/anchor and capture/mini geometry | Extended compositor/workspace and platform variants          |
-| Recording             | Synthetic capture and earlier physical live microphone                       | More devices, quality and long sessions                      |
-| Transcription         | Earlier German macOS file/live and Windows en-US file recognition            | Physical Windows microphone and more installed languages     |
-| Spoken conversation   | Earlier recognition → real Synapse/Codex → native voice/archive              | New dictation view and more device/language combinations     |
-| Assistant accounts    | Earlier real Codex sign-in/catalog/analysis/questions/turns                  | Claude account separately                                    |
-| Audio provenance      | 51 production files and 12 specs unchanged                                   | Deliberate future upstream updates only                      |
-| Organization          | Controlled workflows and bounded full-visible-week detail loading            | Native stress with large real libraries                      |
-| New analysis/evidence | Validated structured fixtures and source selection                           | Real account structured-output integration                   |
-| Distribution          | Public MIT source, native build tooling and earlier CI                       | Trusted signing/notarization, installer releases and updates |
-| Window chrome/updates | Controlled renderer states, drag-region measurement and update unit tests    | Native macOS drag/E2E, a published manifest and real update  |
+| Area                  | Verified scope                                                               | Remaining                                                |
+| --------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------- |
+| macOS app             | Earlier real prototype plus current redesigned source/native bundle          | More devices/OS versions                                 |
+| Tray                  | Confirmed macOS states, actual tray opening/anchor and capture/mini geometry | Extended compositor/workspace and platform variants      |
+| Recording             | Synthetic capture and earlier physical live microphone                       | More devices, quality and long sessions                  |
+| Transcription         | Earlier German macOS file/live and Windows en-US file recognition            | Physical Windows microphone and more installed languages |
+| Spoken conversation   | Earlier recognition → real Synapse/Codex → native voice/archive              | New dictation view and more device/language combinations |
+| Assistant accounts    | Earlier real Codex sign-in/catalog/analysis/questions/turns                  | Claude account separately                                |
+| Audio provenance      | 50 production files and 12 specs unchanged; one PCM identifier adaptation    | Deliberate future upstream updates only                  |
+| Organization          | Controlled workflows and bounded full-visible-week detail loading            | Native stress with large real libraries                  |
+| New analysis/evidence | Validated structured fixtures and source selection                           | Real account structured-output integration               |
+| Distribution          | Public MIT source, native tooling and current macOS/Windows package CI       | Installer publication and native update installation     |
+| Window chrome/updates | Controlled renderer states, update tests and native CI E2E                   | Native macOS drag, a published manifest and real update  |
 
 ## Reproduce checks
 

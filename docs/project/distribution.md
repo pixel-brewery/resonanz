@@ -30,12 +30,32 @@ runtime dependencies. Packaged E2E drives that artifact's executable with an iso
 profile and synthetic media. Neither command proves personal-account inference or
 physical microphone quality.
 
-## Update manifests
+## Automatic releases and updates
 
-A packaged build looks for `update-<platform>-<arch>.json` among the assets of the
-latest GitHub release of this repository. Without such an asset it reports that it
-is up to date. To offer a version, build the installer with `yarn make`, then write
-its manifest and attach both files to the release:
+The prepared release workflow follows the same merge-to-release policy as the
+other Pixel Brewery products. A verified eligible dependency PR merges
+automatically and requests a release for that exact merged source; a human merge
+to `main` starts the normal release workflow. Failed release requests can be
+retried separately from the successful merge.
+
+Each release builds and exercises macOS ARM64 and Windows x64 installers, then
+publishes their sizes, SHA-256 hashes and version-specific download links. All
+required checks and artifact checks must pass before the release becomes latest.
+The packaged app uses those feeds: check for an update, explicitly download the
+installer, then choose restart/update after verification. Without a matching
+platform feed, the app reports that it is up to date. Feed publication and a
+successful native installation remain separate verification evidence.
+
+Workflow publication, the dedicated release-App configuration and the first
+successful native release remain separate activation steps. See the
+[technical distribution contract](../architecture/distribution/README.md) for
+the implemented source, retry behavior, unsigned distribution policy and exact prerequisites.
+
+## Installer manifests
+
+The release workflow creates `update-<platform>-<arch>.json` alongside the
+installer. For a controlled local artifact check, the same writer can be run
+explicitly:
 
 ```sh
 node tools/write-update-manifest.mjs --installer out/make/<installer>.dmg \
@@ -43,14 +63,24 @@ node tools/write-update-manifest.mjs --installer out/make/<installer>.dmg \
   --base-url https://github.com/pixel-brewery/resonanz/releases/download/v0.2.0
 ```
 
-The app downloads the installer in the background, checks size and SHA-256, and
-offers a restart that opens it. Signing, notarization and release channels remain
-release decisions below.
+This local command prepares metadata; publishing uses the verified release
+workflow. Main downloads the installer, checks its size and SHA-256, and offers a
+restart that opens it.
 
-## Release decisions
+## Unsigned distribution and platform acceptance
 
-Before publishing installers, choose supported architectures and OS versions,
-trusted signing/notarization, credentials, release channels and update behavior.
+The publication targets are macOS ARM64 and Windows x64. Releases have no verified
+publisher signature: macOS uses certificate-free ad-hoc sealing without
+notarization, and Windows installers are unsigned. Certificate signing and
+notarization are not planned, and the release workflow has no credential setup
+for them. Operating systems may warn about or block these downloads.
+
+Download, open and use the application at your own risk. You can inspect the
+[public source](https://github.com/pixel-brewery/resonanz); the software is provided
+as is under the [MIT license](../../LICENSE). Installer sizes and SHA-256 hashes
+detect differences from the published manifest; they do not establish publisher
+identity or guarantee that software is safe.
+
 Windows and macOS require their own native evidence. Existing CI exercises both
 platforms with controlled tests; physical devices and account sign-in remain
 separate checks. Do not include recordings, native account profiles, caches or

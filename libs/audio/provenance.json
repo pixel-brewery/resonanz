@@ -1,6 +1,5 @@
 {
-  "schemaVersion": 1,
-  "repository": "https://github.com/RueDeRennes/flamox",
+  "schemaVersion": 2,
   "commit": "b4a9eb8099d968c87c0d6aa20f3dfc037ee86127",
   "licenseDeclaredBySourceManifest": "MIT",
   "files": [
@@ -260,7 +259,9 @@
       "source": "libs/frontend/core/src/audio/realtime/worklets/PcmAudioWorkletDefinition.ts",
       "destination": "libs/audio/src/audio/realtime/worklets/PcmAudioWorkletDefinition.ts",
       "sha256": "8ff25ef1a3dc752a323a55150820f678d1d410fc0e77cbcf5461513aed78c9b5",
-      "kind": "production"
+      "kind": "production",
+      "downstreamSha256": "3a8fd3d29ae2de6e29fe7f16f58a82a2381b0c90970d2e6f1af0da02af92ebb2",
+      "modification": "Resonanz-specific capture/playback processor class and registration identifiers; audio processing behavior unchanged."
     },
     {
       "source": "libs/frontend/core/src/audio/realtime/worklets/RealtimeAudioWorkletModuleLoader.ts",
@@ -389,5 +390,6 @@
     "devices/models/IAudioInputDevicePreference.ts: only used by the omitted preference service",
     "recorder/provider/*: depends on generic feature composition outside the copied audio subtree",
     "provider registration specs: trivial forwarding coverage is not needed in the consumer"
-  ]
+  ],
+  "sourceVisibility": "private; repository identity withheld"
 }

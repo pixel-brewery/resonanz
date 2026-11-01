@@ -238,7 +238,7 @@ export class CapturePresenter {
     }
   }
 
-  /** Starts real microphone capture using the unchanged Flamox recorder. */
+  /** Starts real microphone capture using the unchanged upstream recorder. */
   public async startRecording(): Promise<void> {
     if (this.active() || this.busy()) return;
     await this.perform(async () => {

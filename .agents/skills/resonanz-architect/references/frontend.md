@@ -3,9 +3,9 @@
 Read [frontend architecture](../../../../docs/architecture/frontend/README.md),
 [component contracts](../../../../docs/architecture/frontend/components.md),
 [internationalization](../../../../docs/architecture/frontend/internationalization.md)
-and [reference decisions](../../../../docs/architecture/frontend-reference-flamox.md)
+and [reference decisions](../../../../docs/architecture/frontend-reference.md)
 for affected behavior. Inspect installed public Mosaik APIs and the closest active
-Flamox/Symphony pattern before adding an alternative composition.
+Symphony pattern before adding an alternative composition.
 
 ## Views and owners
 

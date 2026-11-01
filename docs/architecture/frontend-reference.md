@@ -2,9 +2,9 @@
 
 | Reference                                            | Choice            | Resonanz composition                                                      |
 | ---------------------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
-| Angular OnPush, Signals, Signal Forms and presenters | Adopt             | Same framework patterns as Flamox/Symphony with typed Mosaik fields       |
+| Angular OnPush, Signals, Signal Forms and presenters | Adopt             | Same framework patterns as Symphony with typed Mosaik fields              |
 | Mosaik, Soho and Reicon                              | Adopt             | Public packages and theme APIs; owner-approved serif/token customization  |
-| Recording, PCM, player and TTS                       | Adopt             | Byte-identical copies with SHA-256 provenance and original specs          |
+| Recording, PCM, player and TTS                       | Adopt             | Original hashes/specs; one documented PCM processor identifier rename     |
 | Translation tables and Mosaik registry/facade        | Adapt             | English/German, English default and typed settings persistence            |
 | Shell/workspace                                      | Adapt             | Sessions, voice, favorites and collections                                |
 | Native persistence/integration                       | Adapt             | Validated preload/Main/Utility boundaries                                 |

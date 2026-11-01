@@ -281,7 +281,7 @@ try {
   assert.equal(range.status, 206);
   assert.equal(range.bytes, 128);
   passed(
-    'unchanged Flamox recorder/worklet/player: synthetic capture, pause, resume, final flush and ranged playback',
+    'provenance-verified recorder/worklet/player: synthetic capture, pause, resume, final flush and ranged playback',
   );
 
   if ((await page.locator('.organization').getAttribute('open')) === null)
@@ -398,7 +398,7 @@ try {
     await page.getByRole('button', { name: 'Vorlesen beenden', exact: true }).click();
     await control('speech-controls').waitFor({ state: 'hidden' });
     passed(
-      'unchanged Flamox TTS: actual system voice, pause, resume and stop with explicit manual fixture',
+      'unchanged upstream TTS: actual system voice, pause, resume and stop with explicit manual fixture',
     );
   }
 

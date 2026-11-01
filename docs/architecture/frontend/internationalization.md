@@ -1,13 +1,13 @@
 # Internationalization
 
-Resonanz follows Flamox's Mosaik translation pattern, inspected at revision
+Resonanz follows the established Mosaik translation pattern, inspected at upstream revision
 `a9d5dd25487b9f040cd8107c9968294112e8e972`: flat language tables, a registry,
 `provideTranslationRegistry`, `provideTranslations` and a signal facade around the
-public TranslateService. Flamox's generated TypeScript catalog layer is unnecessary
+public TranslateService. The upstream generated TypeScript catalog layer is unnecessary
 for two bundled JSON tables; Resonanz imports the JSON directly into its typed registry.
 The pinned Mosaik 0.1.183 pure TranslatePipe caches unchanged keys across language
 changes. Resonanz supplies a reactive renderer pipe over the same public service;
-vendor packages remain unchanged. No runtime HTTP catalog loader or additional translation framework is introduced.
+the supplied translation implementation remains unchanged. No runtime HTTP catalog loader or additional translation framework is introduced.
 
 ## Source owners
 

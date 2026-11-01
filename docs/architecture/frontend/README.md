@@ -67,7 +67,7 @@ the drawing components. The renderer calls only the typed preload API.
 
 [Theming](theming.md) records the owner-approved export and shared provider.
 
-[Internationalization](internationalization.md) follows Flamox's Mosaik translation
+[Internationalization](internationalization.md) follows the established Mosaik translation
 registry/facade approach. English and German are complete flat tables. English is
 the default; native menus use the same catalogs. UI preference is independent of
 speech locale/voice and never rewrites existing transcripts or AI results.

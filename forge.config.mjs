@@ -107,6 +107,7 @@ export default {
       /^\/node_modules\/(?!(?:electron-native-speech|electron-native-speech-backend-macos|electron-native-speech-preload)(?:\/|$))/,
       /^\/node_modules\/electron-native-speech-backend-macos\/(?:bin|scripts)(?:\/|$)/,
     ],
+    // Ad-hoc sealing keeps Apple Silicon bundles launchable without a certificate.
     ...(process.platform === 'darwin'
       ? {
           osxSign: {

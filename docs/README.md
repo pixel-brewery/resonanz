@@ -23,8 +23,10 @@ The interface supports English and German, with English as its default.
 - [Reusable visual components](architecture/frontend/components.md)
 - [Translation tables and language selection](architecture/frontend/internationalization.md)
 - [Copied audio and host composition](architecture/audio/README.md)
+- [Repository quality and planning](architecture/repository-quality/README.md)
+- [Automated desktop distribution](architecture/distribution/README.md)
 - [Synapse and native assistant accounts](architecture/local-assistants/README.md)
-- [Frontend reference decisions](architecture/frontend-reference-flamox.md)
+- [Frontend reference decisions](architecture/frontend-reference.md)
 
 [Project plan](project-plan.md) describes the binding scope. [Decisions](decisions.md)
 records implemented choices and follow-up decisions. Executable configuration and

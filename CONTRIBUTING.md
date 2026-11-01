@@ -44,7 +44,9 @@ AI or storage. Add interface text to both [translation tables](docs/architecture
 English is the UI default. Documentation and original repository prose are English;
 German catalog entries, intentional test speech and user content keep their language.
 
-Do not edit copied Flamox files for product changes. An intentional upstream update
+The provenance manifest records one intentional PCM processor identifier rename
+with separate upstream/downstream hashes. Do not edit copied upstream files for
+product changes. An intentional upstream update
 must update revision, paths, hashes and relevant tests together. Update vendor
 archives, manifests, dependencies/resolutions and lockfile coherently. Never bypass
 package resolution using a personal peer-checkout alias. Preserve complete notices.
@@ -57,7 +59,7 @@ Run focused checks before integrated gates and coordinate one heavy job at a tim
 | -------------------------- | ---------------------------------------------------------- |
 | `yarn verify:skills`       | Pinned Architecture base, derivation and reference links   |
 | `yarn verify:vendor`       | Pinned distribution hashes                                 |
-| `yarn verify:audio`        | Unchanged copied audio and generated worklet               |
+| `yarn verify:audio`        | Copied/adapted audio integrity and generated worklet       |
 | `yarn typecheck`           | Native TypeScript and Angular templates                    |
 | `yarn test`                | Behavior specifications and packaging-tool tests           |
 | `yarn build`               | Renderer and native bundles                                |
@@ -90,3 +92,12 @@ distinct in documentation.
 Original contributions use [MIT](LICENSE). Upstream sources retain full attribution.
 The root workspace stays `private: true`; public GitHub visibility does not authorize
 npm publication, deployment or a release. See [distribution](docs/project/distribution.md).
+
+## Repository planning and quality
+
+Track repository work on the [Resonanz board](https://github.com/orgs/pixel-brewery/projects/9).
+Pull requests must pass the complete macOS/Windows desktop verification. The
+stable `Quality Gate` rejects failed, cancelled or skipped verification; its
+remote activation follows the [repository-quality contract](docs/architecture/repository-quality/README.md).
+Run `yarn verify:public-content` when changing examples, documentation, source or
+vendor archives; the complete `yarn verify` command includes it.

@@ -31,19 +31,26 @@
     "build:renderer": "nx build renderer",
     "build:desktop": "nx build desktop",
     "test": "vitest run --maxWorkers=1 && yarn test:tooling",
-    "test:tooling": "node --test tools/run-forge.spec.mjs tools/write-update-manifest.spec.mjs",
+    "test:tooling": "node --test --test-concurrency=1 tools/run-forge.spec.mjs tools/verify-public-content.spec.mjs tools/write-update-manifest.spec.mjs tools/prepare-release-assets.spec.mjs tools/verify-release-assets.spec.mjs .github/scripts/mergeDependabotPullRequest.spec.mjs .github/scripts/requestMergedRelease.spec.mjs .github/scripts/rebaseDependabotPullRequests.spec.mjs forge.config.spec.mjs",
     "test:e2e": "node tools/verify-desktop.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && ngc --noEmit -p apps/renderer/tsconfig.app.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify:skills": "python3 .agents/scripts/sync_architect_core.py --check",
     "verify:vendor": "node tools/verify-vendor.mjs",
+    "verify:public-content": "node tools/verify-public-content.mjs",
     "verify:audio": "node libs/audio/verify-provenance.mjs && node tools/generate-audio-worklet.mjs --check",
     "verify:package": "node tools/verify-package.mjs",
-    "verify": "yarn verify:skills && yarn verify:vendor && yarn verify:audio && yarn typecheck && yarn test && yarn build",
+    "verify": "yarn verify:skills && yarn verify:public-content && yarn verify:vendor && yarn verify:audio && yarn typecheck && yarn test && yarn build",
     "icons": "node tools/generate-app-icons.mjs",
     "package": "yarn build && node tools/run-forge.mjs package",
-    "make": "yarn build && node tools/run-forge.mjs make"
+    "make": "yarn build && node tools/run-forge.mjs make",
+    "release": "yarn run release:patch",
+    "release:patch": "gh workflow run release.yml --ref main -f specifier=patch",
+    "release:minor": "gh workflow run release.yml --ref main -f specifier=minor",
+    "release:major": "gh workflow run release.yml --ref main -f specifier=major",
+    "release:dry-run": "yarn run release:nx --specifier=patch --dry-run",
+    "release:nx": "nx release --skip-publish"
   },
   "dependencies": {
     "@angular/cdk": "22.2.3",
@@ -130,5 +137,13 @@
     "@pixel-brewery/synapse-provider-codex": "file:./vendor/synapse/synapse-provider-codex-0.0.3.tgz",
     "@pixel-brewery/synapse-provider-opencode": "file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz",
     "@pixel-brewery/synapse-runtime": "file:./vendor/synapse/synapse-runtime-0.0.3.tgz"
+  },
+  "nx": {
+    "includedScripts": [],
+    "projectType": "application",
+    "tags": [
+      "scope:desktop",
+      "type:application"
+    ]
   }
 }
