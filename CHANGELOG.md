@@ -1,3 +1,13 @@
+## 0.1.2 (2026-11-01)
+
+### 🩹 Fixes
+
+- retain staged runtime manifest with Forge 8 ([7fe5973](https://github.com/pixel-brewery/resonanz/commit/7fe5973))
+
+### ❤️ Thank You
+
+- André Wehlert @RueDeRennes
+
 ## 0.1.1 (2026-11-01)
 
 This was a version bump only, there were no code changes.
