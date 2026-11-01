@@ -10577,7 +10577,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.49, postcss@npm:^8.5.16, postcss@npm:^8.5.28":
+"postcss@npm:^8.4.49, postcss@npm:^8.5.16, postcss@npm:^8.5.28, postcss@npm:^8.5.30":
   version: 8.5.32
   resolution: "postcss@npm:8.5.32"
   dependencies:
@@ -10985,7 +10985,7 @@ __metadata:
     tailwindcss: "npm:4.3.3"
     tslib: "npm:2.8.1"
     typescript: "npm:6.0.3"
-    vite: "npm:8.3.1"
+    vite: "npm:8.3.5"
     vitest: "npm:5.0.5"
     zod: "npm:4.6.5"
   languageName: unknown
@@ -11145,7 +11145,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rolldown@npm:~1.2.6, rolldown@npm:~1.2.9":
+"rolldown@npm:~1.2.14, rolldown@npm:~1.2.6":
   version: 1.2.16
   resolution: "rolldown@npm:1.2.16"
   dependencies:
@@ -12639,19 +12639,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:8.3.1":
-  version: 8.3.1
-  resolution: "vite@npm:8.3.1"
+"vite@npm:8.3.5":
+  version: 8.3.5
+  resolution: "vite@npm:8.3.5"
   dependencies:
     fsevents: "npm:~2.3.3"
     lightningcss: "npm:^1.33.0"
     picomatch: "npm:^4.0.7"
-    postcss: "npm:^8.5.28"
-    rolldown: "npm:~1.2.9"
+    postcss: "npm:^8.5.30"
+    rolldown: "npm:~1.2.14"
     tinyglobby: "npm:^0.2.17"
   peerDependencies:
     "@types/node": ^20.19.0 || >=22.12.0
-    "@vitejs/devtools": ^0.7.1
+    "@vitejs/devtools": ^0.7.1 || ^0.8.0
     esbuild: ^0.27.0 || ^0.28.0
     jiti: ">=1.21.0"
     less: ^4.0.0
@@ -12692,7 +12692,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/a91f4fee1cd331912ee3ac45f49900044846e28b8632ae734fe1978630e643e503d04181b2aeac59f70556fc51137dd49179fd39cbeb72a3e5f0bce88d2bcd30
+  checksum: 10c0/33991600925b6717429c14a2c2907554aed077489ee6ff7815f9f49d5de559f5173ccb0472f2b3f9eef2a49e2e014f6cb624db8d4adebb37baad3a8cbc15065a
   languageName: node
   linkType: hard
 
