@@ -1,3 +1,7 @@
+## 0.1.1 (2026-11-01)
+
+This was a version bump only, there were no code changes.
+
 # Changelog
 
 ## Unreleased — prototype 0.1.0
