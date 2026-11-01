@@ -75,7 +75,6 @@ function settingsScope() {
       settings.set({ ...settings(), ...changes });
     }),
     report: vi.fn(),
-    clearError: vi.fn(),
   };
   TestBed.configureTestingModule({
     providers: [

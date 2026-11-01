@@ -58,10 +58,16 @@ const request = (method, payload = {}) =>
     payload,
   });
 const session = () => request('sessions.get', { sessionId: recordedId });
-const errorText = () =>
-  control('application-error')
-    .locator('mosaik-text')
-    .evaluateAll((nodes) => nodes.map((node) => node.text).join(' '));
+// Application errors appear at the bottom of the window: a toast and today's notices in the
+// status-bar notification centre.
+const errorText = async () => {
+  await control('notification-bell').click();
+  await control('notification-centre').waitFor({ state: 'visible' });
+  const text = await control('notification-centre').innerText();
+  await control('notification-bell').click();
+  await control('notification-centre').waitFor({ state: 'hidden' });
+  return text;
+};
 
 async function launch() {
   const env = {

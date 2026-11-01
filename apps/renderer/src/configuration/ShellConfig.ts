@@ -13,6 +13,8 @@ import {
   provideTheme,
   provideTranslationRegistry,
   provideTranslations,
+  provideToasts,
+  withToastStackBehavior,
 } from '@pixel-brewery/mosaik-elements-angular';
 import { ReiconAliases } from '@pixel-brewery/mosaik-elements-foundation/icons/reicon';
 import { SohoTheme } from '@pixel-brewery/mosaik-themes';
@@ -20,6 +22,8 @@ import { RealtimeAudioWorkletModuleLoader, provideAudioServices } from '@resonan
 import { AUDIO_HOST } from '../audio/AUDIO_HOST';
 import { SelfHostedRealtimeAudioWorkletModuleLoader } from '../audio/SelfHostedRealtimeAudioWorkletModuleLoader';
 import { DesktopAudioHost } from '../services/DesktopAudioHost';
+import { MosaikNotificationToasts } from '../services/MosaikNotificationToasts';
+import { NOTIFICATION_TOASTS } from '../services/NotificationToasts';
 import { icons } from './Icons';
 import { shellRoutes } from './ShellRoutes';
 import { resonanzThemeOverrides } from './ResonanzTheme';
@@ -41,6 +45,8 @@ export const shellConfig: ApplicationConfig = {
     provideIconSet('reicon', ReiconAliases),
     provideDefaultIconSet('reicon'),
     provideIcons(icons),
+    provideToasts(withToastStackBehavior({})),
+    { provide: NOTIFICATION_TOASTS, useClass: MosaikNotificationToasts },
     ...provideAudioServices(),
     {
       provide: RealtimeAudioWorkletModuleLoader,

@@ -11,13 +11,13 @@
         test-id="play-recording"
         [disabled]="!session.audioAvailable || presenter.capturing()"
         [attr.aria-label]="
-          presenter.player.isPlaying()
+          presenter.playingHere()
             ? ('loc.resonanz.common.pause' | translate)
             : ('loc.resonanz.session.listen' | translate)
         "
         (click)="presenter.togglePlayback()"
       >
-        {{ presenter.player.isPlaying() ? 'Ⅱ' : '▶' }}</button
+        {{ presenter.playingHere() ? 'Ⅱ' : '▶' }}</button
       ><button
         [attr.aria-label]="'loc.resonanz.session.forward15' | translate"
         (click)="presenter.seek(presenter.positionMs() + 15000)"

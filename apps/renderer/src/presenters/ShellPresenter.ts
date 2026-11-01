@@ -27,8 +27,10 @@ export class ShellPresenter {
   public readonly capturePanelOpen = signal(false);
   public readonly nativeTray = signal(false);
   public readonly focusMode = computed(() =>
-    /^\/(?:voice|settings|onboarding)(?:\/|$)/u.test(this._url()),
+    /^\/(?:voice|settings|onboarding)(?:[/?]|$)/u.test(this._url()),
   );
+  /** The status bar accompanies every surface except first-run setup. */
+  public readonly statusBarVisible = computed(() => !/^\/onboarding(?:[/?]|$)/u.test(this._url()));
   private readonly _windowSurface = computed<RequestPayload<'window.present'>['surface']>(() =>
     /^\/settings(?:[/?]|$)/u.test(this._url())
       ? 'settings'

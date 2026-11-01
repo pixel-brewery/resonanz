@@ -266,7 +266,6 @@ export class SettingsPresenter {
   public async clearLibrary(): Promise<void> {
     if (!this.confirmingClear() || this.clearingLibrary() || this.clearBlockedReason()) return;
     this.clearingLibrary.set(true);
-    this.library.clearError();
     try {
       await this._api.request('sessions.clear', { confirm: true });
       await Promise.all([this.library.refresh(), this.library.refreshStorage()]);
@@ -312,7 +311,6 @@ export class SettingsPresenter {
       return false;
     this.saving.set(true);
     this.saved.set(false);
-    this.library.clearError();
     const model = { ...this._model() };
     const assistant = assistantSelection(model);
     const binding = bindingKey(assistant);

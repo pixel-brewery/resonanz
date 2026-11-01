@@ -1,5 +1,5 @@
 <div class="voice" test-id="voice-view" [attr.data-state]="presenter.state()">
-  <header class="voice-header">
+  <header class="voice-header" part="window-drag-region">
     <mosaik-button
       [routerLink]="
         presenter.session.session() ? ['/session', presenter.session.session()?.id] : ['/']

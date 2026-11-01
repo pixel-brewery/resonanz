@@ -20,6 +20,7 @@ import { SegmentedTabsComponent } from '../components/segmented-tabs/SegmentedTa
 import { WeekLandscapeComponent } from '../components/week-landscape/WeekLandscapeComponent';
 import { DeleteDialogComponent } from '../components/delete-dialog/DeleteDialogComponent';
 import { TopicThreadsComponent } from '../components/topic-threads/TopicThreadsComponent';
+import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolbarDirective';
 // #endregion
 
 /** Displays real recordings, their collections and first-use capture actions. */
@@ -46,6 +47,7 @@ import { TopicThreadsComponent } from '../components/topic-threads/TopicThreadsC
     SearchBoxComponent,
     TextBoxComponent,
     DurationPipe,
+    WindowToolbarDirective,
   ],
   templateUrl: './LibraryView.html',
   styleUrl: './LibraryView.scss',

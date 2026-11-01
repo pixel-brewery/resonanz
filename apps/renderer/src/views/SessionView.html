@@ -2,29 +2,23 @@
   @if (presenter.loading()) {
     <div class="empty-state" role="status">{{ 'loc.resonanz.session.loading' | translate }}</div>
   } @else if (presenter.session(); as session) {
-    <header class="workspace-header session-header">
-      <mosaik-button
-        routerLink="/"
-        icon="chevronLeft"
-        appearance="plain"
-        [attr.aria-label]="'loc.resonanz.session.backToSessions' | translate"
-      />
-      <div class="header-title">
-        <h1 test-id="session-title">{{ session.title }}</h1>
-        <span class="caption"
-          >{{ session.createdAt | date: 'EEEE, dd. MMMM, HH:mm' : undefined : intl.locale() }} ·
-          {{ session.durationMs | duration }}
-          @if (presenter.chapters().length) {
-            · {{ intl.t('loc.resonanz.session.chapterCount', presenter.chapters().length) }}
-          }
-          ·
-          {{
-            session.kind === 'conversation'
-              ? ('loc.resonanz.capture.live' | translate)
-              : ('loc.resonanz.capture.microphone' | translate)
-          }}</span
-        >
-      </div>
+    <ng-template
+      resonanzWindowToolbar
+      toolbarTitleTestId="session-title"
+      [toolbarTitle]="session.title"
+      [toolbarSubtitle]="
+        (session.createdAt | date: 'EEEE, dd. MMMM, HH:mm' : undefined : intl.locale()) +
+        ' · ' +
+        (session.durationMs | duration) +
+        (presenter.chapters().length
+          ? ' · ' + intl.t('loc.resonanz.session.chapterCount', presenter.chapters().length)
+          : '') +
+        ' · ' +
+        (session.kind === 'conversation'
+          ? ('loc.resonanz.capture.live' | translate)
+          : ('loc.resonanz.capture.microphone' | translate))
+      "
+    >
       <resonanz-segmented-tabs
         [tabs]="tabs"
         [value]="presenter.tab()"
@@ -40,7 +34,7 @@
       />
       <details class="session-menu">
         <summary [attr.aria-label]="'loc.resonanz.session.more' | translate">···</summary>
-        <div (click)="closeMenu($event)">
+        <div part="window-no-drag" (click)="closeMenu($event)">
           <mosaik-button
             test-id="toggle-favorite"
             [label]="
@@ -101,7 +95,7 @@
           />
         </div>
       </details>
-    </header>
+    </ng-template>
     @if (presenter.editingMetadata()) {
       <div class="metadata-editor outline-card" test-id="session-metadata-editor">
         <mosaik-textbox
@@ -135,24 +129,6 @@
         </div>
       </div>
     }
-    @if (session.error) {
-      <div class="session-error" role="status">{{ session.error | message }}</div>
-    }
-    @if (presenter.liveHere()) {
-      <div class="live-state" test-id="live-conversation-state" role="status">
-        {{
-          presenter.capture.state() === 'paused'
-            ? ('loc.resonanz.error.conversationPaused' | translate)
-            : presenter.capture.live().microphoneMuted
-              ? ('loc.resonanz.error.micMuted' | translate)
-              : presenter.capture.live().stage === 'speaking'
-                ? ('loc.resonanz.voice.speaking' | translate)
-                : presenter.capture.live().stage === 'thinking'
-                  ? ('loc.resonanz.question.thinking' | translate)
-                  : ('loc.resonanz.voice.listening' | translate)
-        }}
-      </div>
-    }
     @if (presenter.tab() === 'processing') {
       <resonanz-session-recovery />
     } @else if (presenter.tab() === 'ring') {
@@ -161,31 +137,6 @@
       <resonanz-session-analysis />
     } @else {
       <resonanz-session-questions />
-    }
-    @if (presenter.speech.isSpeaking()) {
-      <div class="speech-controls" test-id="speech-controls">
-        @if (presenter.speech.isPaused()) {
-          <mosaik-button
-            [label]="'loc.resonanz.session.resumeRead' | translate"
-            icon="play"
-            appearance="plain"
-            (click)="presenter.speech.resume()"
-          />
-        } @else {
-          <mosaik-button
-            [label]="'loc.resonanz.session.pauseRead' | translate"
-            icon="pause"
-            appearance="plain"
-            (click)="presenter.speech.pause()"
-          />
-        }
-        <mosaik-button
-          [label]="'loc.resonanz.session.stopRead' | translate"
-          icon="stop"
-          appearance="plain"
-          (click)="presenter.stopSpeaking()"
-        />
-      </div>
     }
     @if (presenter.confirmDeletion()) {
       <resonanz-delete-dialog

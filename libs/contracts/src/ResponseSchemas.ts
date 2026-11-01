@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { dataSchemas } from './DataSchemas.js';
 import { miniRecorderSchema } from './MiniRecorderSchema.js';
+import { updateStateSchema } from './UpdateStateSchema.js';
 // #endregion
 
 const done = z.object({ ok: z.literal(true) });
@@ -91,4 +92,10 @@ export const responseSchemas = {
   }),
   'window.hide': done,
   'app.quit': done,
+  'updates.get': updateStateSchema,
+  'updates.check': updateStateSchema,
+  'updates.download': z.strictObject({ outcome: z.enum(['started', 'unavailable']) }),
+  'updates.install': z.strictObject({
+    outcome: z.enum(['started', 'not-ready', 'capture-active']),
+  }),
 } as const;

@@ -19,6 +19,12 @@
 - Unchanged Flamox audio sources with reproducible provenance.
 - macOS/Windows CI for native packaging and controlled application workflows.
 - Public GitHub repository, MIT license and English documentation/contributor templates.
+- Symphony-style window chrome: a unified toolbar that drags the window everywhere except its
+  controls, back/forward navigation and per-screen titles and actions.
+- Status bar with the running capture, a mini player for any playback, a notification bell
+  with today's notices and bottom-left toasts instead of banners above the workspace.
+- Installer updates checked from release manifests, downloaded with verified size and
+  SHA-256, and installed on an explicit restart from the status bar or Settings.
 
 This records working source behavior, not a published release tag, installer or update
 channel. Actual runtime evidence and remaining requirements are recorded in

@@ -39,7 +39,7 @@
             test-id="play-recording"
             [disabled]="!session.audioAvailable || presenter.capturing()"
             [attr.aria-label]="
-              presenter.player.isPlaying()
+              presenter.playingHere()
                 ? ('loc.resonanz.capture.pause' | translate)
                 : ('loc.resonanz.session.listenRecording' | translate)
             "

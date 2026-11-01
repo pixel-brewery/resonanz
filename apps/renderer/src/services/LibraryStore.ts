@@ -1,6 +1,5 @@
-import { translateMessage, uiLanguage } from '@resonanz/intl';
 // #region Imports
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
   defaultSettings,
@@ -14,6 +13,7 @@ import {
   type IStorageUsage,
 } from '@resonanz/contracts';
 import { DesktopApi } from './DesktopApi';
+import { NotificationService } from './NotificationService';
 // #endregion
 
 /** Owns the application projection and coalesces committed native changes. */
@@ -21,12 +21,12 @@ import { DesktopApi } from './DesktopApi';
 export class LibraryStore {
   // #region Fields
   private readonly _api = inject(DesktopApi);
+  private readonly _notifications = inject(NotificationService);
   private readonly _sessions = signal<readonly ISessionSummary[]>([]);
   private readonly _collections = signal<readonly ICollection[]>([]);
   private readonly _settings = signal<ISettings>(defaultSettings);
   private readonly _capabilities = signal<ICapabilities | null>(null);
   private readonly _loading = signal(true);
-  private readonly _error = signal<string | null>(null);
   private readonly _storage = signal<IStorageUsage | null>(null);
   private readonly _measuringStorage = signal(false);
   private _storageRefresh: Promise<void> | null = null;
@@ -43,12 +43,6 @@ export class LibraryStore {
   public readonly loading = this._loading.asReadonly();
   public readonly storage = this._storage.asReadonly();
   public readonly measuringStorage = this._measuringStorage.asReadonly();
-  public readonly error = computed(() => {
-    const message = this._error();
-    return message === null
-      ? null
-      : translateMessage(uiLanguage(this.settings().uiLanguage), message);
-  });
   public readonly events = this._events.asObservable();
   // #endregion
 
@@ -108,14 +102,12 @@ export class LibraryStore {
     return work;
   }
 
-  /** Exposes a useful application error. */
+  /**
+   * Reports a failed operation as a notification at the bottom of the window (toast and
+   * notification centre) instead of a banner above the workspace.
+   */
   public report(error: unknown): void {
-    this._error.set(error instanceof Error ? error.message : 'loc.resonanz.error.operation');
-  }
-
-  /** Dismisses the current error. */
-  public clearError(): void {
-    this._error.set(null);
+    this._notifications.report(error);
   }
 
   /** Creates a collection and refreshes its projection. */

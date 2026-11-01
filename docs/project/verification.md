@@ -335,6 +335,40 @@ synthetic media. Logs are `handoff-completion/precommit-package.log`,
 these checks. No fresh personal-account inference or physical-device claim follows
 from this verification.
 
+## Window chrome, notifications, playback and updates
+
+The Symphony-style toolbar, status bar, notification centre, mini player and update
+path were checked in a Linux container. The repository verification passed skills,
+vendor, audio provenance and both typechecks. **445 of 446 behavior tests in 55
+files** passed. `OwnedProcessSupervisor.spec.ts` was the only failure: its fixture
+did not reach the expected state in this container. Its source and spec are
+unchanged and it failed the same way here before this work. Also passing: **9
+tooling tests**, both production builds and `format:check`. New specs cover:
+
+- the update coordinator, including disabled states, check, download progress,
+  ready, install and failures;
+- the verified installer adapter;
+- notification history and reporting;
+- the update store;
+- the playback store and toolbar registration;
+- the manifest tool.
+
+The built renderer was rendered in Chromium with a schema-validated stub bridge in
+light and dark, 40 states each, with no console errors. Drag regions were measured
+with `elementFromPoint` and computed `app-region`. Draggable toolbar width rose:
+
+| Screen   | Before | After   |
+| -------- | ------ | ------- |
+| Library  | 86 px  | 640 px  |
+| Session  | 70 px  | 614 px  |
+| Settings | 70 px  | 1230 px |
+| Voice    | 148 px | 1070 px |
+
+The remaining width is controls. The harness simulated media and speech timing to
+show the mini player. That is visual evidence only; it is not native playback.
+Electron E2E, packaging, a real update download and the macOS window drag itself
+were not exercised here. No release with an update manifest exists yet.
+
 ## Remaining requirements
 
 | Area                  | Verified scope                                                               | Remaining                                                    |
@@ -349,6 +383,7 @@ from this verification.
 | Organization          | Controlled workflows and bounded full-visible-week detail loading            | Native stress with large real libraries                      |
 | New analysis/evidence | Validated structured fixtures and source selection                           | Real account structured-output integration                   |
 | Distribution          | Public MIT source, native build tooling and earlier CI                       | Trusted signing/notarization, installer releases and updates |
+| Window chrome/updates | Controlled renderer states, drag-region measurement and update unit tests    | Native macOS drag/E2E, a published manifest and real update  |
 
 ## Reproduce checks
 

@@ -30,6 +30,7 @@ import { TranslatePipe } from '../pipes/TranslatePipe';
 import { SettingsPresenter } from '../presenters/SettingsPresenter';
 import { DesktopApi } from '../services/DesktopApi';
 import { TranslateFacade } from '../services/TranslateFacade';
+import { UpdateStore } from '../services/UpdateStore';
 import { AssistantLoginView } from './AssistantLoginView';
 import { StorageBreakdownComponent } from '../components/storage-breakdown/StorageBreakdownComponent';
 import type { IStorageSegment } from '../components/storage-breakdown/IStorageSegment';
@@ -69,6 +70,45 @@ export class SettingsView implements OnInit {
   private readonly _filter = signal({ text: '' });
   protected readonly intl = inject(TranslateFacade);
   protected readonly presenter = inject(SettingsPresenter);
+  protected readonly updates = inject(UpdateStore);
+  /** One-line description of the update state for the Updates section. */
+  protected readonly updateStatus = computed(() => {
+    const state = this.updates.state();
+    if (!state) return this.intl.t('loc.resonanz.update.unknown');
+    switch (state.kind) {
+      case 'disabled':
+        return this.intl.t(
+          state.reason === 'development'
+            ? 'loc.resonanz.update.disabledDevelopment'
+            : state.reason === 'unsupported-platform'
+              ? 'loc.resonanz.update.disabledPlatform'
+              : 'loc.resonanz.update.disabledFeed',
+        );
+      case 'checking':
+        return this.intl.t('loc.resonanz.update.checking');
+      case 'available':
+        return this.intl.t('loc.resonanz.update.availableTitle', state.targetVersion);
+      case 'downloading':
+        return this.intl.t(
+          'loc.resonanz.update.downloadingProgress',
+          Math.round((state.progress ?? 0) * 100),
+        );
+      case 'ready':
+        return this.intl.t('loc.resonanz.update.readyTitle', state.targetVersion);
+      case 'failed':
+        return this.intl.message(state.message);
+      default:
+        return state.lastCheckedAt
+          ? this.intl.t(
+              'loc.resonanz.update.upToDateChecked',
+              new Date(state.lastCheckedAt).toLocaleString(this.intl.locale(), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }),
+            )
+          : this.intl.t('loc.resonanz.update.notChecked');
+    }
+  });
   protected readonly searchForm = form(this._filter);
   protected readonly activeSection = signal('recording');
   protected readonly connectionOpen = signal(false);
@@ -120,6 +160,12 @@ export class SettingsView implements OnInit {
       label: 'loc.resonanz.settings.appearance',
       search: 'loc.resonanz.settings.appearanceSearch',
       icon: 'settings',
+    },
+    {
+      id: 'updates',
+      label: 'loc.resonanz.settings.updates',
+      search: 'loc.resonanz.settings.updatesSearch',
+      icon: 'refresh',
     },
   ];
   protected readonly visibility = computed(() => {

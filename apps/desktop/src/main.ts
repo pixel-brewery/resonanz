@@ -46,6 +46,9 @@ import { parseAudioRange } from './parseAudioRange.js';
 import { MiniRecorderWindow } from './MiniRecorderWindow.js';
 import { WindowPresentation } from './WindowPresentation.js';
 import { CaptureReminderNotification } from './CaptureReminderNotification.js';
+import { HttpInstallerUpdateAdapter } from './HttpInstallerUpdateAdapter.js';
+import { UpdateCoordinator } from './UpdateCoordinator.js';
+import { defaultUpdateFeedUrl } from './UpdateFeed.js';
 import { resonanzTheme as theme } from '../../../resources/themes/resonanz-soho.js';
 // #endregion
 
@@ -152,6 +155,35 @@ const captureReminder = new CaptureReminderNotification({
       message: 'loc.resonanz.error.silenceReminder',
     }),
 });
+
+// Installer updates follow Symphony's desktop update lifecycle; only packaged builds check.
+const UPDATE_FIRST_CHECK_DELAY_MS = 20_000;
+const UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const updates = new UpdateCoordinator({
+  installerAdapter: new HttpInstallerUpdateAdapter(globalThis.fetch, {
+    downloadRoot: join(app.getPath('temp'), 'resonanz-updates'),
+    openPath: (path) => shell.openPath(path),
+  }),
+  currentVersion: app.getVersion(),
+  feedUrl: defaultUpdateFeedUrl,
+  platform: process.platform,
+  architecture: process.arch,
+  packaged: app.isPackaged && !hidden,
+  quitApplication: () => void quitApplication(),
+});
+let updateCheckTimer: NodeJS.Timeout | undefined;
+updates.subscribe((state) => {
+  if (startupPhase === 'ready') publish({ type: 'update.state', state });
+});
+
+function scheduleUpdateCheck(delayMilliseconds = UPDATE_CHECK_INTERVAL_MS): void {
+  if (updateCheckTimer) clearTimeout(updateCheckTimer);
+  if (updates.snapshot().kind === 'disabled') return;
+  updateCheckTimer = setTimeout(() => {
+    void updates.check().finally(() => scheduleUpdateCheck());
+  }, delayMilliseconds);
+  updateCheckTimer.unref();
+}
 
 function iconPath(relative: string): string {
   return app.isPackaged
@@ -633,6 +665,8 @@ async function quitApplication(): Promise<void> {
         });
     }
     await speech.dispose();
+    if (updateCheckTimer) clearTimeout(updateCheckTimer);
+    updates.dispose();
     captureReminder.reset();
     miniRecorder.dispose();
     globalShortcut.unregisterAll();
@@ -940,6 +974,21 @@ async function nativeRequest(method: RequestMethod, payload: unknown): Promise<u
     case 'app.quit':
       setImmediate(() => app.quit());
       return { ok: true };
+    case 'updates.get':
+      return updates.snapshot();
+    case 'updates.check': {
+      const state = await updates.check();
+      scheduleUpdateCheck();
+      return state;
+    }
+    case 'updates.download':
+      return { outcome: updates.download() ? 'started' : 'unavailable' };
+    case 'updates.install': {
+      if (updates.snapshot().kind !== 'ready') return { outcome: 'not-ready' };
+      if ((await activeRecordings().catch(() => [])).length > 0)
+        return { outcome: 'capture-active' };
+      return { outcome: (await updates.install()) ? 'started' : 'not-ready' };
+    }
     default:
       return background.request(method, payload);
   }
@@ -1170,6 +1219,7 @@ if (ownsLock)
       if (process.platform === 'darwin') app.dock?.setIcon(iconPath('png/app/resonanz-512.png'));
       configureApplicationMenu();
       startupPhase = 'ready';
+      scheduleUpdateCheck(UPDATE_FIRST_CHECK_DELAY_MS);
     })
     .catch(reportStartupFailure);
 app.on('activate', () => {

@@ -23,9 +23,10 @@
   overflow-y: auto;
 }
 .window-drag-region {
+  // Spans the sidebar's padding so its whole top edge moves the window.
+  margin: 0 -10px;
   height: 52px;
   min-height: 52px;
-  -webkit-app-region: drag;
 }
 .settings-sidebar mosaik-searchbox {
   width: 100%;
@@ -260,4 +261,21 @@ summary:focus-visible {
   .shortcut-grid > div:nth-child(n + 2) {
     border-top: 1px solid var(--mosaik-scheme-highlight);
   }
+}
+
+.update-setting {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.update-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.update-summary strong {
+  font-weight: 600;
 }

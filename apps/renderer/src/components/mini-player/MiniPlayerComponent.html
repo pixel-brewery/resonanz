@@ -1,0 +1,76 @@
+@let current = playback();
+<div
+  class="mini-player"
+  role="group"
+  [class.paused]="!current.playing"
+  [attr.test-id]="speech() ? 'speech-controls' : 'mini-player'"
+  [attr.aria-label]="'loc.resonanz.player.label' | translate"
+>
+  <mosaik-button
+    test-id="mini-player-toggle"
+    iconSize="small"
+    appearance="plain"
+    [icon]="current.playing ? 'pause' : 'play'"
+    [attr.aria-label]="
+      (speech()
+        ? current.playing
+          ? 'loc.resonanz.session.pauseRead'
+          : 'loc.resonanz.session.resumeRead'
+        : current.playing
+          ? 'loc.resonanz.common.pause'
+          : 'loc.resonanz.common.resume'
+      ) | translate
+    "
+    [attr.title]="
+      (current.playing ? 'loc.resonanz.common.pause' : 'loc.resonanz.common.resume') | translate
+    "
+    (click)="toggled.emit()"
+  /><mosaik-button
+    test-id="mini-player-stop"
+    iconSize="small"
+    appearance="plain"
+    icon="stop"
+    [attr.aria-label]="
+      (speech() ? 'loc.resonanz.session.stopRead' : 'loc.resonanz.common.stop') | translate
+    "
+    [attr.title]="'loc.resonanz.common.stop' | translate"
+    (click)="stopped.emit()"
+  />
+  <button
+    class="now-playing"
+    type="button"
+    test-id="mini-player-open"
+    [disabled]="!current.sessionId"
+    [attr.title]="'loc.resonanz.player.open' | translate"
+    (click)="opened.emit()"
+  >
+    <mosaik-icon aria-hidden="true" size="tiny" [icon]="speech() ? 'speaker' : 'live'" />
+    <span class="label">{{
+      speech()
+        ? ('loc.resonanz.player.reading' | translate)
+        : ('loc.resonanz.player.playing' | translate)
+    }}</span>
+    @if (current.title) {
+      <span class="title">{{ current.title }}</span>
+    }
+    @if (!speech()) {
+      <span class="time"
+        >{{ current.positionMs | duration }}
+        @if (current.durationMs) {
+          / {{ current.durationMs | duration }}
+        }
+      </span>
+    }
+  </button>
+  @if (!speech()) {
+    <span
+      class="progress"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="progressPercent()"
+      [attr.aria-label]="'loc.resonanz.player.progress' | translate"
+      ><span [style.width.%]="progressPercent()"></span
+    ></span>
+  }
+</div>

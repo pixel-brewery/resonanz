@@ -1,6 +1,6 @@
 <div class="settings" test-id="settings-view">
   <aside class="settings-sidebar" [attr.aria-label]="'loc.resonanz.settings.sections' | translate">
-    <div class="window-drag-region" aria-hidden="true"></div>
+    <div class="window-drag-region" part="window-drag-region" aria-hidden="true"></div>
     <mosaik-searchbox
       test-id="settings-search"
       [placeholder]="'loc.resonanz.settings.search' | translate"
@@ -42,7 +42,7 @@
     />
   </aside>
   <div class="settings-main">
-    <header class="workspace-header">
+    <header class="workspace-header" part="window-drag-region">
       <div class="header-title">
         <h1>{{ 'loc.resonanz.nav.settings' | translate }}</h1>
       </div>
@@ -612,6 +612,59 @@
                   value="dark"
                   [label]="'loc.resonanz.settings.dark' | translate" /></mosaik-select
               ><span class="caption">{{ 'loc.resonanz.settings.systemHint' | translate }}</span>
+            </div>
+          </div>
+        </section>
+        <section id="settings-updates" class="wide-section" [hidden]="!visibility()['updates']">
+          <h2>{{ 'loc.resonanz.settings.updates' | translate }}</h2>
+          <div class="settings-card">
+            <div class="setting update-setting" test-id="update-settings">
+              <div class="update-summary">
+                <strong>{{
+                  intl.t('loc.resonanz.update.version', updates.state()?.currentVersion ?? '–')
+                }}</strong>
+                <span class="caption" test-id="update-status" role="status">{{
+                  updateStatus()
+                }}</span>
+              </div>
+              @switch (updates.state()?.kind) {
+                @case ('available') {
+                  <mosaik-button
+                    test-id="settings-download-update"
+                    icon="download"
+                    appearance="solid"
+                    [label]="'loc.resonanz.update.download' | translate"
+                    [disabled]="updates.busy()"
+                    (click)="updates.download()"
+                  />
+                }
+                @case ('ready') {
+                  <mosaik-button
+                    test-id="settings-install-update"
+                    icon="refresh"
+                    appearance="solid"
+                    [label]="'loc.resonanz.update.restart' | translate"
+                    [disabled]="updates.busy() || presenter.capture.active()"
+                    (click)="updates.install()"
+                  />
+                }
+                @default {
+                  <mosaik-button
+                    test-id="check-updates"
+                    icon="refresh"
+                    appearance="outline"
+                    [label]="'loc.resonanz.update.check' | translate"
+                    [disabled]="
+                      updates.busy() ||
+                      !updates.state() ||
+                      updates.state()?.kind === 'disabled' ||
+                      updates.state()?.kind === 'checking' ||
+                      updates.state()?.kind === 'downloading'
+                    "
+                    (click)="updates.check()"
+                  />
+                }
+              }
             </div>
           </div>
         </section>

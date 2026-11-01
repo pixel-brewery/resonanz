@@ -22,6 +22,16 @@ claims, questions, the ring, transcript and original audio.
 6. Organize sessions with titles, tags, collections and favorites. Export audio,
    structured session data or Markdown notes; delete sessions explicitly.
 
+The window's top bar shows where you are, goes back and forward, and holds the
+screen's actions; drag the window by any part of it that is not a control. The
+status bar at the bottom shows a running capture, a mini player whenever a recording
+or read-aloud text plays (pause, stop, open its session; playback continues while
+you navigate), today's notifications behind the bell and the app version. Problems
+and confirmations appear briefly at the bottom left instead of above the workspace.
+When a newer installed version is published, the status bar offers to download it
+and then to restart; Settings → Updates checks on request. A running capture is
+never interrupted by an update.
+
 ## Language and appearance
 
 Settings offers English and German interface languages. English is the default,

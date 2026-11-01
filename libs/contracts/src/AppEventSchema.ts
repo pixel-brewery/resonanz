@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { dataSchemas } from './DataSchemas.js';
 import { miniRecorderSchema, miniRecorderActionSchema } from './MiniRecorderSchema.js';
+import { updateStateSchema } from './UpdateStateSchema.js';
 // #endregion
 
 /**
@@ -13,6 +14,7 @@ export const appEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('mini.state'), snapshot: miniRecorderSchema }),
   miniRecorderActionSchema.extend({ type: z.literal('capture.command') }),
   z.object({ type: z.literal('library.changed') }),
+  z.object({ type: z.literal('update.state'), state: updateStateSchema }),
   z.object({ type: z.literal('storage.failed'), message: z.string().max(1000) }),
   z.object({
     type: z.literal('capture.reminder.failed'),

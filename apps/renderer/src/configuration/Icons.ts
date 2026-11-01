@@ -1,6 +1,9 @@
 // #region Imports
 import {
   reiconAdd,
+  reiconArrowRightUp,
+  reiconBell,
+  reiconChevronRight,
   reiconArrowLeft,
   reiconArrowUp,
   reiconCheck,
@@ -58,6 +61,9 @@ export const icons = {
   close: reiconX,
   folderOpen: reiconFolderOpen,
   chevronLeft: reiconChevronLeft,
+  chevronRight: reiconChevronRight,
+  bell: reiconBell,
+  open: reiconArrowRightUp,
   edit: reiconEdit,
   person: reiconUser,
   claude: lobeClaude,

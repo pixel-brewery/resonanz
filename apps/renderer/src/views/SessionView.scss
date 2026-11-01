@@ -11,23 +11,32 @@
   min-height: 0;
   flex-direction: column;
 }
-.session-header {
-  padding-left: 12px;
-  gap: 10px;
-}
 .session-menu {
   position: relative;
 }
 .session-menu summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   list-style: none;
   cursor: pointer;
-  font-size: 22px;
-  padding: 0 5px;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+.session-menu summary::-webkit-details-marker {
+  display: none;
+}
+.session-menu summary:hover,
+.session-menu[open] summary {
+  background: color-mix(in oklab, var(--mosaik-scheme-highlight) 70%, transparent);
 }
 .session-menu > div {
   position: absolute;
   right: 0;
-  top: 28px;
+  top: 38px;
   width: 225px;
   padding: 8px;
   border-radius: 10px;
@@ -50,27 +59,9 @@
   gap: 8px;
   align-items: end;
 }
-.session-error,
-.live-state {
-  padding: 10px 24px;
-  color: var(--mosaik-color-warning-600);
-  background: color-mix(in oklab, var(--mosaik-color-warning-500) 8%, transparent);
-}
-.speech-controls {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px;
-  border-top: 1px solid var(--mosaik-scheme-highlight);
-}
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible {
   outline: 2px solid var(--mosaik-color-info-500);
   outline-offset: 2px;
-}
-@media (max-width: 1050px) {
-  .session-header {
-    gap: 5px;
-  }
 }

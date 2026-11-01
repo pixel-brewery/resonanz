@@ -1,235 +1,210 @@
 <div class="app-shell" [class.focus-mode]="presenter.focusMode()">
-  <aside class="sidebar" [attr.aria-label]="'loc.resonanz.nav.main' | translate">
-    <div class="window-drag-region" aria-hidden="true"></div>
-    <a class="brand" routerLink="/"><resonanz-glyph [tile]="true" /><span>Resonanz</span></a>
-    <button class="new-session" test-id="new-recording" (click)="presenter.openCapture()">
-      <span></span>{{ 'loc.resonanz.capture.newSession' | translate }}
-    </button>
-    <nav class="primary-nav" [attr.aria-label]="'loc.resonanz.nav.sections' | translate">
-      <mosaik-button
-        routerLink="/"
-        routerLinkActive="nav-active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        test-id="nav-library"
-        [label]="'loc.resonanz.nav.sessions' | translate"
-        icon="folderOpen"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-      <mosaik-button
-        routerLink="/voice"
-        routerLinkActive="nav-active"
-        test-id="nav-voice"
-        [label]="'loc.resonanz.nav.voice' | translate"
-        icon="mic"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-      <mosaik-button
-        routerLink="/"
-        [queryParams]="{ scope: 'moments' }"
-        test-id="nav-moments"
-        [label]="'loc.resonanz.nav.moments' | translate"
-        icon="sparkle"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-      <mosaik-button
-        routerLink="/settings"
-        routerLinkActive="nav-active"
-        test-id="nav-settings"
-        [label]="'loc.resonanz.nav.settings' | translate"
-        icon="settings"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-    </nav>
-    <details class="organization" open>
-      <summary>{{ 'loc.resonanz.nav.organize' | translate }}</summary>
-      <mosaik-button
-        routerLink="/"
-        [queryParams]="{ scope: 'favorites' }"
-        test-id="nav-favorites"
-        [label]="'loc.resonanz.nav.favorites' | translate"
-        icon="star"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-      <mosaik-button
-        routerLink="/"
-        [queryParams]="{ scope: 'conversations' }"
-        [label]="'loc.resonanz.nav.conversations' | translate"
-        icon="live"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
-      />
-      <div class="collection-heading">
-        <span>{{ 'loc.resonanz.nav.collections' | translate }}</span
-        ><mosaik-button
-          test-id="add-collection"
-          icon="add"
-          size="small"
-          appearance="plain"
-          [attr.aria-label]="'loc.resonanz.nav.addCollection' | translate"
-          (click)="presenter.creatingCollection.set(!presenter.creatingCollection())"
-        />
-      </div>
-      @if (presenter.creatingCollection()) {
-        <div class="collection-editor" test-id="collection-form">
-          <mosaik-textbox
-            test-id="collection-name"
-            [label]="'loc.resonanz.nav.collectionName' | translate"
-            [formField]="presenter.collectionForm.name"
-            (keydown.enter)="presenter.createCollection()"
-          /><mosaik-button
-            test-id="save-collection"
-            [label]="'loc.resonanz.nav.create' | translate"
-            appearance="soft"
-            [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
-            (click)="presenter.createCollection()"
-          />
-        </div>
-      }
-      @for (collection of presenter.library.collections(); track collection.id) {
+  <div class="app-body">
+    <aside class="sidebar" [attr.aria-label]="'loc.resonanz.nav.main' | translate">
+      <div class="window-drag-region" part="window-drag-region" aria-hidden="true"></div>
+      <a class="brand" routerLink="/"><resonanz-glyph [tile]="true" /><span>Resonanz</span></a>
+      <button class="new-session" test-id="new-recording" (click)="presenter.openCapture()">
+        <span></span>{{ 'loc.resonanz.capture.newSession' | translate }}
+      </button>
+      <nav class="primary-nav" [attr.aria-label]="'loc.resonanz.nav.sections' | translate">
         <mosaik-button
           routerLink="/"
-          [queryParams]="{ collection: collection.id }"
-          [attr.test-id]="'collection-' + collection.id"
-          [label]="collection.name"
-          icon="folder"
+          routerLinkActive="nav-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          test-id="nav-library"
+          [label]="'loc.resonanz.nav.sessions' | translate"
+          icon="folderOpen"
           appearance="plain"
           fit="width"
           horizontalContentAlignment="left"
         />
-      }
-    </details>
-    <div class="sidebar-spacer"></div>
-    <div class="assistant-card">
-      <span class="caption">{{
-        presenter.library.capabilities()?.platform === 'darwin'
-          ? ('loc.resonanz.nav.assistantsOnMac' | translate)
-          : ('loc.resonanz.nav.assistantsOnComputer' | translate)
-      }}</span>
-      @for (provider of ['claude', 'codex']; track provider) {
-        <a routerLink="/settings" class="assistant-row"
-          ><mosaik-icon [icon]="provider === 'claude' ? 'claude' : 'openai'" size="small" /><span>{{
-            provider === 'claude' ? 'Claude Code' : 'Codex'
-          }}</span>
-          @if (presenter.assistantStatus()?.provider === provider) {
-            @if (presenter.assistantStatus()?.authenticated) {
-              <span
-                class="status-dot success"
-                [attr.aria-label]="'loc.resonanz.auth.signedIn' | translate"
-              ></span>
+        <mosaik-button
+          routerLink="/voice"
+          routerLinkActive="nav-active"
+          test-id="nav-voice"
+          [label]="'loc.resonanz.nav.voice' | translate"
+          icon="mic"
+          appearance="plain"
+          fit="width"
+          horizontalContentAlignment="left"
+        />
+        <mosaik-button
+          routerLink="/"
+          [queryParams]="{ scope: 'moments' }"
+          test-id="nav-moments"
+          [label]="'loc.resonanz.nav.moments' | translate"
+          icon="sparkle"
+          appearance="plain"
+          fit="width"
+          horizontalContentAlignment="left"
+        />
+        <mosaik-button
+          routerLink="/settings"
+          routerLinkActive="nav-active"
+          test-id="nav-settings"
+          [label]="'loc.resonanz.nav.settings' | translate"
+          icon="settings"
+          appearance="plain"
+          fit="width"
+          horizontalContentAlignment="left"
+        />
+      </nav>
+      <details class="organization" open>
+        <summary>{{ 'loc.resonanz.nav.organize' | translate }}</summary>
+        <mosaik-button
+          routerLink="/"
+          [queryParams]="{ scope: 'favorites' }"
+          test-id="nav-favorites"
+          [label]="'loc.resonanz.nav.favorites' | translate"
+          icon="star"
+          appearance="plain"
+          fit="width"
+          horizontalContentAlignment="left"
+        />
+        <mosaik-button
+          routerLink="/"
+          [queryParams]="{ scope: 'conversations' }"
+          [label]="'loc.resonanz.nav.conversations' | translate"
+          icon="live"
+          appearance="plain"
+          fit="width"
+          horizontalContentAlignment="left"
+        />
+        <div class="collection-heading">
+          <span>{{ 'loc.resonanz.nav.collections' | translate }}</span
+          ><mosaik-button
+            test-id="add-collection"
+            icon="add"
+            size="small"
+            appearance="plain"
+            [attr.aria-label]="'loc.resonanz.nav.addCollection' | translate"
+            (click)="presenter.creatingCollection.set(!presenter.creatingCollection())"
+          />
+        </div>
+        @if (presenter.creatingCollection()) {
+          <div class="collection-editor" test-id="collection-form">
+            <mosaik-textbox
+              test-id="collection-name"
+              [label]="'loc.resonanz.nav.collectionName' | translate"
+              [formField]="presenter.collectionForm.name"
+              (keydown.enter)="presenter.createCollection()"
+            /><mosaik-button
+              test-id="save-collection"
+              [label]="'loc.resonanz.nav.create' | translate"
+              appearance="soft"
+              [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
+              (click)="presenter.createCollection()"
+            />
+          </div>
+        }
+        @for (collection of presenter.library.collections(); track collection.id) {
+          <mosaik-button
+            routerLink="/"
+            [queryParams]="{ collection: collection.id }"
+            [attr.test-id]="'collection-' + collection.id"
+            [label]="collection.name"
+            icon="folder"
+            appearance="plain"
+            fit="width"
+            horizontalContentAlignment="left"
+          />
+        }
+      </details>
+      <div class="sidebar-spacer"></div>
+      <div class="assistant-card">
+        <span class="caption">{{
+          presenter.library.capabilities()?.platform === 'darwin'
+            ? ('loc.resonanz.nav.assistantsOnMac' | translate)
+            : ('loc.resonanz.nav.assistantsOnComputer' | translate)
+        }}</span>
+        @for (provider of ['claude', 'codex']; track provider) {
+          <a routerLink="/settings" class="assistant-row"
+            ><mosaik-icon
+              [icon]="provider === 'claude' ? 'claude' : 'openai'"
+              size="small"
+            /><span>{{ provider === 'claude' ? 'Claude Code' : 'Codex' }}</span>
+            @if (presenter.assistantStatus()?.provider === provider) {
+              @if (presenter.assistantStatus()?.authenticated) {
+                <span
+                  class="status-dot success"
+                  [attr.aria-label]="'loc.resonanz.auth.signedIn' | translate"
+                ></span>
+              } @else {
+                <span class="caption">{{
+                  presenter.assistantStatus()?.installed
+                    ? ('loc.resonanz.nav.signedOut' | translate)
+                    : ('loc.resonanz.nav.notInstalled' | translate)
+                }}</span>
+              }
             } @else {
-              <span class="caption">{{
-                presenter.assistantStatus()?.installed
-                  ? ('loc.resonanz.nav.signedOut' | translate)
-                  : ('loc.resonanz.nav.notInstalled' | translate)
-              }}</span>
+              <span class="caption">{{ 'loc.resonanz.nav.notChecked' | translate }}</span>
             }
-          } @else {
-            <span class="caption">{{ 'loc.resonanz.nav.notChecked' | translate }}</span>
+          </a>
+        }
+      </div>
+    </aside>
+    <div class="workspace">
+      @if (!presenter.focusMode()) {
+        <!-- The unified toolbar is the window's title bar (Symphony's window chrome): back and
+             forward, the screen's title and subtitle and the screen's contextual actions. Every
+             part that is not a control drags the window. -->
+        <header class="window-toolbar" part="window-drag-region" test-id="window-toolbar">
+          <div class="window-history" part="window-no-drag">
+            <mosaik-button
+              test-id="navigate-back"
+              icon="chevronLeft"
+              iconSize="small"
+              appearance="plain"
+              [disabled]="!history.canGoBack()"
+              [attr.aria-label]="'loc.resonanz.nav.back' | translate"
+              [attr.title]="'loc.resonanz.nav.back' | translate"
+              (click)="history.back()"
+            /><mosaik-button
+              test-id="navigate-forward"
+              icon="chevronRight"
+              iconSize="small"
+              appearance="plain"
+              [disabled]="!history.canGoForward()"
+              [attr.aria-label]="'loc.resonanz.nav.forward' | translate"
+              [attr.title]="'loc.resonanz.nav.forward' | translate"
+              (click)="history.forward()"
+            />
+          </div>
+          <div class="window-title" test-id="window-title">
+            <h1 [attr.test-id]="toolbar.titleTestId()">
+              {{ toolbar.title() || ('loc.resonanz.nav.sessions' | translate) }}
+            </h1>
+            @if (toolbar.subtitle()) {
+              <span class="caption" test-id="window-subtitle">{{ toolbar.subtitle() }}</span>
+            }
+          </div>
+          @if (toolbar.actions(); as actions) {
+            <div class="window-toolbar-actions" test-id="window-toolbar-actions">
+              <ng-container [ngTemplateOutlet]="actions" />
+            </div>
           }
-        </a>
+        </header>
+      }
+      <main class="workspace-outlet" [attr.aria-label]="'loc.resonanz.nav.workspace' | translate">
+        <router-outlet />
+      </main>
+      @if (presenter.capture.silenceReminder() && !presenter.capturePanelOpen()) {
+        <resonanz-silence-reminder
+          class="workspace-reminder"
+          [title]="'loc.resonanz.capture.silenceTitle' | translate"
+          [description]="'loc.resonanz.capture.silenceDescription' | translate"
+          [continueLabel]="'loc.resonanz.capture.continueRecording' | translate"
+          [stopLabel]="'loc.resonanz.capture.saveStop' | translate"
+          [busy]="presenter.capture.busy()"
+          (continued)="presenter.capture.continueAfterSilence()"
+          (stopped)="presenter.capture.stop()"
+        />
       }
     </div>
-  </aside>
-  <div class="workspace">
-    @if (presenter.library.error(); as error) {
-      <div class="application-error" test-id="application-error" role="alert">
-        <mosaik-text [text]="error | message" [wrap]="true" /><mosaik-button
-          icon="close"
-          appearance="plain"
-          size="small"
-          [attr.aria-label]="'loc.resonanz.nav.dismissError' | translate"
-          (click)="presenter.library.clearError()"
-        />
-      </div>
-    }
-    @if (presenter.capture.silenceReminder() && !presenter.capturePanelOpen()) {
-      <resonanz-silence-reminder
-        class="workspace-reminder"
-        [title]="'loc.resonanz.capture.silenceTitle' | translate"
-        [description]="'loc.resonanz.capture.silenceDescription' | translate"
-        [continueLabel]="'loc.resonanz.capture.continueRecording' | translate"
-        [stopLabel]="'loc.resonanz.capture.saveStop' | translate"
-        [busy]="presenter.capture.busy()"
-        (continued)="presenter.capture.continueAfterSilence()"
-        (stopped)="presenter.capture.stop()"
-      />
-    }
-    @if (
-      presenter.capture.active() &&
-      !presenter.capturePanelOpen() &&
-      !presenter.library.settings().showMiniRecorder
-    ) {
-      <div class="active-capture" test-id="active-capture">
-        <span class="status-dot" [class.recording]="presenter.capture.state() !== 'paused'"></span
-        ><button class="text-button" (click)="presenter.openCapture()">
-          {{
-            presenter.capture.mode() === 'conversation'
-              ? ('loc.resonanz.capture.liveConversation' | translate)
-              : ('loc.resonanz.capture.running' | translate)
-          }}
-          · {{ presenter.capture.durationMs() | duration }}</button
-        ><span class="flex-spacer"></span>
-        @if (presenter.capture.mode() === 'conversation') {
-          <mosaik-button
-            test-id="live-interrupt"
-            [label]="'loc.resonanz.capture.interrupt' | translate"
-            appearance="plain"
-            (click)="presenter.capture.interrupt()"
-          /><mosaik-button
-            [label]="
-              presenter.capture.live().microphoneMuted
-                ? ('loc.resonanz.capture.unmute' | translate)
-                : ('loc.resonanz.capture.mute' | translate)
-            "
-            icon="mic"
-            appearance="plain"
-            (click)="presenter.capture.muteMicrophone()"
-          />
-        }
-        @if (presenter.capture.state() === 'paused') {
-          <mosaik-button
-            test-id="capture-resume"
-            [label]="'loc.resonanz.common.resume' | translate"
-            icon="play"
-            appearance="plain"
-            (click)="presenter.capture.resume()"
-          />
-        } @else {
-          <mosaik-button
-            test-id="capture-pause"
-            [label]="'loc.resonanz.common.pause' | translate"
-            icon="pause"
-            appearance="plain"
-            [disabled]="presenter.capture.busy()"
-            (click)="presenter.capture.pause()"
-          />
-        }
-        <mosaik-button
-          test-id="capture-stop"
-          [label]="'loc.resonanz.common.stop' | translate"
-          icon="stop"
-          variant="danger"
-          appearance="soft"
-          [disabled]="presenter.capture.busy()"
-          (click)="presenter.capture.stop()"
-        />
-      </div>
-    }
-    <main class="workspace-outlet" [attr.aria-label]="'loc.resonanz.nav.workspace' | translate">
-      <router-outlet />
-    </main>
   </div>
+  @if (presenter.statusBarVisible()) {
+    <resonanz-status-bar />
+  }
 </div>
 @if (presenter.capturePanelOpen()) {
   <resonanz-capture-panel (closed)="presenter.closeCapture()" />

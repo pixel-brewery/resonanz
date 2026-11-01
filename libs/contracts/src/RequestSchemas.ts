@@ -152,4 +152,8 @@ export const requestSchemas = {
   'storage.cleanup': empty,
   'window.hide': empty,
   'app.quit': empty,
+  'updates.get': empty,
+  'updates.check': empty,
+  'updates.download': empty,
+  'updates.install': empty,
 } as const;

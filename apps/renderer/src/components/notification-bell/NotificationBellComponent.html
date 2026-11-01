@@ -1,0 +1,98 @@
+<span class="bell-anchor">
+  <mosaik-button
+    test-id="notification-bell"
+    class="bell"
+    icon="bell"
+    iconSize="small"
+    aria-haspopup="dialog"
+    [appearance]="open() ? 'soft' : 'plain'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="label()"
+    [attr.title]="'loc.resonanz.notifications.title' | translate"
+    (click)="toggle()"
+  />
+  @if (unreadCount()) {
+    <mosaik-badge
+      class="bell-count"
+      test-id="notification-bell-count"
+      aria-hidden="true"
+      variant="danger"
+      appearance="solid"
+      size="small"
+      [label]="'' + unreadCount()"
+    />
+  }
+</span>
+@if (open()) {
+  <section
+    class="centre"
+    role="dialog"
+    tabindex="-1"
+    test-id="notification-centre"
+    [attr.aria-label]="'loc.resonanz.notifications.title' | translate"
+  >
+    <header>
+      <div>
+        <strong>{{ 'loc.resonanz.notifications.title' | translate }}</strong>
+        <span class="caption">{{
+          notices().length
+            ? intl.t('loc.resonanz.notifications.today', notices().length)
+            : ('loc.resonanz.notifications.none' | translate)
+        }}</span>
+      </div>
+      <mosaik-button
+        test-id="notification-mark-all-read"
+        appearance="plain"
+        size="small"
+        [label]="'loc.resonanz.notifications.markAllRead' | translate"
+        [disabled]="!unreadCount()"
+        (click)="markedAllRead.emit()"
+      />
+    </header>
+    <div class="notices">
+      @for (notice of notices(); track notice.id) {
+        <article [class.unread]="!notice.read" [attr.test-id]="'notification-notice-' + notice.id">
+          <mosaik-icon
+            aria-hidden="true"
+            size="small"
+            [icon]="icon(notice.kind)"
+            [variant]="variant(notice.kind)"
+          />
+          <div>
+            <strong>{{ text(notice.title, notice.titleParameters) }}</strong>
+            <span class="caption"
+              >{{ notice.content ? text(notice.content) + ' · ' : ''
+              }}{{ notice.occurredAt | date: 'HH:mm' : undefined : intl.locale() }}</span
+            >
+          </div>
+          @if (!notice.read) {
+            <span
+              class="unread-dot"
+              role="img"
+              [attr.aria-label]="'loc.resonanz.notifications.unreadNotice' | translate"
+            ></span>
+          }
+        </article>
+      } @empty {
+        <div class="empty" test-id="notification-centre-empty">
+          <mosaik-icon icon="success" size="small" aria-hidden="true" />
+          <strong>{{ 'loc.resonanz.notifications.emptyTitle' | translate }}</strong>
+          <span class="caption">{{
+            'loc.resonanz.notifications.emptyDescription' | translate
+          }}</span>
+        </div>
+      }
+    </div>
+    <footer>
+      <span class="caption">{{ 'loc.resonanz.notifications.footer' | translate }}</span>
+      <mosaik-button
+        test-id="notification-clear-read"
+        appearance="plain"
+        size="small"
+        [label]="'loc.resonanz.notifications.clearRead' | translate"
+        [disabled]="!readCount()"
+        (click)="clearedRead.emit()"
+      />
+    </footer>
+  </section>
+}

@@ -79,7 +79,6 @@ function scope() {
   const library = {
     events: events.asObservable(),
     report: vi.fn(),
-    clearError: vi.fn(),
     refresh: vi.fn(async () => undefined),
     settings,
   };

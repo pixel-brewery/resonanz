@@ -68,6 +68,39 @@ a {
 .status-dot.recording {
   background: var(--mosaik-color-danger-500);
 }
+// Toasts appear at the bottom left above the status bar (34px) and its mini player.
+mosaik-toast {
+  --toast-offset-x: 16px;
+  --toast-offset-y: 46px;
+  --toast-max-width: 520px;
+}
+// The window toolbar and the other title bars are the window's drag region (Symphony's window
+// chrome rule): every non-interactive part moves the window, only controls stay clickable.
+[part~='window-drag-region'] {
+  app-region: drag;
+  -webkit-app-region: drag;
+  user-select: none;
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  details[open],
+  mosaik-button,
+  mosaik-searchbox,
+  mosaik-select,
+  mosaik-textbox,
+  mosaik-checkbox,
+  mosaik-toggle-switch,
+  mosaik-dropdown-button,
+  resonanz-segmented-tabs,
+  [part~='window-no-drag'] {
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
+  }
+}
 .workspace-header {
   height: 52px;
   min-height: 52px;
@@ -76,10 +109,6 @@ a {
   gap: 14px;
   padding: 0 20px 0 24px;
   border-bottom: 1px solid var(--mosaik-scheme-highlight);
-  -webkit-app-region: drag;
-}
-.workspace-header > * {
-  -webkit-app-region: no-drag;
 }
 .header-title {
   display: flex;

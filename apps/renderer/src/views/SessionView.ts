@@ -1,5 +1,4 @@
 import { SessionRecoveryView } from './SessionRecoveryView';
-import { MessagePipe } from '../pipes/MessagePipe';
 import { TranslateFacade } from '../services/TranslateFacade';
 import { TranslatePipe } from '../pipes/TranslatePipe';
 import { DatePipe } from '@angular/common';
@@ -19,6 +18,7 @@ import { DeleteDialogComponent } from '../components/delete-dialog/DeleteDialogC
 import { SessionRingView } from './SessionRingView';
 import { SessionAnalysisView } from './SessionAnalysisView';
 import { SessionQuestionsView } from './SessionQuestionsView';
+import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolbarDirective';
 /** Hosts one session lifecycle across the three independently rendered feature views. */
 @Component({
   selector: 'resonanz-session',
@@ -26,7 +26,6 @@ import { SessionQuestionsView } from './SessionQuestionsView';
   providers: [SessionPresenter],
   imports: [
     SessionRecoveryView,
-    MessagePipe,
     TranslatePipe,
     DatePipe,
     RouterLink,
@@ -41,6 +40,7 @@ import { SessionQuestionsView } from './SessionQuestionsView';
     SessionRingView,
     SessionAnalysisView,
     SessionQuestionsView,
+    WindowToolbarDirective,
   ],
   templateUrl: './SessionView.html',
   styleUrl: './SessionView.scss',

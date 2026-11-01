@@ -43,3 +43,5 @@ export {
   initialMiniRecorderSnapshot,
 } from './MiniRecorderSchema.js';
 export type { IMiniRecorderSnapshot, MiniRecorderMode } from './MiniRecorderSchema.js';
+export { updateStateSchema } from './UpdateStateSchema.js';
+export type { UpdateState } from './UpdateStateSchema.js';

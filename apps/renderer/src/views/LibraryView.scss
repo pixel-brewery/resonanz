@@ -230,21 +230,10 @@
   overflow: auto;
   padding: 14px 24px 0;
 }
-.heading-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 .week-navigation {
   display: flex;
   align-items: center;
   gap: 2px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.header-title:hover .week-navigation,
-.header-title:focus-within .week-navigation {
-  opacity: 1;
 }
 
 article:focus-visible,
@@ -279,10 +268,6 @@ button:focus-visible {
   }
   .fingerprint {
     display: none;
-  }
-  .workspace-header {
-    gap: 8px;
-    padding-left: 16px;
   }
   .library-search {
     width: 180px;

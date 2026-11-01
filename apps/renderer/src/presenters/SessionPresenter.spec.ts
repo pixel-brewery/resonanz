@@ -47,7 +47,6 @@ function scope(initialSession?: ISession) {
     settings,
     events: events.asObservable(),
     report: vi.fn(),
-    clearError: vi.fn(),
     capabilities: signal<ICapabilities>({
       platform: 'darwin',
       nativeConversation: true,

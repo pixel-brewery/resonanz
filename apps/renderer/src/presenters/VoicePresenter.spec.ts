@@ -84,6 +84,7 @@ function scope() {
     session: value,
     library,
     player,
+    playingHere: isPlaying,
     pendingRunId,
     selectedEvidence,
     liveHere: signal(false),

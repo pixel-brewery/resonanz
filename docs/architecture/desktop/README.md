@@ -63,6 +63,22 @@ The supervisor admits at most 100 pending requests, with 30-second ordinary and
 Registered native children must be safely cleaned up before up to three automatic
 restarts. Saved recordings survive; recognition/playback never silently resumes.
 
+## Updates
+
+`UpdateCoordinator` follows Symphony's installer update path. Only packaged macOS and
+Windows builds check; development, E2E and other platforms report `disabled`. Main
+checks 20 seconds after startup and every six hours, and on request from Settings.
+`HttpInstallerUpdateAdapter` reads `update-<platform>-<arch>.json` from the
+credential-free HTTPS feed (`UpdateFeed.ts`: the assets of the latest GitHub release).
+No manifest means up to date. A newer numeric version becomes `available`; the
+download streams into the temporary `resonanz-updates` directory, enforces the
+declared size and SHA-256, publishes whole-percent progress at most every 150 ms and
+becomes `ready`. Installing opens the verified `.dmg`/`.exe` and quits through the
+normal shutdown; Main refuses while a capture runs. Installer URLs and paths never
+reach the renderer, which receives `update.state` events with versions, progress and
+a stable failure key. `tools/write-update-manifest.mjs` writes a manifest for a made
+installer; publishing releases remains a separate decision.
+
 ## Native process ownership
 
 The Utility observes Node's `child_process.spawn` diagnostic channel without replacing
@@ -104,6 +120,7 @@ processes; platform-specific execution evidence remains separate.
 | `mini.*`                                        | Main-owned passive projection, fixed geometry and session-bound capture commands      |
 | `capture.reminder`                              | One session-bound native quiet-input reminder with explicit continue/stop actions     |
 | `sessions.pause/clear`, `storage.usage/cleanup` | Pause metadata, confirmed library deletion, measured storage and audio retention      |
+| `updates.get/check/download/install`            | Main-owned update state, manifest check, verified installer download and restart      |
 
 Summaries include waveform/count projections without sending complete transcripts
 or analyses for every row. Full sessions add transcript, summary, structured analysis,

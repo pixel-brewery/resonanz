@@ -374,7 +374,6 @@ export class CapturePresenter {
   private async perform(action: () => Promise<void>): Promise<void> {
     if (this.busy()) return;
     this._busy.set(true);
-    this._store.clearError();
     try {
       await action();
     } catch (error) {

@@ -18,10 +18,6 @@
   flex: 0 0 56px;
   padding: 0 20px 0 100px;
   gap: 14px;
-  -webkit-app-region: drag;
-}
-.voice-header > * {
-  -webkit-app-region: no-drag;
 }
 .voice-header > div {
   flex: 1;

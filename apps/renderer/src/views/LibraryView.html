@@ -1,67 +1,64 @@
 <div class="library" test-id="library-view">
-  <header class="workspace-header">
-    <div class="header-title">
-      <div class="heading-row">
-        <h1>
-          {{
-            presenter.collection()?.name ??
-              (presenter.scope() === 'favorites'
-                ? ('loc.resonanz.nav.favorites' | translate)
-                : presenter.scope() === 'moments'
-                  ? ('loc.resonanz.nav.moments' | translate)
-                  : presenter.scope() === 'conversations'
-                    ? ('loc.resonanz.nav.conversations' | translate)
-                    : presenter.view() === 'landscape'
-                      ? ((presenter.weekOffset() === 0
-                          ? 'loc.resonanz.landscape.thisWeek'
-                          : 'loc.resonanz.landscape.week'
-                        ) | translate)
-                      : ('loc.resonanz.nav.sessions' | translate))
-          }}
-        </h1>
-        @if (presenter.view() === 'landscape') {
-          <nav
-            class="week-navigation"
-            [attr.aria-label]="'loc.resonanz.landscape.thisWeek' | translate"
-          >
-            <mosaik-button
-              size="small"
-              icon="back"
-              appearance="plain"
-              [attr.aria-label]="'loc.resonanz.landscape.previous' | translate"
-              (click)="presenter.weekOffset.set(presenter.weekOffset() - 1)"
-            />
-            <mosaik-button
-              size="small"
-              [label]="'loc.resonanz.common.today' | translate"
-              appearance="plain"
-              (click)="presenter.weekOffset.set(0)"
-            />
-            <mosaik-button
-              size="small"
-              icon="chevronRight"
-              appearance="plain"
-              [attr.aria-label]="'loc.resonanz.landscape.next' | translate"
-              (click)="presenter.weekOffset.set(presenter.weekOffset() + 1)"
-            />
-          </nav>
-        }
-      </div>
-      <span class="caption">{{
-        presenter.view() === 'landscape'
-          ? presenter.weekCaption()
-          : intl.t(
-              'loc.resonanz.library.total',
-              presenter.library.sessions().length,
-              intl.durationLabel(presenter.totalDuration())
-            )
-      }}</span>
-    </div>
+  <ng-template
+    resonanzWindowToolbar
+    [toolbarTitle]="
+      presenter.collection()?.name ??
+      (presenter.scope() === 'favorites'
+        ? ('loc.resonanz.nav.favorites' | translate)
+        : presenter.scope() === 'moments'
+          ? ('loc.resonanz.nav.moments' | translate)
+          : presenter.scope() === 'conversations'
+            ? ('loc.resonanz.nav.conversations' | translate)
+            : presenter.view() === 'landscape'
+              ? ((presenter.weekOffset() === 0
+                  ? 'loc.resonanz.landscape.thisWeek'
+                  : 'loc.resonanz.landscape.week'
+                ) | translate)
+              : ('loc.resonanz.nav.sessions' | translate))
+    "
+    [toolbarSubtitle]="
+      presenter.view() === 'landscape'
+        ? presenter.weekCaption()
+        : intl.t(
+            'loc.resonanz.library.total',
+            presenter.library.sessions().length,
+            intl.durationLabel(presenter.totalDuration())
+          )
+    "
+  >
+    @if (presenter.view() === 'landscape') {
+      <nav
+        class="week-navigation"
+        [attr.aria-label]="'loc.resonanz.landscape.thisWeek' | translate"
+      >
+        <mosaik-button
+          size="small"
+          icon="chevronLeft"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.landscape.previous' | translate"
+          (click)="presenter.weekOffset.set(presenter.weekOffset() - 1)"
+        />
+        <mosaik-button
+          size="small"
+          [label]="'loc.resonanz.common.today' | translate"
+          appearance="plain"
+          [disabled]="presenter.weekOffset() === 0"
+          (click)="presenter.weekOffset.set(0)"
+        />
+        <mosaik-button
+          size="small"
+          icon="chevronRight"
+          appearance="plain"
+          [attr.aria-label]="'loc.resonanz.landscape.next' | translate"
+          (click)="presenter.weekOffset.set(presenter.weekOffset() + 1)"
+        />
+      </nav>
+    }
     <resonanz-segmented-tabs
       [tabs]="viewTabs"
       [value]="presenter.view()"
       (valueChange)="presenter.view.set($event)"
-      [label]="'loc.resonanz.settings.appearance' | translate"
+      [label]="'loc.resonanz.library.viewLabel' | translate"
     /><mosaik-searchbox
       class="library-search"
       test-id="session-search"
@@ -75,7 +72,7 @@
       [attr.aria-label]="'loc.resonanz.library.import' | translate"
       (click)="presenter.shell.importSession()"
     />
-  </header>
+  </ng-template>
   @if (presenter.collection()) {
     <div class="collection-tools">
       <mosaik-button

@@ -115,7 +115,7 @@ export class VoicePresenter {
     if (this.listening() || this.starting()) return 'listening';
     if (this.stopping()) return 'searching';
     if (this.session.pendingRunId()) return 'searching';
-    if (this.session.player.isPlaying() && this.originalRange()) return 'playing';
+    if (this.session.playingHere() && this.originalRange()) return 'playing';
     return this.lastAnswer()
       ? this.lastAnswer()?.answer?.kind === 'gap'
         ? 'gap'
@@ -353,7 +353,7 @@ export class VoicePresenter {
   /** Plays the selected validated evidence with progress supplied by the existing player. */
   public async playOriginal(): Promise<void> {
     if (!this.canPlayOriginal()) return;
-    if (this.session.player.isPlaying() && this.originalRange()) {
+    if (this.session.playingHere() && this.originalRange()) {
       await this.session.togglePlayback();
       return;
     }

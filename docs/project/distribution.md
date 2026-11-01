@@ -2,7 +2,8 @@
 
 The GitHub repository is public under the [MIT license](../../LICENSE). The root
 workspace remains `private: true` to prevent accidental npm publication. Public
-source visibility does not create a release, installer, update feed or trusted signature.
+source visibility does not create a release, installer or trusted signature; the
+update check only finds what a release publishes.
 
 ## Build a native bundle
 
@@ -28,6 +29,23 @@ packages, bridge script, audio worklet, fonts, icons and complete license notice
 runtime dependencies. Packaged E2E drives that artifact's executable with an isolated
 profile and synthetic media. Neither command proves personal-account inference or
 physical microphone quality.
+
+## Update manifests
+
+A packaged build looks for `update-<platform>-<arch>.json` among the assets of the
+latest GitHub release of this repository. Without such an asset it reports that it
+is up to date. To offer a version, build the installer with `yarn make`, then write
+its manifest and attach both files to the release:
+
+```sh
+node tools/write-update-manifest.mjs --installer out/make/<installer>.dmg \
+  --version 0.2.0 --platform darwin --arch arm64 \
+  --base-url https://github.com/pixel-brewery/resonanz/releases/download/v0.2.0
+```
+
+The app downloads the installer in the background, checks size and SHA-256, and
+offers a restart that opens it. Signing, notarization and release channels remain
+release decisions below.
 
 ## Release decisions
 

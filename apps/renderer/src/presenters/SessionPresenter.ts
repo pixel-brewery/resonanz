@@ -23,6 +23,8 @@ import { LibraryStore } from '../services/LibraryStore';
 import { NativeTranscriptionService } from '../services/NativeTranscriptionService';
 import { CapturePresenter } from './CapturePresenter';
 import { WaveformService } from '../services/WaveformService';
+import { PlaybackStore } from '../services/PlaybackStore';
+import { NotificationService } from '../services/NotificationService';
 import {
   allClaims,
   findEvidence,
@@ -93,7 +95,7 @@ export class SessionPresenter {
     return tab === 'analysis' || tab === 'questions' || tab === 'processing' ? tab : 'ring';
   });
   public readonly positionMs = computed(() =>
-    this.player.isPlaying() ? this.player.currentTime() * 1000 : this._selectedMs(),
+    this.playingHere() ? this.player.currentTime() * 1000 : this._selectedMs(),
   );
   public readonly waveform = computed(
     () => this._waveforms.cache().get(this.session()?.id ?? '') ?? this.session()?.waveform ?? [],
@@ -289,6 +291,19 @@ export class SessionPresenter {
   public readonly capture = inject(CapturePresenter);
   public readonly player = inject(AudioPlayer);
   public readonly speech = inject(TextToSpeechService);
+  private readonly _playback = inject(PlaybackStore);
+  private readonly _notifications = inject(NotificationService);
+  /**
+   * Whether the shared player is playing this session's recording. Playback continues in the
+   * status-bar mini player while the person opens other screens, so another session's audio can
+   * be playing while this one is shown.
+   */
+  public readonly playingHere = computed(
+    () =>
+      this.player.isPlaying() &&
+      !!this.session()?.audioUrl &&
+      this.player.sourceUrl() === this.session()?.audioUrl,
+  );
   public readonly session = this._session.asReadonly();
   public readonly deletionDetails = computed(() => sessionDeletionDetails(this.session()));
   public readonly loading = this._loading.asReadonly();
@@ -330,7 +345,7 @@ export class SessionPresenter {
 
   public constructor() {
     effect(() => {
-      const playing = this.player.isPlaying();
+      const playing = this.playingHere();
       const position = this.player.currentTime() * 1000;
       if (this.digestPlaying()) {
         const clip = this.digestClips()[this.digestIndex()];
@@ -362,7 +377,7 @@ export class SessionPresenter {
         this.editingTranscript.set(false);
         this.confirmDeletion.set(false);
         this._savedGapKeys.set(new Set());
-        this.player.stop();
+        this.endBoundedPlayback();
         this._loading.set(true);
         if (id) void this.load(id);
       });
@@ -372,8 +387,9 @@ export class SessionPresenter {
       this._loadVersion++;
       this._playbackGeneration++;
       if (this._refreshTimer) clearTimeout(this._refreshTimer);
-      this.stopSpeaking();
-      this.player.stop();
+      // Plain playback and reading continue in the mini player; an excerpt or the digest depends
+      // on this screen's clip bounds, so it pauses there.
+      this.endBoundedPlayback();
     });
   }
   public async selectTab(tab: string): Promise<void> {
@@ -391,7 +407,7 @@ export class SessionPresenter {
     this.selectedEvidence.set(evidence);
     this._selectedMs.set(evidence.atMs);
     if (play) await this.playExcerpt(evidence);
-    else if (this.player.isPlaying()) await this.seek(evidence.atMs);
+    else if (this.playingHere()) await this.seek(evidence.atMs);
   }
   public async selectMarker(marker: ITimelineMarker): Promise<void> {
     this.selectedMarkerId.set(marker.id);
@@ -406,14 +422,14 @@ export class SessionPresenter {
     this.selectedChapterId.set(chapter.id);
     this.selectedMarkerId.set(null);
     this._selectedMs.set(chapter.startMs);
-    if (this.player.isPlaying()) await this.seek(chapter.startMs);
+    if (this.playingHere()) await this.seek(chapter.startMs);
   }
   public async seek(atMs: number): Promise<void> {
     const session = this.session();
     if (!session) return;
     const value = Math.min(session.durationMs, Math.max(0, atMs));
     this._selectedMs.set(value);
-    if (session.audioUrl && this.player.isPlaying())
+    if (session.audioUrl && this.playingHere())
       await this.player
         .play(undefined, { startAt: value / 1000 })
         .catch((error) => this.library.report(error));
@@ -748,11 +764,10 @@ export class SessionPresenter {
   public async togglePlayback(): Promise<void> {
     const session = this.session();
     if (!session?.audioUrl || this.capturing()) return;
-    this.library.clearError();
     try {
       this.digestPlaying.set(false);
       this._excerptEndMs = null;
-      if (this.player.isPlaying()) {
+      if (this.playingHere()) {
         this._selectedMs.set(this.player.currentTime() * 1000);
         this.player.pause();
       } else
@@ -770,6 +785,7 @@ export class SessionPresenter {
   /** Reads an answer through the unchanged Flamox TextToSpeechService. */
   public async speak(text: string): Promise<void> {
     const generation = ++this._speechGeneration;
+    this._playback.announceSpeech(this.session());
     try {
       const settings = this.library.settings();
       const voice = this.library
@@ -805,11 +821,21 @@ export class SessionPresenter {
     const session = this.session();
     if (!session || !this.confirmDeletion() || this.capturing()) return;
     await this.perform(async () => {
-      this.player.stop();
+      if (this.player.sourceUrl() === session.audioUrl) this.player.stop();
+      if (this.speech.isSpeaking()) this.stopSpeaking();
       await this._api.request('sessions.delete', { sessionId: session.id });
       await this.library.refresh();
       await this._router.navigate(['/']);
     });
+  }
+
+  /** Pauses an excerpt or digest whose clip bounds belong to the session that is closing. */
+  private endBoundedPlayback(): void {
+    const bounded = this.digestPlaying() || this._excerptEndMs !== null;
+    this._excerptEndMs = null;
+    this.digestPlaying.set(false);
+    this.digestIndex.set(-1);
+    if (bounded && this.player.isPlaying()) this.player.pause();
   }
 
   private async load(id: string): Promise<void> {
@@ -818,6 +844,14 @@ export class SessionPresenter {
       const session = await this._api.request('sessions.get', { sessionId: id });
       if (version === this._loadVersion && id === this._parameters().get('id')) {
         this._session.set(session);
+        // A persisted session error is reported once at the bottom of the window instead of a
+        // banner above the session.
+        if (session.error)
+          this._notifications.pushOnce(`session-error:${session.id}:${session.error}`, {
+            kind: 'warning',
+            title: 'loc.resonanz.session.errorNotice',
+            content: session.error,
+          });
         const requestedAt = this._query().get('at');
         if (requestedAt !== null && this.selectedEvidence() === null) {
           const atMs = Number(requestedAt);
@@ -904,7 +938,6 @@ export class SessionPresenter {
   private async perform(action: () => Promise<void>): Promise<void> {
     if (this.mutating()) return;
     this.mutating.set(true);
-    this.library.clearError();
     try {
       await action();
     } catch (error) {
