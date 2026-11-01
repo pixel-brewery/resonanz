@@ -298,7 +298,8 @@ jobs:
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json id >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --latest=false --title "Resonanz $RELEASE_VERSION" --notes-file out/release-notes.md
           fi
-          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" > out/release-state.json
+          release_api_url="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json apiUrl --jq '.apiUrl')"
+          gh api "$release_api_url" > out/release-state.json
           if jq -e '.draft == true' out/release-state.json >/dev/null; then
             node tools/verify-release-assets.mjs out/release-publication/manifest.json out/release-state.json --allow-missing
             for asset in out/release-publication/assets/*; do
@@ -315,7 +316,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" > out/release-state.json
+          release_api_url="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json apiUrl --jq '.apiUrl')"
+          gh api "$release_api_url" > out/release-state.json
           node tools/verify-release-assets.mjs out/release-publication/manifest.json out/release-state.json
           git fetch origin main --tags
           test "$(git rev-parse origin/main)" = "$RELEASE_COMMIT"
