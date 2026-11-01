@@ -1,3 +1,13 @@
+## 0.1.3 (2026-11-01)
+
+### 🩹 Fixes
+
+- verify draft-bound release asset URLs ([#12](https://github.com/pixel-brewery/resonanz/pull/12))
+
+### ❤️ Thank You
+
+- André Wehlert @RueDeRennes
+
 ## 0.1.2 (2026-11-01)
 
 ### 🩹 Fixes
