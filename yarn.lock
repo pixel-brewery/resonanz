@@ -4691,7 +4691,7 @@ __metadata:
 
 "@pixel-brewery/mosaik-themes@file:./vendor/mosaik/mosaik-themes-0.1.183.tgz::locator=resonanz%40workspace%3A.":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-themes@file:./vendor/mosaik/mosaik-themes-0.1.183.tgz#./vendor/mosaik/mosaik-themes-0.1.183.tgz::hash=99dda7&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-themes@file:./vendor/mosaik/mosaik-themes-0.1.183.tgz#./vendor/mosaik/mosaik-themes-0.1.183.tgz::hash=740c1e&locator=resonanz%40workspace%3A."
   dependencies:
     "@pixel-brewery/mosaik-elements": "npm:0.1.183"
     tslib: "npm:2.8.1"
@@ -4706,7 +4706,7 @@ __metadata:
       optional: true
   bin:
     mosaik-design-md: ./bin/design-md.mjs
-  checksum: 10c0/a8e0313ea27b916a3f33959429cec63d49e25bf4ef0adc88201d95106cd6f03f657ad1d7b10ef716bbe84a6d6d1f03f1168b5b92f6e7b7a5a7a7651314b73fc7
+  checksum: 10c0/241d9e11dc3419e41fd6d3c51d083d02cad48f8fe5b60af13ddf05a68839e828d02171bf28a887ad69c86bcba23a800d2e92748bb512b23770f7647e53a5b561
   languageName: node
   linkType: hard
 

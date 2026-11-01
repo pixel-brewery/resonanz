@@ -1,9 +1,51 @@
 # Verification and evidence
 
 Updated 2026-11-01. Resonanz uses native Codex/Claude account sign-in, system speech
-and the unchanged Flamox audio core. An additional API key or cloud speech provider
+and the provenance-verified upstream audio core. An additional API key or cloud speech provider
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
+
+## Repository privacy maintenance: 2026-11-01
+
+Repository source, guidance and documentation now use neutral upstream references.
+The private upstream identity is withheld while its revision, original paths,
+original hashes and complete supplied license text remain recorded. One PCM
+worklet processor identifier adaptation and one vendored documentation-generator
+comment adaptation have explicit original/downstream provenance.
+
+Checks passed: current tracked/unignored file names and contents plus all 12 decoded
+vendor archives contained no prohibited project reference; audio provenance verified
+63 files; the generated static worklet matched; the seven existing PCM worklet
+behavior specs passed; the pinned architecture skill and relative links validated.
+The existing README application screenshot was also inspected and contains no
+private project label. These maintenance checks do not establish native recording,
+speech, packaging or account inference. Older ignored local package artifacts
+predate this maintenance and are not evidence for the current source state.
+
+After the vendor lockfile refresh, an immutable installation and the complete
+`yarn verify` passed under Node 24: **411 behavior tests in 49 files**, **17 tooling
+tests**, native/Angular type checks and both production builds (two executed Nx
+tasks). The guard's ten cases also passed after diagnostic path redaction;
+repository formatting, source provenance and the final skill/link checks passed.
+The integrated log is `.codex-work/verify-2026-11-01.log`. Packaging, desktop E2E
+and Windows were not rerun locally for this maintenance revision.
+
+The integrated distribution-source revision subsequently passed the complete
+`yarn verify`: **413 behavior tests in 49 files**, **51 single-worker tooling
+tests**, native/Angular type checks and both builds. The tooling suites cover
+release request recovery, exact installer/feed receipts and optional signing
+configuration. Workflow YAML, shell syntax, Nx release configuration discovery,
+formatting and source-content checks also passed. The final integrated log is
+`.codex-work/repository-alignment-verify-2026-11-01.log`. No release, tag, signing
+operation or native installer publication was executed during local validation.
+
+Integration on the existing updater/window-chrome head
+`f27071f32b7315dbeda12786a6a2cffb283985d4` passed an immutable installation,
+**22 focused updater/process-supervision tests in three files**, and the full
+verification with **448 behavior tests in 55 files**, **51 tooling tests**,
+native/Angular types and both builds. Formatting and the final skill/link drift
+check passed. Logs are in `.codex-work/ci-alignment/integration/`; this evidence
+does not replace the native installer/E2E matrix executed by GitHub CI.
 
 ## Earlier prototype: actual macOS execution
 
@@ -379,7 +421,7 @@ were not exercised here. No release with an update manifest exists yet.
 | Transcription         | Earlier German macOS file/live and Windows en-US file recognition            | Physical Windows microphone and more installed languages     |
 | Spoken conversation   | Earlier recognition → real Synapse/Codex → native voice/archive              | New dictation view and more device/language combinations     |
 | Assistant accounts    | Earlier real Codex sign-in/catalog/analysis/questions/turns                  | Claude account separately                                    |
-| Audio provenance      | 51 production files and 12 specs unchanged                                   | Deliberate future upstream updates only                      |
+| Audio provenance      | 50 production files and 12 specs unchanged; one PCM identifier adaptation    | Deliberate future upstream updates only                      |
 | Organization          | Controlled workflows and bounded full-visible-week detail loading            | Native stress with large real libraries                      |
 | New analysis/evidence | Validated structured fixtures and source selection                           | Real account structured-output integration                   |
 | Distribution          | Public MIT source, native build tooling and earlier CI                       | Trusted signing/notarization, installer releases and updates |

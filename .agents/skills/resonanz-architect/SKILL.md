@@ -46,7 +46,8 @@ Resonanz translates shared backend examples into framework-neutral application
 owners, Zod-validated IPC and versioned JSON/audio storage. It does not acquire
 NestJS, Prisma, HTTP controllers, tenant/billing policy or a database through an
 example. Public Mosaik packages own controls/themes; Synapse owns native CLI
-protocols and accounts; the copied Flamox audio set remains unchanged. These local
+protocols and accounts; the copied upstream audio set is provenance-verified, with one documented
+processor-identifier adaptation. These local
 translations preserve ownership, contracts, lifecycle, resource limits,
 compatibility and meaningful verification.
 

@@ -1,11 +1,16 @@
 # Recording, speech output and conversation audio
 
-## Unchanged Flamox sources
+## Provenance-verified upstream sources
 
-`@resonanz/audio` contains 51 production files and 12 supplied behavior specs copied
-byte-for-byte from Flamox. [The provenance manifest](../../../libs/audio/provenance.json)
-records revision, original/copied paths and SHA-256 hashes. Preserve complete upstream
-notices and license text. Product adaptations belong outside the copied file set.
+`@resonanz/audio` contains 51 production files and 12 supplied behavior specs from
+a private upstream. [The provenance manifest](../../../libs/audio/provenance.json)
+records revision, original/copied paths and original SHA-256 hashes without
+publishing the private repository identity. All files remain byte-identical except
+`PcmAudioWorkletDefinition.ts`: its processor class and registration identifiers
+were renamed for Resonanz. Its original `sha256`, separate `downstreamSha256` and
+modification description preserve both upstream evidence and current integrity.
+The DSP and message protocol are unchanged. Preserve complete upstream notices and
+license text. Other product adaptations belong outside the copied file set.
 
 | Primitive               | Responsibility                                        |
 | ----------------------- | ----------------------------------------------------- |
@@ -17,7 +22,7 @@ notices and license text. Product adaptations belong outside the copied file set
 | TextToSpeechService     | Browser/system reading of saved text                  |
 | DurableAudioChunkOutbox | Shared IndexedDB outbox primitive                     |
 
-The static worklet loader emits the unchanged processor definition as a local asset.
+The static worklet loader emits the provenance-verified processor definition as a local asset.
 `tools/generate-audio-worklet.mjs --check` verifies it; the script policy need not
 allow blob scripts. WaveformService decodes protected local recordings in a bounded,
 serialized path and caches measured normalized peaks. Missing/silent data is not
@@ -27,7 +32,7 @@ replaced with decorative random amplitude.
 
 The renderer owns capture, PCM, playback and ConversationAudioRecorder's stereo graph.
 Main owns system recognition and native WAV clips. Utility owns session context and
-Synapse turns. No Flamox cloud audio billing/key setup is introduced.
+Synapse turns. No cloud audio billing/key setup is introduced.
 
 Final `speech.result` participant segments are persisted before confirmation.
 `live.respond` starts actual Synapse work. Ordered speakable response sections are
@@ -66,7 +71,7 @@ to the public TTS voice-name option without accessing private audio implementati
 The optional persisted `speechRate` preference is finite, between 0.5 and 2, with
 neutral value 1. It controls subsequent output; saving a new value does not alter
 existing recordings or already requested utterances. Saved-text reading passes it
-through the copied Flamox service's public `ITextToSpeechOptions.rate` option.
+through the copied upstream service's public `ITextToSpeechOptions.rate` option.
 No copied source is modified.
 
 Native live synthesis reads current settings for every requested WAV clip, so it
@@ -87,6 +92,7 @@ or platforms. Controlled specs cover parameter mapping, legacy defaults and the
 unchanged-clip invariant. They do not establish actual audible pacing or Windows
 native execution; those require separate runtime evidence.
 
-Provenance checks prove copied bytes. Unit/controlled media tests prove their own
+Provenance checks prove the recorded current bytes; the original digest remains
+upstream evidence for the one documented identifier adaptation. Unit/controlled media tests prove their own
 contracts. Physical recognition, native account inference, actual system output and
 archive energy each require separate [runtime evidence](../../project/verification.md).

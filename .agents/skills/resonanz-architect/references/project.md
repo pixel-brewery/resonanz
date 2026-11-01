@@ -21,7 +21,7 @@ keep dependent decisions and shared writes coordinated. Run only one heavy
 install/build/typecheck/test job at a time across the team. Delegation does not
 authorize new chats, extra checkouts, external writes or a broader product change.
 
-Reference checkouts of Symphony, Synapse, Flamox and Mosaik remain read-only unless
+Reference checkouts of Symphony, Synapse and Mosaik remain read-only unless
 a coordinated change is explicitly authorized. Use them to inspect an established
 pattern; normal installation/runtime and ordinary skill use must work without
 them. Read the relevant provenance before touching copied material or vendor

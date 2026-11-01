@@ -16,7 +16,7 @@
 - Measured library storage, opt-in recording retention and confirmed library clearing.
 - Favorites, tags, collections, local search and confirmed deletion.
 - Audio/JSON imports and audio/JSON/Markdown exports.
-- Unchanged Flamox audio sources with reproducible provenance.
+- Unchanged upstream audio sources with reproducible provenance.
 - macOS/Windows CI for native packaging and controlled application workflows.
 - Public GitHub repository, MIT license and English documentation/contributor templates.
 - Symphony-style window chrome: a unified toolbar that drags the window everywhere except its

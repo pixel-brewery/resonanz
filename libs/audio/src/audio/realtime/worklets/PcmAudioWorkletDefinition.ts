@@ -4,10 +4,10 @@
  * @private
  */
 export const PCM_AUDIO_WORKLET_DEFINITION = Object.freeze({
-    captureProcessorName: 'flamox-pcm-capture',
-    playbackProcessorName: 'flamox-pcm-playback',
+    captureProcessorName: 'resonanz-pcm-capture',
+    playbackProcessorName: 'resonanz-pcm-playback',
     source: String.raw`
-class FlamoxPcmCaptureProcessor extends AudioWorkletProcessor {
+class ResonanzPcmCaptureProcessor extends AudioWorkletProcessor {
     constructor(options) {
         super();
         const configuration = options.processorOptions || {};
@@ -93,7 +93,7 @@ class FlamoxPcmCaptureProcessor extends AudioWorkletProcessor {
     }
 }
 
-class FlamoxPcmPlaybackProcessor extends AudioWorkletProcessor {
+class ResonanzPcmPlaybackProcessor extends AudioWorkletProcessor {
     constructor(options) {
         super();
         const configuration = options.processorOptions || {};
@@ -281,7 +281,7 @@ class FlamoxPcmPlaybackProcessor extends AudioWorkletProcessor {
     }
 }
 
-registerProcessor('flamox-pcm-capture', FlamoxPcmCaptureProcessor);
-registerProcessor('flamox-pcm-playback', FlamoxPcmPlaybackProcessor);
+registerProcessor('resonanz-pcm-capture', ResonanzPcmCaptureProcessor);
+registerProcessor('resonanz-pcm-playback', ResonanzPcmPlaybackProcessor);
 `
 });

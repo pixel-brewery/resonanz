@@ -4,7 +4,7 @@ import { TranslateService } from '@pixel-brewery/mosaik-elements-angular';
 import { map } from 'rxjs';
 import { isTranslationKey, uiLanguage, type TranslationKey, type UiLanguage } from '@resonanz/intl';
 
-/** Flamox's signal facade over Mosaik's translation service, with English as the default. */
+/** Signal facade over Mosaik's translation service, with English as the default. */
 @Injectable({ providedIn: 'root' })
 export class TranslateFacade {
   private readonly _translate = inject(TranslateService);

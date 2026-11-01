@@ -80,7 +80,7 @@ flowchart LR
 You can also speak a question about a saved session. That question uses a separate
 native dictation operation and does not rewrite the recording's transcript.
 The ring shows listening, lookup, response and original-audio states. Stored
-summaries and answers can be read aloud with the unchanged Flamox speech service.
+summaries and answers can be read aloud with the unchanged upstream speech service.
 
 See the [voice guide](docs/project/live-conversation.md) for lifecycle and archive details.
 
@@ -125,12 +125,12 @@ explains permissions, accounts and visible recovery states.
 
 ## Built on existing implementations
 
-| Foundation                                            | Responsibility                                                                                                  |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| [Symphony](https://github.com/pixel-brewery/symphony) | Desktop process boundaries, native lifecycle, tray and packaging patterns.                                      |
-| [Synapse](https://github.com/pixel-brewery/synapse)   | Public packages for native CLI authentication, isolated accounts, streaming, continuations and cancellation.    |
-| Mosaik                                                | Angular controls, Soho controls with the owner-approved warm palette, Georgia typography and icons.             |
-| FLAMOX365 audio                                       | 51 production files and twelve specifications copied unchanged for recording, PCM, playback and text-to-speech. |
+| Foundation                                            | Responsibility                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [Symphony](https://github.com/pixel-brewery/symphony) | Desktop process boundaries, native lifecycle, tray and packaging patterns.                                   |
+| [Synapse](https://github.com/pixel-brewery/synapse)   | Public packages for native CLI authentication, isolated accounts, streaming, continuations and cancellation. |
+| Mosaik                                                | Angular controls, Soho controls with the owner-approved warm palette, Georgia typography and icons.          |
+| Upstream browser audio                                | 51 production files and twelve specifications with recorded provenance; one PCM identifier adaptation.       |
 
 The runtime remains **Angular renderer → typed preload → Electron Main → supervised
 Utility Process**. The renderer has no Node, filesystem, shell or credential-store

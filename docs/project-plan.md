@@ -12,13 +12,13 @@ inference and speech output belongs to the prototype scope.
 
 Angular and Mosaik own presentation. Synapse owns installed Codex/Claude integration.
 The product is keyless: system speech plus native assistant account sign-in. Copied
-Flamox recording, PCM, playback and TTS files remain byte-identical to their documented
-revision. Symphony supplies the process/lifecycle reference.
+upstream recording, playback and TTS files remain byte-identical to their documented
+revision; PCM processor identifiers have one explicit provenance-recorded adaptation. Symphony supplies the process/lifecycle reference.
 
 The revised design centers the session ring, original audio, chapters, evidence,
 weekly landscape and voice interaction. Each visualization is an independent,
 data-driven Angular component. Interface text lives in English/German translation
-tables following Flamox's Mosaik pattern. English is the default; speech locale is
+tables following the established Mosaik pattern. English is the default; speech locale is
 independent. Repository documentation is English.
 
 ## Delivery sequence

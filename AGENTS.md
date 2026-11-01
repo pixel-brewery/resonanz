@@ -35,7 +35,7 @@ older prose.
   local checkout parent. Do not place that parent in a synced directory.
 - Do not write credentials, personal paths, recordings, native account profiles
   or runtime caches into tracked source or documentation.
-- Reference checkouts of Symphony, Synapse, Flamox and Mosaik remain read-only
+- Reference checkouts of Symphony, Synapse and Mosaik remain read-only
   unless the user authorizes a coordinated source change. A reference path is
   not a runtime dependency.
 - Keep all work within the authorized scope. Do not automatically install/update
@@ -45,7 +45,7 @@ older prose.
 ## Production owners and boundaries
 
 - `apps/renderer`: standalone Angular views, Signals, presenters and browser media.
-  Use Mosaik's public components/theme APIs and existing Flamox/Symphony patterns.
+  Use Mosaik's public components/theme APIs and existing Symphony patterns.
   Keep view markup, TypeScript and SCSS in their matching files and use OnPush.
 - `libs/intl`: portable English/German tables and consistent message formatting.
 - `libs/contracts`: shared DTOs, method/event catalog and Zod runtime validation.
@@ -55,7 +55,7 @@ older prose.
 - `apps/orchestrator`: application use cases and supervised utility bootstrap.
 - `libs/sessions`: versioned session storage, catalog and ordered audio journal.
 - `libs/assistant`: the long-lived Synapse host adapter and normalized lifecycle.
-- `libs/audio`: copied Flamox audio implementation plus explicitly identified
+- `libs/audio`: copied upstream audio implementation plus explicitly identified
   Resonanz composition. Read its provenance before touching it.
 
 Preserve Renderer → typed preload → Main → Utility. The renderer has no Node,
@@ -78,10 +78,11 @@ exports explicit and colocate meaningful specs with their production owners.
 
 ## Copied sources and vendored dependencies
 
-- The files in `libs/audio/provenance.json` are byte-identical copies from the
-  documented Flamox revision. Do not edit or reformat them for product changes.
-  Keep Electron, persistence and UI adaptations in host-owned files outside that
-  unchanged file set.
+- The files in `libs/audio/provenance.json` retain their original upstream hashes.
+  All remain byte-identical except the explicitly documented PCM worklet processor
+  identifier rename, which has a separate downstream hash. Do not edit or reformat
+  copied primitives for product changes. Keep Electron, persistence and UI
+  adaptations in host-owned files outside that file set.
 - A deliberate upstream audio update changes the revision, copied paths, hashes
   and relevant tests together. Preserve all supplied notices.
 - Import Synapse and Mosaik by their public package names. Keep vendor archives,
@@ -127,6 +128,15 @@ native speech, native account inference, Windows or packaging. Keep
 `docs/project/verification.md` aligned with actual evidence and remaining requirements.
 
 ## Documentation and pull requests
+
+Track confirmed repository work on the
+[Resonanz board](https://github.com/orgs/pixel-brewery/projects/9), using its shared
+Backlog, Qualified, Ready, Progress, Acceptance and Done statuses. Add newly
+recorded work to the board; the repository link does not enable automatic intake.
+Run `yarn verify:public-content` after changing content or vendor archives. The
+guard also decodes compressed archives and is included in `yarn verify`.
+The [repository-quality contract](docs/architecture/repository-quality/README.md)
+distinguishes current remote protection from a locally prepared workflow revision.
 
 Keep product documentation under `docs/project` focused on user workflows and
 feature behavior. Keep technical documentation under the appropriate feature in

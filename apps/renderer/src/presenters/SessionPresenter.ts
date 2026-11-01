@@ -760,7 +760,7 @@ export class SessionPresenter {
     }
   }
 
-  /** Uses the unchanged Flamox AudioPlayer for normal recording playback. */
+  /** Uses the unchanged upstream AudioPlayer for normal recording playback. */
   public async togglePlayback(): Promise<void> {
     const session = this.session();
     if (!session?.audioUrl || this.capturing()) return;
@@ -782,7 +782,7 @@ export class SessionPresenter {
     }
   }
 
-  /** Reads an answer through the unchanged Flamox TextToSpeechService. */
+  /** Reads an answer through the unchanged upstream TextToSpeechService. */
   public async speak(text: string): Promise<void> {
     const generation = ++this._speechGeneration;
     this._playback.announceSpeech(this.session());

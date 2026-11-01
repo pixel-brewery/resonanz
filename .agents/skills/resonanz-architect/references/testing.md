@@ -28,7 +28,7 @@ global CLI accounts as a test fixture.
 | -------------------------- | ---------------------------------------------------------------------------------- |
 | `yarn verify:skills`       | Locked shared base, inherited local skill and relative Markdown links              |
 | `yarn verify:vendor`       | Pinned Mosaik/Synapse archive integrity                                            |
-| `yarn verify:audio`        | Copied production/spec hashes and generated static worklet                         |
+| `yarn verify:audio`        | Original/adapted audio hashes and generated static worklet                         |
 | `yarn typecheck`           | Native TypeScript and Angular/template types                                       |
 | `yarn test`                | Configured behavior suites and Node packaging-tool tests                           |
 | `yarn build`               | Configured renderer and desktop/Utility bundles through Nx                         |

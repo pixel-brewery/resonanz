@@ -14,7 +14,7 @@ assistant runtime; views and bootstrap code compose those responsibilities.
 | [Orchestrator](../../../../apps/orchestrator/src)   | Application use cases, session context, structured AI results and supervised utility bootstrap           |
 | [Sessions](../../../../libs/sessions/src)           | Versioned local metadata/catalog, private continuation storage and ordered acknowledged audio writes     |
 | [Assistant adapter](../../../../libs/assistant/src) | Long-lived Synapse host adapter, isolated accounts and normalized run/auth lifecycle                     |
-| [Audio workspace](../../../../libs/audio/README.md) | Byte-identical Flamox primitives/specs plus explicitly identified Resonanz composition                   |
+| [Audio workspace](../../../../libs/audio/README.md) | Provenance-verified upstream primitives/specs with one documented identifier adaptation                  |
 
 ## Dependency and transport decisions
 

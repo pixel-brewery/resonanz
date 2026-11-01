@@ -13,7 +13,7 @@ Updated 2026-10-31. Current code and verified behavior take precedence over olde
 | Process boundary   | Renderer → typed preload → Main → supervised Utility                                             |
 | Assistants         | Synapse and installed Codex/Claude Code with explicit private native account profiles            |
 | Speech             | Operating-system recognition/output; no extra API key or cloud speech fallback                   |
-| Audio              | Unchanged Flamox primitives, with Resonanz host composition outside the copied set               |
+| Audio              | Provenance-verified upstream primitives, one PCM identifier adaptation and host composition      |
 | Persistence        | Versioned JSON session documents and an ordered append-only audio journal                        |
 | Evidence           | Actual transcript segment IDs and bounds; invalid/unknown model references remain unverified     |
 | Library threads    | Validated per-session topic evidence grouped by stable keys; exact tags for legacy analyses      |

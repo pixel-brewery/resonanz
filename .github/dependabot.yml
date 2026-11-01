@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    rebase-strategy: auto
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: typescript
+    groups:
+      angular:
+        patterns: ['@angular/*', '@angular-devkit/*', '@schematics/*']
+      nx:
+        patterns: ['@nx/*', nx]
+      electron:
+        patterns: [electron, '@electron-forge/*', '@electron/*']
+      testing:
+        patterns: [vitest, '@vitest/*', playwright, '@playwright/*']
+  - package-ecosystem: github-actions
+    directory: /
+    rebase-strategy: auto
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ['*']
