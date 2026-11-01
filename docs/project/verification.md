@@ -47,6 +47,15 @@ native/Angular types and both builds. Formatting and the final skill/link drift
 check passed. Logs are in `.codex-work/ci-alignment/integration/`; this evidence
 does not replace the native installer/E2E matrix executed by GitHub CI.
 
+[Desktop CI run 41291030041](https://github.com/pixel-brewery/resonanz/actions/runs/41291030041)
+then passed both macOS and Windows jobs for commit
+`4053700d960bc0b7c74448603b0af0d60347cd61`, followed by `Quality Gate`.
+Both platforms passed immutable installation, formatting, complete source
+verification, built-app E2E, native packaging, package verification and the
+packaged-executable E2E. The Windows speech-runtime check also passed. These are
+controlled CI checks; trusted signing, a published update feed, real update
+installation and personal-account/device coverage still need separate evidence.
+
 ## Earlier prototype: actual macOS execution
 
 The keyless macOS arm64 prototype ran as a native bundle. Package verification
@@ -128,8 +137,9 @@ the local signature. The new bundle is under `out/design-handoff/`.
 Current evidence is in `i18n/verify-final-3.log`, `i18n/e2e-source-3.log`,
 `i18n/package.log`, `i18n/verify-package.log` and `i18n/e2e-packaged.log` under
 `.codex-work/`. New question dictation and structured model output still need separate
-physical speech/real-account evidence. The current redesign has not yet run through
-the Windows CI matrix.
+physical speech/real-account evidence. That local redesign pass did not include
+the Windows CI matrix; the later integrated revision passed both native CI
+platforms as recorded above.
 
 The subsequent local preview in `out/design-refinement/` packages the later task,
 transcript and processing-state refinements. Its macOS arm64 build and package
@@ -424,8 +434,8 @@ were not exercised here. No release with an update manifest exists yet.
 | Audio provenance      | 50 production files and 12 specs unchanged; one PCM identifier adaptation    | Deliberate future upstream updates only                      |
 | Organization          | Controlled workflows and bounded full-visible-week detail loading            | Native stress with large real libraries                      |
 | New analysis/evidence | Validated structured fixtures and source selection                           | Real account structured-output integration                   |
-| Distribution          | Public MIT source, native build tooling and earlier CI                       | Trusted signing/notarization, installer releases and updates |
-| Window chrome/updates | Controlled renderer states, drag-region measurement and update unit tests    | Native macOS drag/E2E, a published manifest and real update  |
+| Distribution          | Public MIT source, native tooling and current macOS/Windows package CI       | Trusted signing/notarization, installer releases and updates |
+| Window chrome/updates | Controlled renderer states, update tests and native CI E2E                   | Native macOS drag, a published manifest and real update      |
 
 ## Reproduce checks
 

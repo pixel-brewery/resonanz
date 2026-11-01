@@ -10,8 +10,8 @@ it is recorded. A project link does not imply automatic intake of future issues.
 
 Active GitHub rulesets protect `main` against deletion and force pushes, require
 pull requests with resolved review conversations, and require the current macOS
-and Windows desktop checks from GitHub Actions. Branches must include the current
-base revision before merging. No human or administrator bypass was added.
+and Windows desktop checks plus `Quality Gate` from GitHub Actions. Branches must
+include the current base revision before merging. No human or administrator bypass was added.
 Independent approval is not mandatory for this owner-maintained repository.
 The dedicated release App alone may bypass the PR/check rule to publish verified
 metadata commits and tags. History protection retains no bypass.
@@ -54,17 +54,17 @@ installation. The source check does not rewrite Git history or old local output.
 
 ## Remote activation and acceptance
 
-The existing required check names are:
+The active required check names are:
 
 - `Build and exercise desktop (macos-latest)`
 - `Build and exercise desktop (windows-latest)`
+- `Quality Gate`
 
-The new `Quality Gate` becomes eligible as a required GitHub Actions check only
-after the workflow revision is published and has executed. Until then, the two
-existing substantive checks remain mandatory. Add the new check to the active
-status-check ruleset after observing its exact name and expected GitHub Actions
-source; retain the platform checks during this rollout. Do not require an
-unpublished check that cannot report a result.
+`Quality Gate` was added to the active status-check ruleset after its successful
+execution in [desktop CI run 41291030041](https://github.com/pixel-brewery/resonanz/actions/runs/41291030041).
+All three checks are bound to the GitHub Actions integration; the platform checks
+remain mandatory. Future check-name changes require observing the replacement
+check before updating the ruleset so an unpublished check cannot block merging.
 
 Acceptance requires inspecting the effective rules for `main`, the linked board
 and its saved board layout, plus a successful remote run of this workflow
