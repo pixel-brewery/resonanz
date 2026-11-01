@@ -172,127 +172,18 @@ jobs:
         if: matrix.platform == 'win32'
         run: node tools/verify-windows-speech.mjs
       - run: yarn test:e2e
-      - name: Configure optional macOS signing and notarization
-        id: macos-signing
-        if: matrix.platform == 'darwin'
-        env:
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-        run: |
-          set -euo pipefail
-          count_present() {
-            local count=0
-            for value in "$@"; do
-              if [ -n "$value" ]; then count=$((count + 1)); fi
-            done
-            printf '%s' "$count"
-          }
-          signing_count="$(count_present "$APPLE_SIGNING_IDENTITY" "$MACOS_CERTIFICATE_BASE64" "$MACOS_CERTIFICATE_PASSWORD")"
-          notarization_count="$(count_present "$APPLE_API_KEY_BASE64" "$APPLE_API_KEY_ID" "$APPLE_API_ISSUER")"
-          if [ "$signing_count" -ne 0 ] && [ "$signing_count" -ne 3 ]; then
-            echo 'Configure the complete macOS signing credential group.' >&2
-            exit 1
-          fi
-          if [ "$notarization_count" -ne 0 ] && [ "$notarization_count" -ne 3 ]; then
-            echo 'Configure the complete Apple notarization credential group.' >&2
-            exit 1
-          fi
-          if [ "$notarization_count" -eq 3 ] && [ "$signing_count" -ne 3 ]; then
-            echo 'Notarization requires trusted macOS signing.' >&2
-            exit 1
-          fi
-          echo 'signed=false' >> "$GITHUB_OUTPUT"
-          echo 'notarized=false' >> "$GITHUB_OUTPUT"
-          if [ "$signing_count" -eq 3 ]; then
-            certificate_path="$RUNNER_TEMP/resonanz-signing.p12"
-            keychain_path="$RUNNER_TEMP/resonanz-signing.keychain-db"
-            printf '%s' "$MACOS_CERTIFICATE_BASE64" | base64 --decode > "$certificate_path"
-            security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" "$keychain_path"
-            security set-keychain-settings -lut 21600 "$keychain_path"
-            security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" "$keychain_path"
-            security import "$certificate_path" -P "$MACOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
-            security set-key-partition-list -S apple-tool:,apple: -k "$MACOS_CERTIFICATE_PASSWORD" "$keychain_path"
-            security list-keychain -d user -s "$keychain_path"
-            echo "APPLE_SIGNING_IDENTITY=$APPLE_SIGNING_IDENTITY" >> "$GITHUB_ENV"
-            echo 'signed=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'Using the existing ad-hoc macOS signature without Developer ID trust.'
-          fi
-          if [ "$notarization_count" -eq 3 ]; then
-            api_key_path="$RUNNER_TEMP/resonanz-notarization.p8"
-            printf '%s' "$APPLE_API_KEY_BASE64" | base64 --decode > "$api_key_path"
-            echo "APPLE_API_KEY_PATH=$api_key_path" >> "$GITHUB_ENV"
-            echo "APPLE_API_KEY_ID=$APPLE_API_KEY_ID" >> "$GITHUB_ENV"
-            echo "APPLE_API_ISSUER=$APPLE_API_ISSUER" >> "$GITHUB_ENV"
-            echo 'notarized=true' >> "$GITHUB_OUTPUT"
-          fi
-      - name: Configure optional Windows signing
-        id: windows-signing
-        if: matrix.platform == 'win32'
-        shell: pwsh
-        env:
-          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        run: |
-          $configured = @($env:WINDOWS_CERTIFICATE_BASE64, $env:WINDOWS_CERTIFICATE_PASSWORD) | Where-Object { $_ }
-          if ($configured.Count -ne 0 -and $configured.Count -ne 2) { throw 'Configure the complete Windows signing credential group.' }
-          "signed=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          if ($configured.Count -eq 2) {
-            $certificatePath = Join-Path $env:RUNNER_TEMP 'resonanz-signing.pfx'
-            [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
-            "WINDOWS_CERTIFICATE_FILE=$certificatePath" | Out-File -FilePath $env:GITHUB_ENV -Append
-            "signed=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          } else {
-            Write-Output 'Using the existing unsigned Windows installer policy.'
-          }
-      - name: Make native installers with optional platform credentials
-        env:
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ matrix.platform == 'win32' && secrets.WINDOWS_CERTIFICATE_PASSWORD || '' }}
+      - name: Make native installers without platform certificates
         run: yarn make
-      - name: Verify the macOS installer and requested trust level
+      - name: Verify the ad-hoc macOS bundle and installer integrity
         if: matrix.platform == 'darwin'
-        env:
-          SIGNED: ${{ steps.macos-signing.outputs.signed }}
-          NOTARIZED: ${{ steps.macos-signing.outputs.notarized }}
         run: |
           set -euo pipefail
           app='out/Resonanz-darwin-arm64/Resonanz.app'
           codesign --verify --deep --strict "$app"
           codesign -dvvv "$app" 2> "$RUNNER_TEMP/resonanz-signature.txt"
-          if [ "$SIGNED" = true ]; then
-            grep -q '^Authority=Developer ID Application:' "$RUNNER_TEMP/resonanz-signature.txt"
-          else
-            grep -q '^Signature=adhoc$' "$RUNNER_TEMP/resonanz-signature.txt"
-            if grep -q 'flags=.*runtime' "$RUNNER_TEMP/resonanz-signature.txt"; then exit 1; fi
-          fi
-          if [ "$NOTARIZED" = true ]; then xcrun stapler validate "$app"; fi
+          grep -q '^Signature=adhoc$' "$RUNNER_TEMP/resonanz-signature.txt"
+          if grep -q 'flags=.*runtime' "$RUNNER_TEMP/resonanz-signature.txt"; then exit 1; fi
           while IFS= read -r -d '' image; do hdiutil verify "$image"; done < <(find out/make -name '*.dmg' -print0)
-      - name: Verify the requested Windows installer signature
-        if: matrix.platform == 'win32' && steps.windows-signing.outputs.signed == 'true'
-        shell: pwsh
-        run: |
-          $installers = @(Get-ChildItem -Path out/make -Recurse -Filter ResonanzSetup.exe)
-          if ($installers.Count -ne 1) { throw 'Exactly one Windows installer must be signed.' }
-          if ((Get-AuthenticodeSignature $installers[0].FullName).Status -ne 'Valid') { throw 'The Windows installer signature is invalid.' }
-      - name: Remove temporary macOS signing material
-        if: always() && matrix.platform == 'darwin'
-        run: |
-          set -euo pipefail
-          keychain="$RUNNER_TEMP/resonanz-signing.keychain-db"
-          if [ -f "$keychain" ]; then security delete-keychain "$keychain"; fi
-          rm -f "$RUNNER_TEMP/resonanz-signing.p12" "$RUNNER_TEMP/resonanz-notarization.p8"
-          printf 'APPLE_SIGNING_IDENTITY=\nAPPLE_API_KEY_PATH=\nAPPLE_API_KEY_ID=\nAPPLE_API_ISSUER=\n' >> "$GITHUB_ENV"
-      - name: Remove temporary Windows signing material
-        if: always() && matrix.platform == 'win32'
-        shell: pwsh
-        run: |
-          $certificatePath = Join-Path $env:RUNNER_TEMP 'resonanz-signing.pfx'
-          if (Test-Path $certificatePath) { Remove-Item -LiteralPath $certificatePath -Force -ErrorAction Stop }
-          "WINDOWS_CERTIFICATE_FILE=" | Out-File -FilePath $env:GITHUB_ENV -Append
       - run: yarn verify:package
       - run: yarn test:e2e --packaged
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -403,7 +294,7 @@ jobs:
           set -euo pipefail
           git fetch origin main --tags
           test "$(git rev-parse origin/main)" = "$RELEASE_COMMIT"
-          printf 'Resonanz %s, verified from source %s.\n\nInstall the macOS arm64 DMG or Windows x64 installer. The update manifests contain each installer SHA-256 and exact byte count. Trusted signing and notarization are optional; absent credentials retain ad-hoc macOS signatures and unsigned Windows installers.\n' "$RELEASE_VERSION" "$GITHUB_SHA" > out/release-notes.md
+          printf 'Resonanz %s, verified from source %s.\n\nInstall the macOS arm64 DMG or Windows x64 installer. The update manifests contain each installer SHA-256 and exact byte count. Installers have no verified publisher signature: macOS uses ad-hoc sealing without notarization and Windows is unsigned. Download, open and use the application at your own risk. The public source is available at https://github.com/pixel-brewery/resonanz and the software is provided as is under the MIT license.\n' "$RELEASE_VERSION" "$GITHUB_SHA" > out/release-notes.md
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json id >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --latest=false --title "Resonanz $RELEASE_VERSION" --notes-file out/release-notes.md
           fi

@@ -31,7 +31,7 @@
     "build:renderer": "nx build renderer",
     "build:desktop": "nx build desktop",
     "test": "vitest run --maxWorkers=1 && yarn test:tooling",
-    "test:tooling": "node --test --test-concurrency=1 tools/run-forge.spec.mjs tools/verify-public-content.spec.mjs tools/write-update-manifest.spec.mjs tools/prepare-release-assets.spec.mjs tools/verify-release-assets.spec.mjs .github/scripts/mergeDependabotPullRequest.spec.mjs .github/scripts/requestMergedRelease.spec.mjs .github/scripts/rebaseDependabotPullRequests.spec.mjs tools/release-signing.spec.mjs",
+    "test:tooling": "node --test --test-concurrency=1 tools/run-forge.spec.mjs tools/verify-public-content.spec.mjs tools/write-update-manifest.spec.mjs tools/prepare-release-assets.spec.mjs tools/verify-release-assets.spec.mjs .github/scripts/mergeDependabotPullRequest.spec.mjs .github/scripts/requestMergedRelease.spec.mjs .github/scripts/rebaseDependabotPullRequests.spec.mjs forge.config.spec.mjs",
     "test:e2e": "node tools/verify-desktop.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && ngc --noEmit -p apps/renderer/tsconfig.app.json",
     "format": "prettier --write .",

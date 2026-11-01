@@ -49,7 +49,7 @@ successful native installation remain separate verification evidence.
 Workflow publication, the dedicated release-App configuration and the first
 successful native release remain separate activation steps. See the
 [technical distribution contract](../architecture/distribution/README.md) for
-the implemented source, retry behavior, optional signing and exact prerequisites.
+the implemented source, retry behavior, unsigned distribution policy and exact prerequisites.
 
 ## Installer manifests
 
@@ -67,10 +67,20 @@ This local command prepares metadata; publishing uses the verified release
 workflow. Main downloads the installer, checks its size and SHA-256, and offers a
 restart that opens it.
 
-## Signing and platform acceptance
+## Unsigned distribution and platform acceptance
 
-The publication targets are macOS ARM64 and Windows x64. Trusted
-signing/notarization and their credentials require explicit configuration.
+The publication targets are macOS ARM64 and Windows x64. Releases have no verified
+publisher signature: macOS uses certificate-free ad-hoc sealing without
+notarization, and Windows installers are unsigned. Certificate signing and
+notarization are not planned, and the release workflow has no credential setup
+for them. Operating systems may warn about or block these downloads.
+
+Download, open and use the application at your own risk. You can inspect the
+[public source](https://github.com/pixel-brewery/resonanz); the software is provided
+as is under the [MIT license](../../LICENSE). Installer sizes and SHA-256 hashes
+detect differences from the published manifest; they do not establish publisher
+identity or guarantee that software is safe.
+
 Windows and macOS require their own native evidence. Existing CI exercises both
 platforms with controlled tests; physical devices and account sign-in remain
 separate checks. Do not include recordings, native account profiles, caches or

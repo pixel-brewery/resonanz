@@ -68,8 +68,11 @@ license text and source/vendor metadata. Packager staging uses only the authoriz
 sibling exception. `RESONANZ_OUTPUT_DIR` can preserve an existing artifact.
 
 After packaging, verify the actual artifact and exercise its executable before
-claiming package behavior. Host packaging does not prove another OS, trusted
-signing/notarization, public installer readiness or an update feed.
+claiming package behavior. Host packaging does not prove another OS, public
+installer readiness or an update feed. Releases permanently use certificate-free
+macOS ad-hoc sealing and unsigned Windows installers; certificate signing and
+notarization are not future acceptance requirements. Preserve strict bundle,
+installer and update-integrity checks.
 
 ## Real integration and reporting
 

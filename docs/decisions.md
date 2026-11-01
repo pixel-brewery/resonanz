@@ -1,6 +1,6 @@
 # Decisions and follow-up work
 
-Updated 2026-10-31. Current code and verified behavior take precedence over older plans.
+Updated 2026-11-01. Current code and verified behavior take precedence over older plans.
 
 | Area               | Decision                                                                                         |
 | ------------------ | ------------------------------------------------------------------------------------------------ |
@@ -19,6 +19,7 @@ Updated 2026-10-31. Current code and verified behavior take precedence over olde
 | Library threads    | Validated per-session topic evidence grouped by stable keys; exact tags for legacy analyses      |
 | Mini recorder      | Passive native floating window; bounded projection and actions, one workspace capture owner      |
 | Packaging          | Pinned distributable archives, complete attribution and host-specific native verification        |
+| Distribution trust | Permanent certificate-free macOS ad-hoc sealing and unsigned Windows installers; no notarization |
 | Source visibility  | Public GitHub repository, MIT; workspace stays private for package publication                   |
 
 The JSON store deliberately differs from Symphony's broader persistence. A future
@@ -35,7 +36,7 @@ claim of new physical microphone or Claude-account verification. See
 
 ## Pending decisions
 
-- Trusted signing/notarization, installer releases, supported architectures and updates.
+- First verified installer release and native update installation on the supported architectures.
 - General system audio capture and automatic speaker separation.
 - Longer-session/device coverage and additional recognition languages.
 - Whole-library topic/question inference, larger-catalog projections and long-recording splitting.

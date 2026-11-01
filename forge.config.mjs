@@ -5,12 +5,10 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 import { dirname, join, resolve } from 'node:path';
 import { readFile, writeFile, access } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { releaseSigning } from './tools/release-signing.mjs';
 // #endregion
 
 const root = dirname(fileURLToPath(import.meta.url));
 const icons = resolve(root, 'resources/icons');
-const { osxSign, osxNotarize, windowsSign } = releaseSigning(process.platform, process.env);
 
 export default {
   outDir: resolve(root, process.env['RESONANZ_OUTPUT_DIR'] ?? 'out'),
@@ -109,9 +107,17 @@ export default {
       /^\/node_modules\/(?!(?:electron-native-speech|electron-native-speech-backend-macos|electron-native-speech-preload)(?:\/|$))/,
       /^\/node_modules\/electron-native-speech-backend-macos\/(?:bin|scripts)(?:\/|$)/,
     ],
-    ...(osxSign ? { osxSign } : {}),
-    ...(osxNotarize ? { osxNotarize } : {}),
-    ...(windowsSign ? { windowsSign } : {}),
+    // Ad-hoc sealing keeps Apple Silicon bundles launchable without a certificate.
+    ...(process.platform === 'darwin'
+      ? {
+          osxSign: {
+            identity: '-',
+            identityValidation: false,
+            optionsForFile: () => ({ hardenedRuntime: false }),
+            continueOnError: false,
+          },
+        }
+      : {}),
   },
   makers: [
     new MakerZIP({}, ['darwin', 'win32', 'linux']),
@@ -125,7 +131,6 @@ export default {
       name: 'resonanz',
       setupExe: 'ResonanzSetup.exe',
       setupIcon: resolve(icons, 'resonanz.ico'),
-      ...(windowsSign ? { windowsSign } : {}),
     }),
   ],
 };

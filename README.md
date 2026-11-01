@@ -166,8 +166,13 @@ and file recognition when a matching recognition package is installed. Ordinary
 checks use synthetic data and isolated profiles, with no personal login or paid inference.
 
 `RESONANZ_OUTPUT_DIR` selects a separate artifact directory. Host packaging does
-not prove another operating system or release readiness. Signing, notarization
-and public installers follow the [distribution guide](docs/project/distribution.md).
+not prove another operating system or release readiness.
+
+Releases have no verified publisher signature. macOS uses certificate-free ad-hoc
+sealing without notarization; Windows installers are unsigned. Certificate signing
+and notarization are not planned. Download, open and use Resonanz at your own risk.
+The source is public and the software is provided as is under the [MIT license](LICENSE).
+See the [distribution guide](docs/project/distribution.md) for installer and update checks.
 
 ## Documentation and contribution
 

@@ -94,24 +94,25 @@ the required installation token. Main's PR/check rules exempt only this release
 App; deletion and force-push protection have no bypass. Never place the key in
 source, logs, PR code or a general repository secret.
 
-Optional platform signing uses complete, platform-scoped credential groups after
-dependency installation and verification, with task-owned files/keychains cleaned
-on exit. Missing signing credentials preserve explicitly ad hoc/unsigned output;
-partial configured groups fail. Trusted signatures and notarization require their
-own configured material and verification evidence.
+## Permanent unsigned distribution policy
 
-The optional repository-secret groups are:
+Certificate signing and Apple notarization are not planned. Forge always uses
+certificate-free ad-hoc macOS sealing (`identity: '-'`, identity validation off,
+Hardened Runtime off, errors fatal). Windows application bundles and installers
+remain unsigned. There are no platform certificate or notarization credential
+inputs, import steps or temporary keychains in the release workflow. Ambient
+legacy signing variables cannot select another Forge signing mode.
 
-| Capability         | Complete secret group                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| macOS signing      | `APPLE_SIGNING_IDENTITY`, `MACOS_CERTIFICATE_BASE64`, `MACOS_CERTIFICATE_PASSWORD`    |
-| macOS notarization | `APPLE_API_KEY_BASE64`, `APPLE_API_KEY_ID`, `APPLE_API_ISSUER`, together with signing |
-| Windows signing    | `WINDOWS_CERTIFICATE_BASE64`, `WINDOWS_CERTIFICATE_PASSWORD`                          |
+Every macOS release still requires strict recursive bundle verification, an
+ad-hoc signature without Hardened Runtime, and DMG integrity verification. Both
+platforms retain package checks, packaged E2E, exact installer sizes/SHA-256 and
+verified feed publication. These checks do not establish publisher identity or
+guarantee software safety. The release notes and product distribution guide state
+that downloads and execution are at the user's own risk under the MIT license,
+with the public source available for inspection.
 
-The workflow materializes only task-owned certificate/API-key files, exposes their
-paths to Forge for the signing step and clears those paths during cleanup. Forge
-accepts the resolved `APPLE_API_KEY_PATH` or `WINDOWS_CERTIFICATE_FILE`; those paths
-are runtime inputs, never committed credentials.
+The release App key authenticates metadata/tag publication to GitHub. It is
+independent of platform signing and remains required in `release-main`.
 
 ## Dependency update boundary
 
