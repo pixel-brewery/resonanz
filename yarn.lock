@@ -9175,7 +9175,7 @@ __metadata:
     "@resonanz/sessions": "workspace:*"
     "@schematics/angular": "npm:22.2.5"
     "@tailwindcss/postcss": "npm:4.3.3"
-    "@types/node": "npm:26.6.5"
+    "@types/node": "npm:26.6.6"
     chroma-js: "npm:3.2.0"
     electron: "npm:45.1.0"
     electron-native-speech: "npm:0.1.6"
