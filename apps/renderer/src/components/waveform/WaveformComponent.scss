@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+.wave {
+  height: var(--waveform-height, 56px);
+  width: 100%;
+  position: relative;
+}
+.bars {
+  height: 100%;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  overflow: hidden;
+}
+.interactive .bars {
+  position: absolute;
+  inset: 20px 0 0;
+  height: auto;
+}
+.bars span {
+  flex: 1;
+  min-width: 1px;
+  border-radius: 1px;
+  background: var(--mosaik-scheme-middlelight);
+}
+.bars .played {
+  background: var(--mosaik-scheme-foreground);
+}
+.strong .bars span {
+  background: var(--mosaik-scheme-foreground);
+}
+.danger .bars span {
+  background: var(--mosaik-color-danger-300);
+}
+.bars span.pending {
+  opacity: 0.35;
+  animation: pending-pulse 1.6s ease-in-out infinite;
+}
+.above .mark.decorative {
+  top: -5px;
+  height: 12px;
+  width: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+.above .decorative resonanz-marker {
+  display: block;
+}
+@keyframes pending-pulse {
+  50% {
+    opacity: 0.16;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bars span.pending {
+    animation: none;
+  }
+}
+.missing {
+  opacity: 0.35;
+}
+.mark {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.mark.decorative {
+  width: 3px;
+  height: 100%;
+  pointer-events: none;
+  background: var(--mosaik-scheme-foreground);
+  box-shadow: 0 0 0 2px var(--mosaik-scheme-background);
+}
+.mark.decorative.decision {
+  background: var(--mosaik-color-info-500);
+}
+.mark.decorative.task {
+  background: var(--mosaik-color-warning-500);
+}
+.mark.decorative.question {
+  background: var(--mosaik-color-highlight-500);
+}
+.interactive .mark {
+  top: 0;
+  height: 24px;
+}
+.decorative resonanz-marker {
+  display: none;
+}
+.mark.selected {
+  background: color-mix(in oklab, var(--mosaik-color-info-500) 12%, transparent);
+}
+input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.wave:has(input:focus-visible) {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--mosaik-scheme-foreground);
+  pointer-events: none;
+}
+.times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font: var(--mosaik-typography-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--mosaik-scheme-lowlight);
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+}

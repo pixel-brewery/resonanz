@@ -1,0 +1,14 @@
+<div role="tablist" [attr.aria-label]="label() | message">
+  @for (tab of tabs(); track tab.id; let i = $index) {
+    <button
+      role="tab"
+      [attr.aria-selected]="value() === tab.id"
+      [attr.tabindex]="value() === tab.id ? 0 : -1"
+      [attr.test-id]="'tab-' + tab.id"
+      (click)="valueChange.emit(tab.id)"
+      (keydown)="key($event, i)"
+    >
+      {{ tab.label | message }}
+    </button>
+  }
+</div>

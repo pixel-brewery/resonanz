@@ -11,6 +11,7 @@ import { AudioCaptureLease } from './AudioCaptureLease';
 import type { AudioHostEvent } from './AudioHostEvent';
 import type { IAudioHost } from './IAudioHost';
 import { LiveConversationCoordinator } from './LiveConversationCoordinator';
+import type { ICapturePauseEvent } from './ICapturePauseEvent';
 
 // #endregion
 
@@ -164,6 +165,7 @@ function liveScope(createSession?: IAudioHost['createSession']) {
     text,
     complete,
     respondId,
+    frames,
   };
 }
 
@@ -179,6 +181,21 @@ afterEach(async () => {
 });
 
 describe('LiveConversationCoordinator', () => {
+  it('observes actual mixer pause and resume as separate nonspeech metadata', async () => {
+    const scope = liveScope();
+    const pauses: ICapturePauseEvent[] = [];
+    scope.coordinator.pauseEvents.subscribe((event) => pauses.push(event));
+    await scope.coordinator.start();
+    media.timeMs = 5000;
+    await scope.coordinator.pause();
+    media.timeMs = 185000;
+    await scope.coordinator.resume();
+    expect(pauses).toHaveLength(2);
+    expect(pauses[0]?.pause.atMs).toBe(5000);
+    expect(pauses[0]?.pause.durationMs).toBeUndefined();
+    expect(pauses[1]?.pause).toEqual({ id: pauses[0]?.pause.id, atMs: 5000, durationMs: 180000 });
+    expect(scope.host.appendTranscript).not.toHaveBeenCalled();
+  });
   it('does not acquire microphone or native speech when a pending session creation is cancelled', async () => {
     const created = deferred<{ id: string }>();
     const scope = liveScope(vi.fn(() => created.promise));

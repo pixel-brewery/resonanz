@@ -1,20 +1,19 @@
-# Referenzentscheidungen für die Oberfläche
+# Frontend reference decisions
 
-| Entscheidung                                             | Einordnung | Umsetzung und Grund                                                                                                                                        |
-| -------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Angular OnPush, Signals, Signal Forms und View/Presenter | Adopt      | Dieselben Framework-Muster wie Flamox und Symphony; typisierte Mosaik-Formintegration.                                                                     |
-| Mosaik, Soho, Inter und Reicon                           | Adopt      | Öffentliche Angular-Wrapper, Theme und gemeinsame Icons statt Nachbau der Controls.                                                                        |
-| Recorder, PCM, Player und Text-to-Speech                 | Adopt      | Bytegleiche Kopien mit SHA-256-Herkunft und ursprünglichen Verhaltensspezifikationen.                                                                      |
-| Shell und Arbeitsbereich                                 | Adapt      | Aufzeichnungen, Live-Gespräche, Favoriten und Sammlungen statt Delivery-Funktionen.                                                                        |
-| Persistenz und Integration                               | Adapt      | Typisierte Preload-API, Main und Utility Process mit lokaler Sessionablage.                                                                                |
-| Sprachgespräch                                           | Differ     | Die vom Nutzer präzisierte Zielrichtung nutzt systemeigene Sprache und Synapse-CLI-Anmeldung. Flamox-spezifischer Cloud-Audiozugang wird nicht übernommen. |
-| Live-Archiv                                              | Adapt      | Mikrofon und abgespielte native Assistentenclips werden gemeinsam archiviert; die unveränderten Audioprimitive bleiben erhalten.                           |
-| KI-Anbindung                                             | Adapt      | Derselbe native Assistent besitzt Sprachturns, Analyse und Sessionfragen.                                                                                  |
-| Aufnahmewiedergabe                                       | Adopt      | Unveränderter AudioPlayer, ohne Zugriff auf dessen private Implementierung.                                                                                |
-| Name und Bildmarke                                       | Differ     | Eigene Resonanzbögen mit derselben Familie nativer Iconformate.                                                                                            |
-| Credits, Mandanten und Git-Lieferungen                   | Differ     | Diese Referenzdomänen gehören nicht zum Aufnahmeprodukt.                                                                                                   |
+| Reference                                            | Choice            | Resonanz composition                                                      |
+| ---------------------------------------------------- | ----------------- | ------------------------------------------------------------------------- |
+| Angular OnPush, Signals, Signal Forms and presenters | Adopt             | Same framework patterns as Flamox/Symphony with typed Mosaik fields       |
+| Mosaik, Soho and Reicon                              | Adopt             | Public packages and theme APIs; owner-approved serif/token customization  |
+| Recording, PCM, player and TTS                       | Adopt             | Byte-identical copies with SHA-256 provenance and original specs          |
+| Translation tables and Mosaik registry/facade        | Adapt             | English/German, English default and typed settings persistence            |
+| Shell/workspace                                      | Adapt             | Sessions, voice, favorites and collections                                |
+| Native persistence/integration                       | Adapt             | Validated preload/Main/Utility boundaries                                 |
+| Spoken conversation                                  | Adapt             | System speech and Synapse native sign-in, without cloud audio credentials |
+| Live archive                                         | Adapt             | Microphone and actually played native clips on separate channels          |
+| AI ownership                                         | Adapt             | Same native assistant for live turns, analysis and questions              |
+| Brand and visualizations                             | Resonanz-specific | Supplied handoff and generic ring/waveform/evidence components            |
+| Credits, tenants and Git delivery                    | Omit              | Outside this recording product's scope                                    |
 
-Quellrevisionen und Kopierherkunft stehen im [Audiohandbuch](audio/README.md).
-Den Mosaik-Katalogabgleich und Frontendvertrag beschreibt das
-[Oberflächenhandbuch](frontend/README.md). Verhaltensnachweise werden in der
-laufenden Electron-Anwendung erhoben.
+See [audio provenance](audio/README.md), [frontend](frontend/README.md),
+[internationalization](frontend/internationalization.md) and
+[runtime verification](../project/verification.md).

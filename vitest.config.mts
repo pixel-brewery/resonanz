@@ -18,6 +18,7 @@ export default defineConfig({
           include: [
             'libs/assistant/src/**/*.spec.ts',
             'libs/contracts/src/**/*.spec.ts',
+            'libs/intl/src/**/*.spec.ts',
             'libs/sessions/src/**/*.spec.ts',
             'apps/desktop/src/**/*.spec.ts',
             'apps/orchestrator/src/**/*.spec.ts',
@@ -32,6 +33,7 @@ export default defineConfig({
           include: [
             'apps/renderer/src/presenters/**/*.spec.ts',
             'apps/renderer/src/services/**/*.spec.ts',
+            'apps/renderer/src/components/**/*.spec.ts',
           ],
         },
       },

@@ -28,7 +28,7 @@ export class WindowsSpeechSession implements SpeechSession {
   // #endregion
   // #region Methods
   public async start(options: SpeechSessionStartOptions = {}): Promise<void> {
-    if (this._child) throw new Error('Die Spracherkennung läuft bereits.');
+    if (this._child) throw new Error('loc.resonanz.error.recognitionRunning');
     this._stopping = false;
     const child = spawn(
       this._executable,
@@ -57,7 +57,7 @@ export class WindowsSpeechSession implements SpeechSession {
       let ready = false;
       const timeout = setTimeout(() => {
         child.kill();
-        reject(new Error('Die Windows-Spracherkennung konnte nicht gestartet werden.'));
+        reject(new Error('loc.resonanz.error.windowsRecognitionStart'));
       }, 15_000);
       child.stdout.setEncoding('utf8');
       child.stdout.on('data', (chunk: string) => {
@@ -95,7 +95,7 @@ export class WindowsSpeechSession implements SpeechSession {
             else if (event.type === 'error')
               this._events.emit('error', {
                 code: 'backend-failure',
-                message: 'Die native Windows-Spracherkennung wurde unterbrochen.',
+                message: 'loc.resonanz.error.windowsSpeechInterrupted',
               });
           } catch {
             child.kill();
@@ -105,21 +105,16 @@ export class WindowsSpeechSession implements SpeechSession {
       child.stderr.resume();
       child.once('error', () => {
         clearTimeout(timeout);
-        reject(new Error('Windows PowerShell ist für die native Spracherkennung nicht verfügbar.'));
+        reject(new Error('loc.resonanz.error.powershell'));
       });
       child.once('close', () => {
         clearTimeout(timeout);
-        if (!ready)
-          reject(
-            new Error(
-              'Keine passende installierte Windows-Erkennungssprache oder kein Mikrofon verfügbar.',
-            ),
-          );
+        if (!ready) reject(new Error('loc.resonanz.error.recognitionLanguage'));
         else {
           if (!this._stopping)
             this._events.emit('error', {
               code: 'backend-failure',
-              message: 'Die native Windows-Spracherkennung wurde unerwartet beendet.',
+              message: 'loc.resonanz.error.windowsSpeechExit',
             });
           this._events.emit('state', 'stopped');
         }

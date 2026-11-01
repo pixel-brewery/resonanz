@@ -1,0 +1,110 @@
+:host {
+  display: block;
+}
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 6px 0 14px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 22px;
+  background: var(--mosaik-scheme-surface);
+  box-shadow: var(--mosaik-elevation-semibold);
+  -webkit-app-region: drag;
+}
+.pill.collapsed {
+  height: 32px;
+  border-radius: 16px;
+  padding: 0 10px;
+}
+.time {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+time {
+  font: 600 15px/1 var(--mosaik-font-family, Georgia, serif);
+  font-variant-numeric: tabular-nums;
+}
+.collapsed time {
+  font-size: 13px;
+}
+.status-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--mosaik-scheme-middlelight);
+}
+.status-dot.recording {
+  background: var(--mosaik-color-danger-500);
+}
+resonanz-level-meter {
+  flex: 1;
+  min-width: 42px;
+  --level-meter-gap: 2px;
+  --level-meter-height: 20px;
+  --level-meter-color: var(--mosaik-scheme-foreground);
+}
+.divider {
+  height: 22px;
+  width: 1px;
+  background: var(--mosaik-scheme-highlight);
+}
+button,
+mosaik-button {
+  -webkit-app-region: no-drag;
+}
+mosaik-button {
+  flex: 0 0 auto;
+}
+.stop {
+  display: flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--mosaik-color-danger-0);
+  background: var(--mosaik-color-danger-500);
+  cursor: pointer;
+}
+.stop span {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.stop:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.confirmation {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+.confirmation strong {
+  font-weight: 600;
+}
+.undo {
+  border: 0;
+  background: transparent;
+  color: var(--mosaik-scheme-lowlight);
+  font: var(--mosaik-typography-caption);
+  cursor: pointer;
+  padding: 3px 6px;
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 2px;
+}

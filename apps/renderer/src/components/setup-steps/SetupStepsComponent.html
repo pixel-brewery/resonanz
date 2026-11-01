@@ -1,0 +1,21 @@
+<nav [attr.aria-label]="'loc.resonanz.onboarding.steps' | translate">
+  @for (step of steps(); track step.id; let index = $index) {
+    <button
+      type="button"
+      [attr.test-id]="'setup-step-' + step.id"
+      [attr.aria-current]="activeIndex() === index ? 'step' : null"
+      [class.active]="activeIndex() === index"
+      [class.completed]="activeIndex() > index"
+      [disabled]="disabled() || index > availableThrough()"
+      (click)="selected.emit(index)"
+    >
+      <span class="step-number" aria-hidden="true">{{
+        activeIndex() > index ? '✓' : index + 1
+      }}</span>
+      <span class="step-copy"
+        ><strong>{{ step.label | message }}</strong
+        ><span>{{ step.description | message }}</span></span
+      >
+    </button>
+  }
+</nav>

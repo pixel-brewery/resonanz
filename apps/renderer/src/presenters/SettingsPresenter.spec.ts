@@ -10,6 +10,7 @@ import {
   defaultSettings,
   type AppEvent,
   type ISettings,
+  type ISessionSummary,
   type ResponsePayload,
 } from '@resonanz/contracts';
 import { DesktopApi } from '../services/DesktopApi';
@@ -65,9 +66,11 @@ function settingsScope() {
   };
   const library = {
     settings,
+    sessions: signal<readonly ISessionSummary[]>([]),
     capabilities,
     events: events.asObservable(),
     refresh: vi.fn(async () => undefined),
+    refreshStorage: vi.fn(async () => undefined),
     saveSettings: vi.fn(async (changes: Partial<ISettings>) => {
       settings.set({ ...settings(), ...changes });
     }),
@@ -80,7 +83,7 @@ function settingsScope() {
       SettingsPresenter,
       { provide: DesktopApi, useValue: api },
       { provide: LibraryStore, useValue: library },
-      { provide: CapturePresenter, useValue: {} },
+      { provide: CapturePresenter, useValue: { active: signal(false) } },
     ],
   });
   const presenter = TestBed.inject(SettingsPresenter);
@@ -109,6 +112,120 @@ function publish(events: Subject<AppEvent>, event: LoginEvent): void {
 }
 
 describe('SettingsPresenter', () => {
+  it('persists the enabled capture, pause, rate and retention preferences through their typed fields', async () => {
+    const { presenter, library, api, settings } = settingsScope();
+    presenter.form.silenceReminder().value.set(true);
+    presenter.form.markPausesInTranscript().value.set(true);
+    presenter.setSpeechRateIndex(3);
+    presenter.form.audioRetentionDays().value.set('30');
+    TestBed.tick();
+
+    expect(await presenter.save()).toBe(true);
+
+    expect(settings()).toMatchObject({
+      silenceReminder: true,
+      markPausesInTranscript: true,
+      speechRate: 1.5,
+      audioRetentionDays: 30,
+    });
+    expect(api.request).toHaveBeenCalledWith('storage.cleanup', {});
+    expect(library.refreshStorage).toHaveBeenCalledOnce();
+    expect(library.saveSettings.mock.invocationCallOrder[0]).toBeLessThan(
+      api.request.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it('preserves a stored intermediate speech rate when the visual slider initializes at its nearest step', async () => {
+    const { presenter, settings } = settingsScope();
+    settings.update((value) => ({ ...value, speechRate: 0.8 }));
+    await presenter.initialize();
+    presenter.setSpeechRateIndex(presenter.speechRateIndex());
+    presenter.form.userName().value.set('Example');
+
+    expect(await presenter.save()).toBe(true);
+    expect(settings().speechRate).toBe(0.8);
+  });
+
+  it('does not persist an out-of-range native speech rate', async () => {
+    const { presenter, library } = settingsScope();
+    presenter.form.speechRate().value.set(2.5);
+    TestBed.tick();
+
+    expect(await presenter.save()).toBe(false);
+    expect(library.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('requires an in-app confirmation and serializes library deletion until native completion', async () => {
+    const { presenter, api, library } = settingsScope();
+    const cleared = Promise.withResolvers<{ deletedSessionCount: number }>();
+    api.request.mockImplementation(async (method) =>
+      method === 'sessions.clear' ? cleared.promise : { ok: true },
+    );
+
+    await presenter.clearLibrary();
+    expect(api.request).not.toHaveBeenCalled();
+    presenter.requestClearLibrary();
+    const pending = presenter.clearLibrary();
+    await presenter.clearLibrary();
+    presenter.cancelClearLibrary();
+    expect(presenter.confirmingClear()).toBe(true);
+    expect(api.request).toHaveBeenCalledExactlyOnceWith('sessions.clear', { confirm: true });
+    expect(library.refresh).not.toHaveBeenCalled();
+    cleared.resolve({ deletedSessionCount: 2 });
+    await pending;
+
+    expect(presenter.confirmingClear()).toBe(false);
+    expect(presenter.clearingLibrary()).toBe(false);
+    expect(library.refresh).toHaveBeenCalledOnce();
+    expect(library.refreshStorage).toHaveBeenCalledOnce();
+    expect(library.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('rechecks capture ownership after confirmation before deleting or changing capture preferences', async () => {
+    const { presenter, api, library } = settingsScope();
+    presenter.requestClearLibrary();
+    (TestBed.inject(CapturePresenter).active as ReturnType<typeof signal<boolean>>).set(true);
+    presenter.setSpeechRateIndex(4);
+
+    await presenter.clearLibrary();
+    expect(await presenter.save()).toBe(false);
+    expect(presenter.form.speechRate().value()).toBe(1);
+    expect(api.request).not.toHaveBeenCalled();
+    expect(library.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('discards a successful test result when its exact assistant selection changes', async () => {
+    // Arrange
+    const { presenter, api } = settingsScope();
+    api.request.mockImplementation(async (method) => {
+      if (method === 'assistant.status') return { ...nativeStatus('codex'), authenticated: true };
+      if (method === 'assistant.test') return { text: 'Ready', latencyMs: 1800 };
+      return { ok: true };
+    });
+    await presenter.testAssistant();
+    expect(presenter.testResult()).not.toBeNull();
+
+    // Act
+    presenter.form.accountId().value.set('another-account');
+    TestBed.tick();
+
+    // Assert
+    expect(presenter.testResult()).toBeNull();
+  });
+  it('saves only interface language while capture is active without changing speech or assistant settings', async () => {
+    const { presenter, library, settings, api } = settingsScope();
+    const capture = TestBed.inject(CapturePresenter);
+    (capture.active as ReturnType<typeof signal<boolean>>).set(true);
+    presenter.enableAutosave();
+    presenter.form.uiLanguage().value.set('de');
+    TestBed.tick();
+    await Promise.resolve();
+    expect(library.saveSettings).toHaveBeenCalledExactlyOnceWith({ uiLanguage: 'de' });
+    expect(settings().uiLanguage).toBe('de');
+    expect(settings().locale).toBe('de-DE');
+    expect(settings().assistant).toEqual(defaultSettings.assistant);
+    expect(api.request).not.toHaveBeenCalled();
+  });
   it('ignores a delayed old status after a different provider was saved and checked', async () => {
     // Arrange
     const { presenter, api, settings } = settingsScope();
@@ -276,11 +393,22 @@ describe('SettingsPresenter', () => {
 
     // Act
     await presenter.save();
-    presenter.form.voice().value.set('');
+    presenter.form.voice().value.set('default');
     await presenter.save();
 
     // Assert
     expect(library.saveSettings).toHaveBeenNthCalledWith(1, {
+      uiLanguage: 'en',
+      appearance: 'system',
+      userName: '',
+      addressedAs: '',
+      autoAnalyze: false,
+      showMiniRecorder: false,
+      silenceReminder: false,
+      markPausesInTranscript: false,
+      speechRate: 1,
+      audioRetentionDays: 'never',
+      context: 'transcriptAndMoments',
       assistant: settings().assistant,
       locale: settings().locale,
       autoTranscribe: false,
@@ -288,6 +416,17 @@ describe('SettingsPresenter', () => {
       conversationInstructions: 'Antworte kurz auf Deutsch.',
     });
     expect(library.saveSettings).toHaveBeenLastCalledWith({
+      uiLanguage: 'en',
+      appearance: 'system',
+      userName: '',
+      addressedAs: '',
+      autoAnalyze: false,
+      showMiniRecorder: false,
+      silenceReminder: false,
+      markPausesInTranscript: false,
+      speechRate: 1,
+      audioRetentionDays: 'never',
+      context: 'transcriptAndMoments',
       assistant: settings().assistant,
       locale: settings().locale,
       autoTranscribe: false,

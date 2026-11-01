@@ -27,7 +27,7 @@ export class DesktopApi {
 
   private bridge(): IResonanzApi {
     const api = (window as Window & { resonanz?: IResonanzApi }).resonanz;
-    if (!api) throw new Error('Bitte Resonanz als Desktop-App mit „yarn start“ öffnen.');
+    if (!api) throw new Error('loc.resonanz.error.desktop');
     return api;
   }
 }

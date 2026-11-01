@@ -89,9 +89,9 @@ export default {
     icon: resolve(icons, 'resonanz'),
     extendInfo: {
       NSMicrophoneUsageDescription:
-        'Resonanz verwendet das Mikrofon nur für die von dir gestartete Aufnahme oder Live-Unterhaltung.',
+        'Resonanz uses the microphone only for recording or live conversation that you start.',
       NSSpeechRecognitionUsageDescription:
-        'Resonanz erstellt auf diesem Mac lokale Transkripte deiner Aufzeichnungen.',
+        'Resonanz creates local transcripts of your recordings on this Mac.',
     },
     extraResource: [
       icons,

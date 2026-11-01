@@ -57,7 +57,7 @@ port.on('message', ({ data }) => {
           ok: false,
           error: {
             code: 'IMPORT_FAILED',
-            message: cause instanceof Error ? cause.message : 'Import fehlgeschlagen.',
+            message: cause instanceof Error ? cause.message : 'loc.resonanz.error.import',
           },
         }),
       );
@@ -81,10 +81,10 @@ port.on('message', ({ data }) => {
             code: 'REQUEST_FAILED',
             message:
               cause instanceof z.ZodError
-                ? 'Der Auftrag oder die Antwort entspricht nicht dem vereinbarten Datenformat.'
+                ? 'loc.resonanz.error.responseFormat'
                 : cause instanceof Error
                   ? cause.message.slice(0, 2000)
-                  : 'Der Auftrag ist fehlgeschlagen.',
+                  : 'loc.resonanz.error.runFailed',
           },
         }),
       );

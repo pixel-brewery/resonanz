@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+}
+.heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.heading > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.heading > span:last-child {
+  flex: 0 0 auto;
+}
+mosaik-segment-bar {
+  display: block;
+  width: 100%;
+}
+.caption {
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+  line-height: 1.5;
+}
+.legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 6px 12px;
+}
+.legend > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

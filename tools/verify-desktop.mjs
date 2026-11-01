@@ -109,9 +109,22 @@ async function launch() {
   );
 }
 
+async function openLibrary() {
+  await request('window.show');
+  await page.locator('resonanz-shell:not(.tray-mode)').waitFor({ state: 'visible' });
+  const back = control('settings-back');
+  if (await back.isVisible()) await back.click();
+  else await control('nav-library').click();
+  await control('library-view').waitFor({ state: 'visible' });
+}
+async function menuAction(id) {
+  if (!(await control(id).isVisible())) await page.locator('.session-menu > summary').click();
+  await control(id).click();
+}
 async function openSession(id) {
-  await control('nav-library').click();
-  await control(`session-row-${id}`).locator('mosaik-button').first().click();
+  await openLibrary();
+  await control(`session-row-${id}`).click();
+  await control('preview-open').click();
   await control('session-title').waitFor({ state: 'visible' });
 }
 
@@ -119,7 +132,7 @@ async function selectFile(path) {
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
   }, path);
-  await control('nav-library').click();
+  await openLibrary();
   const before = new Set((await request('bootstrap.get')).sessions.map((item) => item.id));
   await control('import-session').click();
   await waitFor(
@@ -132,6 +145,7 @@ async function selectFile(path) {
 }
 
 async function exportFile(format, path, button) {
+  if (!(await button.isVisible())) await page.locator('.session-menu > summary').click();
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showSaveDialog = async () => ({ canceled: false, filePath });
   }, path);
@@ -145,21 +159,23 @@ try {
   assert(page.url().includes('/index.html#/'));
   assert.equal(
     await page
-      .locator('aside[aria-label="Hauptnavigation"]')
+      .locator('aside.sidebar')
       .evaluate((node) => Math.round(node.getBoundingClientRect().width)),
-    248,
+    236,
   );
   passed('Angular/Mosaik, sandboxed preload and native utility start');
+  assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+  assert.equal((await request('bootstrap.get')).settings.uiLanguage, 'en');
+  assert.match(await control('new-recording').innerText(), /New session/u);
 
   await control('new-conversation').click();
   await control('settings-view').waitFor({ state: 'visible' });
-  assert.match(await errorText(), /Assistent|anmelden|Sprach|Codex|Claude/iu);
+  assert.match(await errorText(), /assistant|sign in|speech|Codex|Claude/iu);
   assert.equal(await control('api-key').count(), 0);
   assert.equal((await request('bootstrap.get')).sessions.length, 0);
   passed('native assistant/speech prerequisites lead to setup without API-key fields or capture');
   await waitFor(
-    async () =>
-      !(await control('assistant-status').ariaSnapshot()).includes('Verbindung wird geprüft'),
+    async () => !(await control('assistant-status').ariaSnapshot()).includes('Checking connection'),
     'native CLI discovery',
   );
   const status = await request('assistant.status');
@@ -168,23 +184,72 @@ try {
 
   // The synthetic recording must not request OS speech consent in automation.
   await request('settings.save', { autoTranscribe: false });
-  await control('nav-library').click();
+  await openLibrary();
   await page.reload();
   await control('library-view').waitFor({ state: 'visible' });
   await control('new-recording').click();
+  await control('capture-panel').waitFor({ state: 'visible' });
+  const trayGeometry = await application.evaluate(({ BrowserWindow, screen }) => {
+    const window = BrowserWindow.getAllWindows()[0];
+    return {
+      content: window.getContentBounds(),
+      bounds: window.getBounds(),
+      area: screen.getDisplayMatching(window.getBounds()).workArea,
+      resizable: window.isResizable(),
+    };
+  });
+  assert.equal(trayGeometry.content.width, 368);
+  assert.equal(trayGeometry.resizable, false);
+  assert(
+    trayGeometry.bounds.x >= trayGeometry.area.x && trayGeometry.bounds.y >= trayGeometry.area.y,
+  );
+  await page.keyboard.press('Escape');
+  await control('capture-panel').waitFor({ state: 'hidden' });
+  await request('window.show');
+  await control('new-recording').click();
+  await control('start-session').click();
   await control('capture-pause').waitFor({ state: 'visible' });
   recordedId = (await request('bootstrap.get')).sessions.find(
     (item) => item.status === 'recording',
   )?.id;
   assert(recordedId);
   await waitFor(async () => (await session()).audioBytes > 0, 'first durable media chunk');
+  await control('mark-decision').click();
+  await waitFor(async () => (await session()).moments?.length === 1, 'typed moment journal');
+  // Switch interface language through the actual settings UI while capture keeps its owner.
+  const speechLocale = (await request('bootstrap.get')).settings.locale;
+  await page.keyboard.press('Escape');
+  await control('capture-panel').waitFor({ state: 'hidden' });
+  await request('window.show');
+  await control('nav-settings').click();
+  await control('settings-view').waitFor({ state: 'visible' });
+  await control('ui-language').getByRole('button', { name: 'Toggle options' }).click();
+  await page.getByRole('option', { name: 'Deutsch', exact: true }).click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.uiLanguage === 'de',
+    'German UI preference',
+  );
+  await waitFor(
+    async () => (await page.locator('html').getAttribute('lang')) === 'de',
+    'German interface',
+  );
+  assert.equal((await request('bootstrap.get')).settings.locale, speechLocale);
+  assert.equal((await session()).status, 'recording');
+  assert.equal((await session()).id, recordedId);
+  await openLibrary();
+  assert.match(await control('new-recording').innerText(), /Neue Session/u);
+  await control('new-recording').click();
+  await control('capture-panel').waitFor({ state: 'visible' });
   await control('capture-pause').click();
   await waitFor(async () => (await session()).status === 'paused', 'pause');
   const pausedBytes = (await session()).audioBytes;
   await control('capture-resume').click();
   await waitFor(async () => (await session()).audioBytes > pausedBytes, 'resumed media');
   await control('capture-stop').click();
-  await control('active-capture').waitFor({ state: 'hidden' });
+  await page.keyboard.press('Escape');
+  await control('capture-panel').waitFor({ state: 'hidden' });
+  await openSession(recordedId);
+  await control('tab-analysis').click();
   const recording = await session();
   assert.equal(recording.status, 'ready');
   assert(recording.audioAvailable && recording.audioBytes > 0 && recording.nextAudioSequence > 2);
@@ -192,7 +257,7 @@ try {
   await waitFor(
     () =>
       control('playback-position').evaluate(
-        (node) => typeof node.text === 'string' && Number(node.text.replaceAll(':', '')) > 0,
+        (node) => Number(node.querySelector('strong')?.textContent?.replaceAll(':', '') ?? 0) > 0,
       ),
     'decoded audio playback advances',
   );
@@ -213,6 +278,8 @@ try {
     'unchanged Flamox recorder/worklet/player: synthetic capture, pause, resume, final flush and ranged playback',
   );
 
+  if ((await page.locator('.organization').getAttribute('open')) === null)
+    await page.locator('.organization > summary').click();
   await control('add-collection').click();
   await control('collection-name').locator('input').fill('Projektstart');
   await control('save-collection').click();
@@ -221,7 +288,7 @@ try {
     'collection creation',
   );
   const collection = (await request('bootstrap.get')).collections[0];
-  await control('edit-session').click();
+  await menuAction('edit-session');
   await control('session-title-input').locator('input').fill('Resonanz – Prototypprüfung');
   await control('session-tags').locator('input').fill('Audio, Planung');
   await control('session-collection-select')
@@ -230,7 +297,7 @@ try {
   await page.getByRole('option', { name: 'Projektstart', exact: true }).click();
   await control('save-session-metadata').click();
   await waitFor(async () => (await session()).collectionId === collection.id, 'metadata save');
-  await control('toggle-favorite').click();
+  await menuAction('toggle-favorite');
   await waitFor(async () => (await session()).starred, 'favourite');
   await control('nav-favorites').click();
   await page.waitForURL((url) => url.hash === '#/?scope=favorites');
@@ -243,7 +310,7 @@ try {
   await control(`session-row-${recordedId}`).waitFor({ state: 'visible' });
   await control(`collection-${collection.id}`).click();
   await control('rename-collection').click();
-  await control('nav-library').click();
+  await openLibrary();
   await control('collection-rename-editor').waitFor({ state: 'hidden' });
   await control(`collection-${collection.id}`).click();
   await control('rename-collection').click();
@@ -256,6 +323,11 @@ try {
   passed('title, tags, favourite, search and collection editing across routes');
 
   await openSession(recordedId);
+  await control('tab-analysis').click();
+  const transcriptMenu = page.locator('[test-id="transcript-panel"] .transcript-menu');
+  await transcriptMenu.waitFor({ state: 'visible' });
+  if ((await transcriptMenu.getAttribute('open')) === null)
+    await transcriptMenu.locator('summary').click();
   await control('edit-transcript').click();
   const manualText =
     'Manueller Prüftext: Resonanz speichert Aufzeichnungen lokal. Zum Projektstart werden Aufgaben und offene Fragen gesammelt.';
@@ -308,6 +380,7 @@ try {
       () => page.evaluate(() => speechSynthesis.getVoices().length > 0),
       'available system voice',
     );
+    await control('tab-analysis').click();
     await control('summary-panel').getByRole('button', { name: 'Vorlesen', exact: true }).click();
     await control('speech-controls').waitFor({ state: 'visible' });
     await waitFor(
@@ -325,9 +398,33 @@ try {
 
   await control('nav-settings').click();
   await control('settings-view').waitFor({ state: 'visible' });
+  await control('ui-language').getByRole('button', { name: 'Toggle options' }).click();
+  await page.getByRole('option', { name: 'English', exact: true }).click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.uiLanguage === 'en',
+    'English UI preference',
+  );
+  await waitFor(
+    async () => (await page.locator('html').getAttribute('lang')) === 'en',
+    'English interface',
+  );
+  const nativeLabels = await application.evaluate(({ Menu }) =>
+    Menu.getApplicationMenu()?.items[0]?.submenu?.items.map((item) => item.label),
+  );
+  assert(nativeLabels.includes('Open Resonanz'));
+  assert.equal((await request('bootstrap.get')).settings.locale, speechLocale);
+  passed(
+    'English default, German/English UI switching during capture, independent speech locale and native menus',
+  );
   const conversationInstructions =
     'Sprich auf Deutsch, kurz und klar. Dies ist ein Einrichtungstest.';
+  const speechAdvanced = page.locator('.speech-advanced');
+  if ((await speechAdvanced.getAttribute('open')) === null)
+    await speechAdvanced.locator('summary').click();
   await control('conversation-instructions').locator('textarea').fill(conversationInstructions);
+  const connectionAdvanced = page.locator('.advanced:not(.speech-advanced)');
+  if ((await connectionAdvanced.getAttribute('open')) === null)
+    await connectionAdvanced.locator(':scope > summary').click();
   await control('save-settings').click();
   await waitFor(
     async () =>
@@ -337,6 +434,45 @@ try {
   );
   assert.equal(await control('api-key').count(), 0);
   assert.equal((await request('bootstrap.get')).settings.autoTranscribe, false);
+  await control('silence-reminder').click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.silenceReminder === true,
+    'measured silence reminder preference',
+  );
+  await control('mark-pauses').click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.markPausesInTranscript === true,
+    'recording pause annotation preference',
+  );
+  const rate = control('speech-rate').getByRole('slider');
+  await rate.press('End');
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.speechRate === 2,
+    'native rate slider maximum',
+  );
+  await rate.press('ArrowLeft');
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.speechRate === 1.5,
+    'native rate slider keyboard pacing',
+  );
+  await control('audio-retention').getByRole('button', { name: 'Toggle options' }).click();
+  await page.getByRole('option', { name: 'After 90 days', exact: true }).click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.audioRetentionDays === 90,
+    'native recording retention policy',
+  );
+  await control('audio-retention').getByRole('button', { name: 'Toggle options' }).click();
+  await page.getByRole('option', { name: 'Never', exact: true }).click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).settings.audioRetentionDays === 'never',
+    'retention opt-out',
+  );
+  const beforeCancelledClear = (await request('bootstrap.get')).sessions.length;
+  await control('clear-library').click();
+  await page.getByRole('alertdialog').waitFor({ state: 'visible' });
+  await control('cancel-confirmation').click();
+  await page.getByRole('alertdialog').waitFor({ state: 'hidden' });
+  assert.equal((await request('bootstrap.get')).sessions.length, beforeCancelledClear);
   passed('keyless native speech preferences persist through the actual settings UI');
   await openSession(recordedId);
   await page.reload();
@@ -347,6 +483,12 @@ try {
   application = undefined;
   await launch();
   const persisted = await session();
+  assert.equal((await request('bootstrap.get')).settings.uiLanguage, 'en');
+  assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+  assert.equal((await request('bootstrap.get')).settings.silenceReminder, true);
+  assert.equal((await request('bootstrap.get')).settings.markPausesInTranscript, true);
+  assert.equal((await request('bootstrap.get')).settings.speechRate, 1.5);
+  assert.equal((await request('bootstrap.get')).settings.audioRetentionDays, 'never');
   assert.equal(persisted.audioBytes, recording.audioBytes);
   assert.equal(persisted.transcript[0]?.text, manualText);
   assert.equal(persisted.collectionId, collection.id);
@@ -364,7 +506,7 @@ try {
   );
   assert.equal((await session()).collectionId, null);
   await openSession(importedAudio.id);
-  await control('delete-session').click();
+  await menuAction('delete-session');
   await control('confirm-delete-session').click();
   await waitFor(
     async () =>
@@ -372,6 +514,32 @@ try {
     'session removal',
   );
   passed('hash route reload, full application restart, persistence and confirmed deletion');
+  await control('nav-settings').click();
+  await control('settings-view').waitFor({ state: 'visible' });
+  const usage = await request('storage.usage');
+  assert(usage.totalBytes > 0 && usage.audioBytes > 0 && usage.transcriptBytes > 0);
+  await waitFor(
+    async () =>
+      (await page
+        .locator('resonanz-storage-breakdown mosaik-segment-bar')
+        .evaluate((element) => element.max)) === usage.totalBytes,
+    'measured library storage presentation',
+  );
+  assert.equal(await page.locator('resonanz-storage-breakdown mosaik-segment-bar-item').count(), 3);
+  const keptSettings = (await request('bootstrap.get')).settings;
+  await control('clear-library').click();
+  await control('confirm-clear-library').click();
+  await waitFor(
+    async () => (await request('bootstrap.get')).sessions.length === 0,
+    'explicitly confirmed complete library deletion',
+  );
+  await page.getByRole('alertdialog').waitFor({ state: 'hidden' });
+  assert.equal((await request('bootstrap.get')).collections.length, 0);
+  assert.deepEqual((await request('bootstrap.get')).settings, keptSettings);
+  assert.equal((await request('assistant.status')).authenticated, false);
+  passed(
+    'measured storage, retention controls and confirmed library deletion preserve native preferences/accounts',
+  );
   assert.deepEqual(errors, [], 'Unexpected renderer, worker or Chromium errors');
   const evidence = {
     platform: process.platform,

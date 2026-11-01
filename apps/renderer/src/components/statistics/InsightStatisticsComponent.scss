@@ -1,0 +1,37 @@
+:host {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+div {
+  padding: 10px;
+  min-width: 0;
+  border-radius: 10px;
+  background: var(--mosaik-scheme-surface);
+}
+.decisions {
+  background: color-mix(in oklab, var(--mosaik-color-info-500) 9%, var(--mosaik-scheme-surface));
+}
+.tasks {
+  background: color-mix(in oklab, var(--mosaik-color-warning-500) 9%, var(--mosaik-scheme-surface));
+}
+.questions {
+  background: color-mix(
+    in oklab,
+    var(--mosaik-color-highlight-500) 9%,
+    var(--mosaik-scheme-surface)
+  );
+}
+strong {
+  display: block;
+  font: 600 22px/1.2 var(--mosaik-font-family, Georgia, serif);
+  margin-bottom: 3px;
+}
+span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font: var(--mosaik-typography-caption);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}

@@ -1,0 +1,324 @@
+<div class="backdrop" (click)="close()"></div>
+<section
+  class="capture-popover"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'loc.resonanz.tray.recording' | translate"
+  test-id="capture-panel"
+  resonanzModal
+  (modalDismiss)="close()"
+>
+  <div
+    class="capture-content"
+    resonanzIntrinsicHeight
+    [intrinsicHeightEnabled]="shell.nativeTray() && shell.capturePanelOpen()"
+    (intrinsicHeightChanged)="resizeTray($event)"
+  >
+    @if (capture.active()) {
+      <div class="capture-body">
+        <header>
+          <span class="status-dot" [class.recording]="capture.state() !== 'paused'"></span>
+          <div>
+            <strong>{{
+              capture.state() === 'paused'
+                ? ('loc.resonanz.capture.paused' | translate)
+                : capture.mode() === 'conversation'
+                  ? ('loc.resonanz.capture.liveConversation' | translate)
+                  : ('loc.resonanz.capture.running' | translate)
+            }}</strong
+            ><span class="caption">{{
+              capture.mode() === 'conversation'
+                ? ('loc.resonanz.voice.system' | translate)
+                : ('loc.resonanz.capture.microphone' | translate)
+            }}</span>
+          </div>
+          <mosaik-button
+            icon="close"
+            size="small"
+            appearance="plain"
+            [attr.aria-label]="'loc.resonanz.capture.close' | translate"
+            (click)="close()"
+          />
+        </header>
+        <mosaik-textbox
+          [label]="'loc.resonanz.common.title' | translate"
+          test-id="capture-title"
+          [formField]="titleForm.text"
+          (focusout)="saveTitle()"
+        />
+        <div class="time-block">
+          <span class="recording-time" aria-live="off">{{
+            capture.durationMs() | duration: 'clock'
+          }}</span
+          ><resonanz-level-meter [level]="level()" [paused]="capture.state() === 'paused'" /><span
+            class="caption"
+            >{{
+              (capture.state() === 'paused'
+                ? shell.library.settings().markPausesInTranscript
+                  ? 'loc.resonanz.capture.pauseNoted'
+                  : 'loc.resonanz.capture.pauseExcluded'
+                : 'loc.resonanz.capture.windowSafe'
+              ) | translate
+            }}</span
+          >
+        </div>
+        @if (capture.silenceReminder()) {
+          <resonanz-silence-reminder
+            class="compact"
+            [title]="'loc.resonanz.capture.silenceTitle' | translate"
+            [description]="'loc.resonanz.capture.silenceDescription' | translate"
+            [continueLabel]="'loc.resonanz.capture.continueRecording' | translate"
+            [stopLabel]="'loc.resonanz.capture.saveStop' | translate"
+            [busy]="capture.busy()"
+            (continued)="capture.continueAfterSilence()"
+            (stopped)="stop()"
+          />
+        }
+        <div class="section-heading">
+          <strong>{{ 'loc.resonanz.capture.mark' | translate }}</strong
+          ><span class="caption"
+            >{{ 'loc.resonanz.voice.withoutLooking' | translate }}
+            <kbd>{{ shortcuts.mark }}</kbd></span
+          >
+        </div>
+        <div class="marker-actions">
+          @for (kind of markerKinds; track kind) {
+            <button [attr.test-id]="'mark-' + kind" (click)="mark(kind)">
+              <resonanz-marker [kind]="kind" /><span>{{ markerLabels[kind] | translate }}</span>
+            </button>
+          }
+        </div>
+        @if (session()?.moments?.length) {
+          <div class="moments">
+            @for (moment of (session()?.moments ?? []).slice(-4); track moment.id) {
+              <div>
+                <resonanz-marker [kind]="moment.kind" /><span>{{
+                  moment.label || markerLabels[moment.kind] | message
+                }}</span
+                ><time>{{ moment.atMs | duration }}</time>
+              </div>
+            }
+          </div>
+        } @else {
+          <span class="caption">{{ 'loc.resonanz.capture.markHint' | translate }}</span>
+        }
+        <div class="capture-actions">
+          @if (capture.state() === 'paused') {
+            <mosaik-button
+              test-id="capture-resume"
+              [label]="'loc.resonanz.common.resume' | translate"
+              icon="play"
+              appearance="outline"
+              fit="width"
+              [disabled]="capture.busy()"
+              (click)="capture.resume()"
+            />
+          } @else {
+            <mosaik-button
+              test-id="capture-pause"
+              [label]="'loc.resonanz.common.pause' | translate"
+              icon="pause"
+              appearance="outline"
+              fit="width"
+              [disabled]="capture.busy()"
+              (click)="capture.pause()"
+            />
+          }
+          <mosaik-button
+            test-id="capture-stop"
+            [label]="'loc.resonanz.common.stop' | translate"
+            icon="stop"
+            appearance="solid"
+            variant="danger"
+            fit="width"
+            [disabled]="capture.busy()"
+            (click)="stop()"
+          />
+        </div>
+        <span class="caption centered">{{ 'loc.resonanz.capture.saving' | translate }}</span>
+      </div>
+    } @else if (session(); as saved) {
+      <div class="capture-body">
+        <header class="saved-header">
+          <div>
+            <strong>{{ saved.title }}</strong
+            ><span class="caption">{{ savedTitle() | translate }}</span>
+          </div>
+          <mosaik-button
+            icon="close"
+            size="small"
+            appearance="plain"
+            [attr.aria-label]="'loc.resonanz.common.close' | translate"
+            (click)="close()"
+          />
+        </header>
+        <resonanz-pipeline-steps [items]="pipeline()" orientation="vertical" />
+        @if (saved.analysis; as analysis) {
+          <resonanz-insight-statistics
+            [decisions]="analysis.decisions.length"
+            [tasks]="analysis.tasks.length"
+            [assignedTasks]="assignedTasks()"
+            [questions]="analysis.openQuestions.length"
+          />
+          <div class="capture-actions">
+            <mosaik-button
+              [label]="'loc.resonanz.question.ask' | translate"
+              appearance="outline"
+              fit="width"
+              (click)="open(saved.id, 'questions')"
+            />
+            <mosaik-button
+              [label]="'loc.resonanz.library.open' | translate"
+              appearance="solid"
+              fit="width"
+              (click)="open(saved.id)"
+            />
+          </div>
+        } @else {
+          <p class="caption saved-hint">{{ 'loc.resonanz.capture.processingSafe' | translate }}</p>
+          @if (needsAttention()) {
+            <mosaik-button
+              [label]="'loc.resonanz.capture.reviewProcessing' | translate"
+              appearance="outline"
+              fit="width"
+              (click)="open(saved.id, 'processing')"
+            />
+          } @else {
+            <mosaik-button
+              [label]="'loc.resonanz.library.open' | translate"
+              appearance="outline"
+              fit="width"
+              (click)="open(saved.id)"
+            />
+          }
+        }
+        <mosaik-button
+          [label]="'loc.resonanz.capture.newSession' | translate"
+          appearance="plain"
+          fit="width"
+          (click)="reset()"
+        />
+      </div>
+    } @else {
+      <div class="capture-body">
+        <header>
+          <resonanz-glyph [tile]="true" />
+          <div>
+            <strong>Resonanz</strong
+            ><span class="caption">{{ 'loc.resonanz.capture.ready' | translate }}</span>
+          </div>
+          <mosaik-button
+            icon="settings"
+            appearance="plain"
+            [attr.aria-label]="'loc.resonanz.nav.settings' | translate"
+            (click)="openSettings()"
+          />
+        </header>
+        <div class="audio-options">
+          <div class="microphone-choice">
+            <mosaik-select
+              [label]="'loc.resonanz.capture.microphone' | translate"
+              [placeholder]="'loc.resonanz.capture.defaultDevice' | translate"
+              [formField]="capture.deviceForm.id"
+              test-id="capture-microphone"
+              ><mosaik-select-item
+                value="default"
+                [label]="'loc.resonanz.capture.defaultDevice' | translate"
+              />
+              @for (device of capture.devices(); track device.deviceId) {
+                <mosaik-select-item [value]="device.deviceId" [label]="device.label" />
+              }</mosaik-select
+            ><mosaik-button
+              icon="refresh"
+              [attr.aria-label]="'loc.resonanz.capture.devices' | translate"
+              [title]="'loc.resonanz.capture.devices' | translate"
+              appearance="plain"
+              size="small"
+              (click)="capture.loadDevices()"
+            />
+          </div>
+          <div class="system-audio">
+            <div>
+              <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span
+              ><span class="caption">{{ 'loc.resonanz.error.systemAudio' | translate }}</span>
+            </div>
+            <mosaik-toggle-switch
+              [attr.aria-label]="'loc.resonanz.capture.systemUnavailable' | translate"
+              [disabled]="true"
+            />
+          </div>
+          <div class="level-row">
+            <span class="caption">{{ 'loc.resonanz.common.level' | translate }}</span
+            ><resonanz-level-meter [level]="0" [paused]="true" [count]="30" />
+          </div>
+        </div>
+        <mosaik-button
+          test-id="start-session"
+          [label]="'loc.resonanz.capture.start' | translate"
+          icon="mic"
+          appearance="solid"
+          variant="primary"
+          fit="width"
+          [disabled]="capture.busy()"
+          (click)="capture.startRecording()"
+        />
+        <span class="caption centered shortcut-hint"
+          >{{ 'loc.resonanz.capture.startAnywhere' | translate }}
+          <kbd>{{ shortcuts.record }}</kbd></span
+        >
+        <div class="assistant-info">
+          <span class="status-dot" [class.success]="shell.assistantStatus()?.authenticated"></span
+          ><span
+            >{{ 'loc.resonanz.session.analysisWith' | translate }}
+            <strong>{{ shell.assistantName() }}</strong> ·
+            {{
+              shell.assistantStatus()?.authenticated
+                ? ('loc.resonanz.auth.signedIn' | translate)
+                : ('loc.resonanz.auth.required' | translate)
+            }}</span
+          >
+        </div>
+      </div>
+      <div class="recent">
+        <span class="caption">{{ 'loc.resonanz.capture.last' | translate }}</span>
+        @for (item of recent(); track item.id) {
+          <button (click)="open(item.id)">
+            <span class="recent-visual">
+              @if (item.processing) {
+                <mosaik-progress-ring
+                  [radius]="9"
+                  [thickness]="3"
+                  [min]="0"
+                  [max]="100"
+                  [value]="item.progress ?? 0"
+                  [isIndeterminate]="item.progress === undefined"
+                  [attr.aria-label]="item.detail"
+                />
+              } @else if (item.attention) {
+                <span class="attention-symbol" aria-hidden="true">!</span>
+              } @else {
+                <resonanz-waveform [values]="item.waveform ?? []" [count]="12" />
+              }</span
+            ><span
+              ><strong>{{ item.title }}</strong
+              ><small>{{ item.detail }}</small></span
+            ><span>›</span>
+          </button>
+        }
+        @if (!recent().length) {
+          <p class="caption">{{ 'loc.resonanz.capture.noRecent' | translate }}</p>
+        }
+      </div>
+      <footer>
+        <button (click)="shell.openLibrary(); close()">
+          {{ 'loc.resonanz.tray.open' | translate }} <kbd>{{ shortcuts.open }}</kbd></button
+        ><button test-id="new-conversation" (click)="shell.openVoice(); close()">
+          {{ intl.t('loc.resonanz.capture.speakProvider', shell.assistantName()) }}
+          <kbd>{{ shortcuts.voice }}</kbd></button
+        ><button (click)="quit()">
+          {{ 'loc.resonanz.tray.quit' | translate }} <kbd>{{ shortcuts.quit }}</kbd>
+        </button>
+      </footer>
+    }
+  </div>
+</section>

@@ -1,0 +1,94 @@
+<div class="landscape-grid">
+  <div class="hours">
+    <span></span>
+    <div>
+      @for (hour of hours; track hour) {
+        <span [style.left.%]="((hour - 8) / 11) * 100"
+          >{{ hour.toString().padStart(2, '0') }}:00</span
+        >
+      }
+    </div>
+  </div>
+  @for (day of days(); track day.date.getTime()) {
+    <div class="day" [class.today]="day.today">
+      <div class="day-label">
+        <strong>{{ day.date | date: 'EEEE' : undefined : intl.locale() }}</strong
+        ><span>{{ day.date | date: 'dd. MMM' : undefined : intl.locale() }}</span>
+      </div>
+      <div class="track">
+        @for (hour of hours; track hour) {
+          <span class="gridline" [style.left.%]="((hour - 8) / 11) * 100" aria-hidden="true"></span>
+        }
+        @if (!day.items.length) {
+          <span class="no-sessions">{{ 'loc.resonanz.library.none' | translate }}</span>
+        }
+        @for (item of day.items; track item.id) {
+          <button
+            class="ribbon"
+            [class.selected]="selectedId() === item.id"
+            [class.processing]="item.status === 'processing'"
+            [class.error]="item.status === 'error'"
+            [class.waiting]="item.status === 'waiting'"
+            [class.connected]="connected(item)"
+            [style.--thread-color]="threadColor()"
+            [style.left.%]="left(item)"
+            [style.width.%]="width(item)"
+            [attr.aria-label]="
+              item.title +
+              ', ' +
+              (item.startedAt | date: 'HH:mm' : undefined : intl.locale()) +
+              ', ' +
+              intl.message(status(item))
+            "
+            (click)="itemSelected.emit(item)"
+          >
+            <resonanz-waveform
+              [values]="item.waveform"
+              [markers]="item.markers"
+              [durationMs]="item.durationMs"
+              [count]="barCount(item)"
+              markerPlacement="above"
+              [tone]="item.status === 'error' ? 'danger' : connected(item) ? 'strong' : 'default'"
+              [progress]="item.status === 'processing' ? (item.progress ?? null) : null"
+            />
+            <span
+              class="ribbon-label"
+              [class.right]="labelRight(item)"
+              [style.width]="labelWidth(item)"
+              ><strong>{{ item.title }}</strong
+              ><span
+                >{{ item.startedAt | date: 'HH:mm' : undefined : intl.locale() }} ·
+                {{ status(item) | message }}</span
+              ></span
+            >
+          </button>
+        }
+        @if (day.today && nowPosition() >= 0 && nowPosition() <= 100) {
+          <span class="now" [style.left.%]="nowPosition()" aria-hidden="true"
+            ><span>{{ now() | date: 'HH:mm' : undefined : intl.locale() }}</span></span
+          >
+        }
+      </div>
+    </div>
+  }
+  <svg
+    class="connections"
+    [attr.viewBox]="'0 0 1000 ' + days().length * 88"
+    [style.height.px]="days().length * 88"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+  >
+    @for (connection of connections(); track connection.id) {
+      <path
+        [attr.d]="connection.path"
+        [style.stroke]="connection.active ? connection.color : 'var(--mosaik-scheme-middlelight)'"
+        [class.active]="connection.active"
+      />
+      @if (connection.active) {
+        @for (point of connection.points; track $index) {
+          <circle [attr.cx]="point.x" [attr.cy]="point.y" r="5" [style.stroke]="connection.color" />
+        }
+      }
+    }
+  </svg>
+</div>

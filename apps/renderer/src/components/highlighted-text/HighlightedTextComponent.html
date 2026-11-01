@@ -1,0 +1,7 @@
+@for (part of parts(); track $index) {
+  @if (part.highlighted) {
+    <mark>{{ part.text }}</mark>
+  } @else {
+    {{ part.text }}
+  }
+}

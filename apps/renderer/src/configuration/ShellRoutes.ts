@@ -16,5 +16,17 @@ export const shellRoutes: Routes = [
     path: 'settings',
     loadComponent: () => import('../views/SettingsView').then((module) => module.SettingsView),
   },
+  {
+    path: 'voice',
+    loadComponent: () => import('../views/VoiceView').then((module) => module.VoiceView),
+  },
+  {
+    path: 'voice/:id',
+    loadComponent: () => import('../views/VoiceView').then((module) => module.VoiceView),
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('../views/OnboardingView').then((module) => module.OnboardingView),
+  },
   { path: '**', redirectTo: '' },
 ];

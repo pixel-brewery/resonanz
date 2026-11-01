@@ -1,93 +1,102 @@
-<mosaik-app class="block h-full w-full" [hasNav]="false">
-  <div slot="content" class="flex h-full min-h-0 w-full min-w-0 overflow-hidden">
-    <aside
-      class="flex h-full w-[248px] flex-none flex-col gap-2 overflow-y-auto px-2 py-3"
-      aria-label="Hauptnavigation"
-    >
-      <div class="flex items-center gap-1.5 px-1 pb-2">
-        <img src="assets/resonanz-mark.svg" width="34" height="34" alt="" />
-        <mosaik-text text="Resonanz" mosaikTypography="subtitle1" />
-      </div>
+<div class="app-shell" [class.focus-mode]="presenter.focusMode()">
+  <aside class="sidebar" [attr.aria-label]="'loc.resonanz.nav.main' | translate">
+    <div class="window-drag-region" aria-hidden="true"></div>
+    <a class="brand" routerLink="/"><resonanz-glyph [tile]="true" /><span>Resonanz</span></a>
+    <button class="new-session" test-id="new-recording" (click)="presenter.openCapture()">
+      <span></span>{{ 'loc.resonanz.capture.newSession' | translate }}
+    </button>
+    <nav class="primary-nav" [attr.aria-label]="'loc.resonanz.nav.sections' | translate">
       <mosaik-button
-        test-id="new-recording"
-        label="Neue Aufnahme"
+        routerLink="/"
+        routerLinkActive="nav-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        test-id="nav-library"
+        [label]="'loc.resonanz.nav.sessions' | translate"
+        icon="folderOpen"
+        appearance="plain"
+        fit="width"
+        horizontalContentAlignment="left"
+      />
+      <mosaik-button
+        routerLink="/voice"
+        routerLinkActive="nav-active"
+        test-id="nav-voice"
+        [label]="'loc.resonanz.nav.voice' | translate"
         icon="mic"
-        appearance="solid"
-        variant="primary"
+        appearance="plain"
         fit="width"
-        [disabled]="presenter.capture.active() || presenter.capture.busy()"
-        (click)="presenter.capture.startRecording()"
+        horizontalContentAlignment="left"
       />
       <mosaik-button
-        test-id="new-conversation"
-        label="Live-Unterhaltung"
-        icon="live"
-        appearance="outline"
+        routerLink="/"
+        [queryParams]="{ scope: 'moments' }"
+        test-id="nav-moments"
+        [label]="'loc.resonanz.nav.moments' | translate"
+        icon="sparkle"
+        appearance="plain"
         fit="width"
-        [disabled]="presenter.capture.active() || presenter.capture.busy()"
-        (click)="presenter.capture.startLive()"
+        horizontalContentAlignment="left"
       />
-      <mosaik-divider class="my-1" />
-      <nav class="flex flex-col gap-0.5" aria-label="Bibliothek">
-        <mosaik-button
-          routerLink="/"
-          test-id="nav-library"
-          label="Alle Aufzeichnungen"
-          icon="folder"
-          appearance="plain"
-          fit="width"
-          horizontalContentAlignment="left"
-        />
-        <mosaik-button
-          routerLink="/"
-          [queryParams]="{ scope: 'conversations' }"
-          label="Live-Gespräche"
-          icon="live"
-          appearance="plain"
-          fit="width"
-          horizontalContentAlignment="left"
-        />
-        <mosaik-button
-          routerLink="/"
-          [queryParams]="{ scope: 'favorites' }"
-          test-id="nav-favorites"
-          label="Favoriten"
-          icon="star"
-          appearance="plain"
-          fit="width"
-          horizontalContentAlignment="left"
-        />
-      </nav>
-      <div class="mt-2 flex items-center justify-between px-1">
-        <mosaik-text text="Sammlungen" mosaikTypography="overline" variant="neutral" />
-        <mosaik-button
+      <mosaik-button
+        routerLink="/settings"
+        routerLinkActive="nav-active"
+        test-id="nav-settings"
+        [label]="'loc.resonanz.nav.settings' | translate"
+        icon="settings"
+        appearance="plain"
+        fit="width"
+        horizontalContentAlignment="left"
+      />
+    </nav>
+    <details class="organization" open>
+      <summary>{{ 'loc.resonanz.nav.organize' | translate }}</summary>
+      <mosaik-button
+        routerLink="/"
+        [queryParams]="{ scope: 'favorites' }"
+        test-id="nav-favorites"
+        [label]="'loc.resonanz.nav.favorites' | translate"
+        icon="star"
+        appearance="plain"
+        fit="width"
+        horizontalContentAlignment="left"
+      />
+      <mosaik-button
+        routerLink="/"
+        [queryParams]="{ scope: 'conversations' }"
+        [label]="'loc.resonanz.nav.conversations' | translate"
+        icon="live"
+        appearance="plain"
+        fit="width"
+        horizontalContentAlignment="left"
+      />
+      <div class="collection-heading">
+        <span>{{ 'loc.resonanz.nav.collections' | translate }}</span
+        ><mosaik-button
           test-id="add-collection"
           icon="add"
           size="small"
           appearance="plain"
-          aria-label="Sammlung anlegen"
+          [attr.aria-label]="'loc.resonanz.nav.addCollection' | translate"
           (click)="presenter.creatingCollection.set(!presenter.creatingCollection())"
         />
       </div>
       @if (presenter.creatingCollection()) {
-      <div class="flex flex-col gap-1" test-id="collection-form">
-        <mosaik-textbox
-          test-id="collection-name"
-          label="Name der Sammlung"
-          [formField]="presenter.collectionForm.name"
-          (keydown.enter)="presenter.createCollection()"
-        />
-        <mosaik-button
-          test-id="save-collection"
-          label="Anlegen"
-          appearance="soft"
-          [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
-          (click)="presenter.createCollection()"
-        />
-      </div>
+        <div class="collection-editor" test-id="collection-form">
+          <mosaik-textbox
+            test-id="collection-name"
+            [label]="'loc.resonanz.nav.collectionName' | translate"
+            [formField]="presenter.collectionForm.name"
+            (keydown.enter)="presenter.createCollection()"
+          /><mosaik-button
+            test-id="save-collection"
+            [label]="'loc.resonanz.nav.create' | translate"
+            appearance="soft"
+            [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
+            (click)="presenter.createCollection()"
+          />
+        </div>
       }
-      <nav class="flex min-h-0 flex-1 flex-col gap-0.5" aria-label="Sammlungen">
-        @for (collection of presenter.library.collections(); track collection.id) {
+      @for (collection of presenter.library.collections(); track collection.id) {
         <mosaik-button
           routerLink="/"
           [queryParams]="{ collection: collection.id }"
@@ -98,122 +107,130 @@
           fit="width"
           horizontalContentAlignment="left"
         />
-        } @if (presenter.library.collections().length === 0 && !presenter.creatingCollection()) {
-        <mosaik-text
-          class="px-1"
-          text="Gespräche nach Thema oder Projekt sammeln."
-          mosaikTypography="caption"
-          variant="neutral"
-          [wrap]="true"
+      }
+    </details>
+    <div class="sidebar-spacer"></div>
+    <div class="assistant-card">
+      <span class="caption">{{
+        presenter.library.capabilities()?.platform === 'darwin'
+          ? ('loc.resonanz.nav.assistantsOnMac' | translate)
+          : ('loc.resonanz.nav.assistantsOnComputer' | translate)
+      }}</span>
+      @for (provider of ['claude', 'codex']; track provider) {
+        <a routerLink="/settings" class="assistant-row"
+          ><mosaik-icon [icon]="provider === 'claude' ? 'claude' : 'openai'" size="small" /><span>{{
+            provider === 'claude' ? 'Claude Code' : 'Codex'
+          }}</span>
+          @if (presenter.assistantStatus()?.provider === provider) {
+            @if (presenter.assistantStatus()?.authenticated) {
+              <span
+                class="status-dot success"
+                [attr.aria-label]="'loc.resonanz.auth.signedIn' | translate"
+              ></span>
+            } @else {
+              <span class="caption">{{
+                presenter.assistantStatus()?.installed
+                  ? ('loc.resonanz.nav.signedOut' | translate)
+                  : ('loc.resonanz.nav.notInstalled' | translate)
+              }}</span>
+            }
+          } @else {
+            <span class="caption">{{ 'loc.resonanz.nav.notChecked' | translate }}</span>
+          }
+        </a>
+      }
+    </div>
+  </aside>
+  <div class="workspace">
+    @if (presenter.library.error(); as error) {
+      <div class="application-error" test-id="application-error" role="alert">
+        <mosaik-text [text]="error | message" [wrap]="true" /><mosaik-button
+          icon="close"
+          appearance="plain"
+          size="small"
+          [attr.aria-label]="'loc.resonanz.nav.dismissError' | translate"
+          (click)="presenter.library.clearError()"
         />
-        }
-      </nav>
-      <mosaik-divider />
-      <mosaik-button
-        test-id="nav-settings"
-        routerLink="/settings"
-        label="Einstellungen"
-        icon="settings"
-        appearance="plain"
-        fit="width"
-        horizontalContentAlignment="left"
+      </div>
+    }
+    @if (presenter.capture.silenceReminder() && !presenter.capturePanelOpen()) {
+      <resonanz-silence-reminder
+        class="workspace-reminder"
+        [title]="'loc.resonanz.capture.silenceTitle' | translate"
+        [description]="'loc.resonanz.capture.silenceDescription' | translate"
+        [continueLabel]="'loc.resonanz.capture.continueRecording' | translate"
+        [stopLabel]="'loc.resonanz.capture.saveStop' | translate"
+        [busy]="presenter.capture.busy()"
+        (continued)="presenter.capture.continueAfterSilence()"
+        (stopped)="presenter.capture.stop()"
       />
-    </aside>
-    <mosaik-divider orientation="vertical" />
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      @if (presenter.library.error(); as error) {
-      <mosaik-card
-        variant="danger"
-        appearance="soft"
-        class="m-2 flex-none"
-        test-id="application-error"
-      >
-        <div slot="content" class="flex items-start gap-2 p-2" role="alert">
-          <mosaik-text class="min-w-0 flex-1" [text]="error" [wrap]="true" />
-          <mosaik-button
-            icon="close"
-            appearance="plain"
-            size="small"
-            aria-label="Fehlermeldung schließen"
-            (click)="presenter.library.clearError()"
-          />
-        </div>
-      </mosaik-card>
-      } @if (presenter.capture.active()) {
-      <mosaik-card
-        appearance="soft"
-        variant="primary"
-        class="mx-3 mt-2 flex-none"
-        test-id="active-capture"
-      >
-        <div slot="content" class="flex flex-wrap items-center gap-2 p-2">
-          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-            @if (presenter.capture.mode() === 'conversation') {
-            <mosaik-text text="Live-Unterhaltung" mosaikTypography="subtitle2" />
-            } @else { <mosaik-text text="Aufnahme" mosaikTypography="subtitle2" /> }
-            <div class="flex items-center gap-1">
-              <mosaik-text
-                [text]="presenter.capture.durationMs() | duration"
-                mosaikTypography="caption"
-              />
-              @switch (presenter.capture.state()) { @case ('paused') {
-              <mosaik-text text="Pausiert" mosaikTypography="caption" /> } @case ('connecting') {
-              <mosaik-text text="Native Sprachfunktionen starten …" mosaikTypography="caption" /> }
-              @case ('stopping') {
-              <mosaik-text text="Wird gespeichert …" mosaikTypography="caption" /> } @default {
-              <mosaik-text text="Aufnahme läuft" mosaikTypography="caption" /> } }
-            </div>
-          </div>
-          @if (presenter.capture.mode() === 'conversation') {
+    }
+    @if (
+      presenter.capture.active() &&
+      !presenter.capturePanelOpen() &&
+      !presenter.library.settings().showMiniRecorder
+    ) {
+      <div class="active-capture" test-id="active-capture">
+        <span class="status-dot" [class.recording]="presenter.capture.state() !== 'paused'"></span
+        ><button class="text-button" (click)="presenter.openCapture()">
+          {{
+            presenter.capture.mode() === 'conversation'
+              ? ('loc.resonanz.capture.liveConversation' | translate)
+              : ('loc.resonanz.capture.running' | translate)
+          }}
+          · {{ presenter.capture.durationMs() | duration }}</button
+        ><span class="flex-spacer"></span>
+        @if (presenter.capture.mode() === 'conversation') {
           <mosaik-button
             test-id="live-interrupt"
-            label="Unterbrechen"
+            [label]="'loc.resonanz.capture.interrupt' | translate"
             appearance="plain"
-            [disabled]="presenter.capture.busy()"
             (click)="presenter.capture.interrupt()"
-          />
-          <mosaik-button
-            [label]="presenter.capture.live().microphoneMuted ? 'Mikrofon einschalten' : 'Stummschalten'"
+          /><mosaik-button
+            [label]="
+              presenter.capture.live().microphoneMuted
+                ? ('loc.resonanz.capture.unmute' | translate)
+                : ('loc.resonanz.capture.mute' | translate)
+            "
             icon="mic"
             appearance="plain"
             (click)="presenter.capture.muteMicrophone()"
           />
-          } @if (presenter.capture.state() === 'paused') {
+        }
+        @if (presenter.capture.state() === 'paused') {
           <mosaik-button
             test-id="capture-resume"
-            label="Fortsetzen"
+            [label]="'loc.resonanz.common.resume' | translate"
             icon="play"
-            appearance="outline"
-            [disabled]="presenter.capture.busy()"
+            appearance="plain"
             (click)="presenter.capture.resume()"
           />
-          } @else {
+        } @else {
           <mosaik-button
             test-id="capture-pause"
-            label="Pause"
+            [label]="'loc.resonanz.common.pause' | translate"
             icon="pause"
-            appearance="outline"
-            [disabled]="presenter.capture.busy() || presenter.capture.state() === 'starting' || presenter.capture.state() === 'stopping'"
+            appearance="plain"
+            [disabled]="presenter.capture.busy()"
             (click)="presenter.capture.pause()"
           />
-          }
-          <mosaik-button
-            test-id="capture-stop"
-            label="Beenden"
-            icon="stop"
-            appearance="solid"
-            [disabled]="presenter.capture.busy()"
-            (click)="presenter.capture.stop()"
-          />
-        </div>
-      </mosaik-card>
-      }
-      <main
-        class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto"
-        aria-label="Arbeitsbereich"
-      >
-        <router-outlet />
-      </main>
-    </div>
+        }
+        <mosaik-button
+          test-id="capture-stop"
+          [label]="'loc.resonanz.common.stop' | translate"
+          icon="stop"
+          variant="danger"
+          appearance="soft"
+          [disabled]="presenter.capture.busy()"
+          (click)="presenter.capture.stop()"
+        />
+      </div>
+    }
+    <main class="workspace-outlet" [attr.aria-label]="'loc.resonanz.nav.workspace' | translate">
+      <router-outlet />
+    </main>
   </div>
-</mosaik-app>
+</div>
+@if (presenter.capturePanelOpen()) {
+  <resonanz-capture-panel (closed)="presenter.closeCapture()" />
+}

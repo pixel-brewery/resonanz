@@ -1,60 +1,27 @@
-name: Fehler melden
-description: Ein reproduzierbares Problem in Resonanz beschreiben.
-title: '[Fehler]: '
+name: Report a bug
+description: Describe a reproducible problem in Resonanz.
+title: '[Bug]: '
 body:
   - type: markdown
     attributes:
       value: |
-        Verwende bitte künstliche Gesprächsinhalte. Zugangsdaten, Anmeldelinks und persönliche Aufnahmen gehören nicht in öffentliche Berichte. Sicherheitslücken bitte über den privaten Meldeweg unter Security melden.
+        Use synthetic conversation content. Do not share credentials, sign-in links or private recordings. Report vulnerabilities privately through SECURITY.md.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Include the expected behavior and a minimal reproduction.
+    validations:
+      required: true
   - type: input
-    id: version
+    id: environment
     attributes:
-      label: Version oder Commit
-      placeholder: z. B. 0.1.0 oder ein Commit
-    validations:
-      required: true
-  - type: dropdown
-    id: platform
-    attributes:
-      label: Betriebssystem
-      options:
-        - macOS (Apple Silicon)
-        - macOS (Intel)
-        - Windows (x64)
-        - Windows (ARM64)
-        - Anderes System
-    validations:
-      required: true
-  - type: dropdown
-    id: mode
-    attributes:
-      label: Betroffener Bereich
-      options:
-        - Aufnahme oder Wiedergabe
-        - Transkription
-        - Live-Unterhaltung
-        - Codex-Anbindung
-        - Claude-Code-Anbindung
-        - Bibliothek, Organisation oder Import/Export
-        - Start oder Paketierung
-        - Anderer Bereich
-    validations:
-      required: true
-  - type: textarea
-    id: reproduction
-    attributes:
-      label: Schritte zum Nachstellen
-      description: Was wurde gestartet und was ist passiert? Welche Sprachpakete oder CLI-Versionen sind beteiligt?
-    validations:
-      required: true
-  - type: textarea
-    id: expected
-    attributes:
-      label: Erwartetes Verhalten
+      label: Environment
+      description: Version or commit, OS, interface/speech language and selected assistant CLI.
     validations:
       required: true
   - type: textarea
     id: evidence
     attributes:
-      label: Bereinigte Belege
-      description: Optionaler Screenshot oder ein gekürzter Log ohne private Inhalte. Bitte die Reichweite von Tests angeben.
+      label: Supporting evidence
+      description: Sanitized logs or screenshots using synthetic data only.

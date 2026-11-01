@@ -7,6 +7,21 @@ Synapse owns installed local-assistant integration. Read `README.md`,
 Executable configuration and verified runtime behavior take precedence over
 older prose.
 
+## Architecture skill
+
+- Apply [resonanz-architect](.agents/skills/resonanz-architect/SKILL.md) for Resonanz
+  engineering work, including delegated tasks. Read its project contract and the
+  inherited [Architecture base](.agents/skills/architecture/SKILL.md) with the
+  shared workflow, then select the relevant production and testing references.
+- `.agents/skills/` is the canonical skill tree. The shared base comes from
+  `pixel-brewery/skills`, pinned by full commit and content hash in root
+  `skills-lock.json`. Maintain Resonanz rules in the derived skill; change shared
+  rules upstream and restore/update the base through the Skills CLI. Do not edit
+  or reformat the imported base or duplicate its common modules locally.
+- After skill changes, run `yarn verify:skills` or
+  `python3 .agents/scripts/sync_architect_core.py --check`. This validates the
+  dependency, inheritance and reference links without a peer checkout or network.
+
 ## Workspace and authority
 
 - Work only in the owner-designated local checkout and preserve existing work.
@@ -32,6 +47,7 @@ older prose.
 - `apps/renderer`: standalone Angular views, Signals, presenters and browser media.
   Use Mosaik's public components/theme APIs and existing Flamox/Symphony patterns.
   Keep view markup, TypeScript and SCSS in their matching files and use OnPush.
+- `libs/intl`: portable English/German tables and consistent message formatting.
 - `libs/contracts`: shared DTOs, method/event catalog and Zod runtime validation.
   Keep request, response, persistence and UI validation consistent.
 - `apps/desktop`: Electron lifecycle, tray, sandboxed preload, native dialogs,
@@ -82,6 +98,7 @@ heavy install/build/typecheck/test job at a time across agents.
 
 ```sh
 yarn install --immutable
+yarn verify:skills
 yarn verify:vendor
 yarn verify:audio
 yarn typecheck
@@ -107,7 +124,7 @@ service, browser-profile or provider instances merely for convenience.
 Report only checks actually run, with their scope and outcome. A passing build,
 typed IPC, a unit test or executable discovery does not prove real recording,
 native speech, native account inference, Windows or packaging. Keep
-`docs/project/abnahme.md` aligned with actual evidence and remaining requirements.
+`docs/project/verification.md` aligned with actual evidence and remaining requirements.
 
 ## Documentation and pull requests
 

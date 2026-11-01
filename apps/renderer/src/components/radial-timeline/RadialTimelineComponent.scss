@@ -1,0 +1,218 @@
+:host {
+  display: block;
+  width: min(100%, 710px);
+  aspect-ratio: 1;
+}
+.radial {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.empty-ring {
+  fill: none;
+  stroke: var(--mosaik-scheme-highlight);
+  stroke-width: 10px;
+}
+.chapter-arc {
+  fill: none;
+  stroke-width: 10px;
+}
+.chapter-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 26px;
+  cursor: pointer;
+}
+.chapter-label-box {
+  overflow: visible;
+  pointer-events: none;
+}
+.chapter-label-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.chapter-label {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--mosaik-scheme-lowlight);
+  font: 12px var(--mosaik-font-family, Georgia, serif);
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.chapter.selected .chapter-label {
+  background: var(--mosaik-scheme-foreground);
+  color: var(--mosaik-scheme-background);
+  font-weight: 600;
+}
+.chapter.highlighted:not(.selected) .chapter-label {
+  color: var(--mosaik-scheme-foreground);
+  font-weight: 600;
+}
+.chapter:focus-visible {
+  outline: none;
+}
+.chapter:focus-visible .chapter-arc {
+  stroke-width: 17px;
+}
+.audio-bars line {
+  stroke: var(--mosaik-scheme-foreground);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.audio-bars line.faded,
+.marker.faded {
+  opacity: 0.35;
+}
+.subtle .audio-bars line {
+  stroke: var(--mosaik-scheme-middlelight);
+  opacity: 1;
+}
+.subtle .audio-bars line.faded {
+  opacity: 0.45;
+}
+.subtle.evidence-focused .audio-bars line:not(.faded) {
+  stroke: var(--mosaik-scheme-foreground);
+}
+.missing .audio-bars {
+  opacity: 0.2;
+}
+.playhead {
+  stroke: var(--mosaik-scheme-foreground);
+  stroke-width: 2px;
+}
+.marker {
+  cursor: pointer;
+  fill: var(--mosaik-scheme-foreground);
+}
+.marker.decision {
+  fill: var(--mosaik-color-info-500);
+}
+.marker.task {
+  fill: var(--mosaik-color-warning-500);
+}
+.marker.question {
+  fill: var(--mosaik-color-highlight-500);
+}
+.hit {
+  fill: transparent;
+}
+.marker.selected .hit,
+.marker:focus-visible .hit {
+  fill: var(--mosaik-scheme-highlight);
+  stroke: var(--mosaik-scheme-foreground);
+  stroke-width: 1px;
+}
+.marker:focus-visible {
+  outline: none;
+}
+.user-mark {
+  stroke: var(--mosaik-scheme-foreground);
+  fill: none;
+  stroke-width: 1px;
+}
+.centre {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 46.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  z-index: 1;
+}
+.beam {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  opacity: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 290deg,
+    color-mix(in oklab, var(--mosaik-color-info-500) 22%, transparent) 359deg,
+    transparent 360deg
+  );
+}
+.searching .beam {
+  opacity: 1;
+  animation: search 1.6s linear infinite;
+}
+.listening .centre {
+  animation: breathe 2s ease-in-out infinite;
+}
+.evidence-lines {
+  color: var(--mosaik-color-info-500);
+}
+.evidence-lines line {
+  stroke: currentColor;
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 6;
+  opacity: 0.6;
+  animation: flow 1.2s linear infinite;
+}
+.evidence-lines circle {
+  fill: currentColor;
+  animation: glow 1.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.evidence-focused .evidence-lines {
+  color: var(--mosaik-scheme-foreground);
+}
+.evidence-focused .evidence-lines circle {
+  display: none;
+}
+.evidence-halo {
+  fill: inherit;
+  opacity: 0.25;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: glow 1.4s ease-in-out infinite;
+}
+.clip-arc {
+  fill: none;
+  stroke: var(--mosaik-scheme-foreground);
+  stroke-width: 5px;
+  stroke-linecap: round;
+}
+@keyframes search {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes glow {
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.7;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}

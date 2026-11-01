@@ -1,0 +1,21 @@
+:host,
+span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+svg {
+  width: 24px;
+  height: 24px;
+}
+.tile {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--mosaik-color-primary-500);
+  color: var(--mosaik-color-primary-0);
+}
+.tile svg {
+  width: 18px;
+  height: 18px;
+}

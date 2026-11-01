@@ -1,0 +1,32 @@
+<article class="outline-card" [attr.data-kind]="kind()">
+  <header>
+    <resonanz-marker [kind]="kind()" /><strong>{{ heading() | message }}</strong
+    ><time>{{ atMs() | duration }}</time>
+  </header>
+  @if (before()) {
+    <p class="context">{{ before() }}</p>
+  }
+  <blockquote>„{{ quote() }}“</blockquote>
+  @if (after()) {
+    <p class="context">{{ after() }}</p>
+  }
+  <div class="position" aria-hidden="true">
+    <span [style.left.%]="durationMs() ? (atMs() / durationMs()) * 100 : 0"></span>
+  </div>
+  <footer>
+    <mosaik-button
+      [label]="
+        intl.t('loc.resonanz.session.playFrom', (atMs() - 5000 > 0 ? atMs() - 5000 : 0) | duration)
+      "
+      icon="play"
+      appearance="outline"
+      [disabled]="!audioAvailable()"
+      (click)="play.emit()"
+    /><mosaik-button
+      [label]="'loc.resonanz.session.inTranscript' | translate"
+      icon="open"
+      appearance="plain"
+      (click)="transcript.emit()"
+    />
+  </footer>
+</article>

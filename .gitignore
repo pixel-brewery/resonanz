@@ -1,18 +1,18 @@
-# Betriebssystem
+# Operating system
 .DS_Store
 Thumbs.db
 
-# Lokale Konfiguration und Zugangsdaten
+# Local configuration and credentials
 .env
 .env.*
 !.env.example
 
-# Lokale Aufnahmen und Sessiondaten
+# Local recordings and session data
 /recordings/
 /transcripts/
 /sessions/
 
-# Abhängigkeiten, Builds und Prüfartefakte
+# Dependencies, builds and verification artifacts
 node_modules/
 .codex-work/
 .nx/

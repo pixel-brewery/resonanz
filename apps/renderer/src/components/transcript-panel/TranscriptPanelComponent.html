@@ -1,0 +1,97 @@
+<header>
+  <h2>{{ 'loc.resonanz.session.transcript' | translate }}</h2>
+  <span class="caption">{{ metadata() }}</span>
+  @if (showTools()) {
+    <details class="transcript-menu">
+      <summary [attr.aria-label]="'loc.resonanz.session.more' | translate">···</summary>
+      <div>
+        <mosaik-button
+          test-id="edit-transcript"
+          [label]="'loc.resonanz.common.edit' | translate"
+          appearance="plain"
+          [disabled]="!canEdit()"
+          (click)="request($event, 'edit')"
+        />
+        <mosaik-button
+          test-id="transcribe-session"
+          [label]="'loc.resonanz.session.transcribe' | translate"
+          appearance="plain"
+          [disabled]="!canTranscribe()"
+          (click)="request($event, 'transcribe')"
+        />
+      </div>
+    </details>
+  }
+</header>
+<div class="search">
+  <mosaik-searchbox
+    #searchBox
+    [placeholder]="'loc.resonanz.session.searchTranscript' | translate"
+    [attr.aria-label]="'loc.resonanz.session.searchTranscript' | translate"
+    [formField]="searchForm.text"
+  />
+</div>
+@if (keepSearchContext() && !editing()) {
+  <p
+    class="search-summary caption"
+    [class.has-query]="searchResult().query !== ''"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    test-id="transcript-search-summary"
+  >
+    @if (searchResult().query) {
+      {{
+        intl.t(
+          'loc.resonanz.session.searchHits',
+          intl.number(searchResult().matchCount),
+          searchResult().query
+        )
+      }}
+    }
+  </p>
+}
+<div class="body">
+  @if (editing()) {
+    <ng-content />
+  } @else {
+    <div class="transcript-segments" test-id="transcript-segments">
+      @for (entry of visible(); track entry.id) {
+        @if (entry.kind === 'pause') {
+          <div class="pause-note" role="note" test-id="pause-annotation">
+            <time>{{ entry.startMs | duration }}</time>
+            <span
+              ><strong>{{ entry.text }}</strong
+              ><small>{{ 'loc.resonanz.session.pauseNonSpeech' | translate }}</small></span
+            >
+          </div>
+        } @else {
+          <button
+            [id]="'segment-' + entry.id"
+            [class.selected]="selectedId() === entry.id"
+            [class.search-hit]="keepSearchContext() && searchResult().matchingIds.has(entry.id)"
+            (click)="selected.emit(entry)"
+          >
+            <span class="segment-time"
+              >{{ entry.startMs | duration }}
+              @if (entry.marker) {
+                <resonanz-marker [kind]="entry.marker" [marked]="entry.marked ?? false" />
+              }
+              @if (entry.annotation) {
+                <small>{{ entry.annotation }}</small>
+              }
+            </span>
+            <span><resonanz-highlighted-text [text]="entry.text" [query]="query()" /></span>
+          </button>
+        }
+      } @empty {
+        <p class="caption">
+          {{
+            (query() ? 'loc.resonanz.session.noPassage' : 'loc.resonanz.session.transcriptEmpty')
+              | translate
+          }}
+        </p>
+      }
+    </div>
+  }
+</div>

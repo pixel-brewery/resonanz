@@ -10,8 +10,19 @@ export interface ISettingsFormModel {
   model: string;
   nativeProviderId: string;
   nativeAuthMethod: string;
+  uiLanguage: 'en' | 'de';
   locale: string;
   autoTranscribe: boolean;
   voice: string;
   conversationInstructions: string;
+  appearance: 'system' | 'light' | 'dark';
+  userName: string;
+  addressedAs: string;
+  autoAnalyze: boolean;
+  showMiniRecorder: boolean;
+  silenceReminder: boolean;
+  markPausesInTranscript: boolean;
+  speechRate: number;
+  audioRetentionDays: 'never' | '30' | '90';
+  context: 'transcript' | 'transcriptAndMoments';
 }

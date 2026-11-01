@@ -1,0 +1,223 @@
+@if (presenter.session(); as session) {
+  <div class="ring-layout">
+    <section class="ring-stage" [attr.aria-label]="'loc.resonanz.library.ring' | translate">
+      <resonanz-radial-timeline
+        [values]="presenter.waveform()"
+        [durationMs]="session.durationMs"
+        [positionMs]="presenter.positionMs()"
+        [markers]="presenter.markers()"
+        [chapters]="presenter.chapters()"
+        [selectedChapterId]="presenter.selectedChapterId()"
+        [selectedMarkerId]="presenter.selectedMarkerId()"
+        (chapterSelected)="presenter.selectChapter($event)"
+        (markerSelected)="presenter.selectMarker($event)"
+      >
+        @if (presenter.selectedMarker(); as marker) {
+          <span class="ring-eyebrow"
+            ><resonanz-marker [kind]="marker.kind" />{{ markerLabels[marker.kind] | translate }} ·
+            {{ marker.atMs | duration }}</span
+          >
+          <h2 class="marker-title">{{ marker.label | message }}</h2>
+          @if (presenter.selectedEvidence(); as evidence) {
+            <p class="ring-quote">„{{ evidence.quote }}“</p>
+          }
+        } @else if (presenter.selectedChapter(); as chapter) {
+          @if (presenter.selectedChapterDetails(); as details) {
+            <span class="ring-eyebrow"
+              >{{ intl.t('loc.resonanz.session.chapterNumber', details.ordinal) }} ·
+              {{ chapter.startMs | duration }}–{{ chapter.endMs | duration }}</span
+            >
+          }
+          <h2 class="chapter-title">{{ chapter.title }}</h2>
+          <p class="chapter-summary">{{ chapter.summary }}</p>
+          @if (chapterCounts()) {
+            <p class="chapter-counts">{{ chapterCounts() }}</p>
+          }
+        } @else {
+          <button
+            class="ring-duration"
+            test-id="play-recording"
+            [disabled]="!session.audioAvailable || presenter.capturing()"
+            [attr.aria-label]="
+              presenter.player.isPlaying()
+                ? ('loc.resonanz.capture.pause' | translate)
+                : ('loc.resonanz.session.listenRecording' | translate)
+            "
+            (click)="presenter.togglePlayback()"
+          >
+            {{ session.durationMs | duration }}
+          </button>
+          <p class="ring-counts">
+            {{
+              intl.t(
+                'loc.resonanz.session.overviewCounts',
+                presenter.chapters().length,
+                session.analysis?.decisions?.length ?? 0,
+                session.analysis?.tasks?.length ?? 0,
+                session.analysis?.openQuestions?.length ?? 0
+              )
+            }}
+          </p>
+          <p class="caption">
+            {{
+              presenter.markers().length || presenter.chapters().length
+                ? ('loc.resonanz.session.chooseChapter' | translate)
+                : ('loc.resonanz.session.analysisShape' | translate)
+            }}
+          </p>
+        }</resonanz-radial-timeline
+      ><resonanz-marker-legend [circular]="true" />
+    </section>
+    <aside
+      class="ring-sidebar"
+      [attr.aria-label]="'loc.resonanz.session.chapterSummary' | translate"
+    >
+      <div class="digest-card">
+        <div>
+          <button
+            class="digest-play"
+            [attr.aria-label]="'loc.resonanz.session.digestToggle' | translate"
+            [disabled]="
+              !presenter.digestClips().length || !session.audioAvailable || presenter.capturing()
+            "
+            (click)="presenter.toggleDigest()"
+          >
+            {{ presenter.digestPlaying() ? 'Ⅱ' : '▶' }}
+          </button>
+          <div>
+            <strong>{{ 'loc.resonanz.session.digestTitle' | translate }}</strong
+            ><span
+              >{{ intl.t('loc.resonanz.session.sourceClips', presenter.digestClips().length) }} ·
+              {{ presenter.digestDurationMs() | duration }}
+              @if (presenter.digestIndex() >= 0) {
+                · {{ intl.t('loc.resonanz.session.currentClip', presenter.digestIndex() + 1) }}
+              }
+            </span>
+          </div>
+        </div>
+        <div class="digest-progress" aria-hidden="true">
+          @for (clip of presenter.digestClips(); track clip.evidence.segmentId; let i = $index) {
+            <span [class.current]="i <= presenter.digestIndex()"></span>
+          }
+        </div>
+        <p>{{ 'loc.resonanz.session.digestDescription' | translate }}</p>
+      </div>
+      <div class="section-heading">
+        <h2>{{ 'loc.resonanz.session.chapters' | translate }}</h2>
+        <span class="caption">
+          @if (savedAnalysisProvider(); as provider) {
+            {{ intl.t('loc.resonanz.session.identifiedBy', provider) }}
+          } @else {
+            {{
+              session.analysis
+                ? ('loc.resonanz.marker.assistant' | translate)
+                : ('loc.resonanz.library.notAnalyzed' | translate)
+            }}
+          }
+        </span>
+      </div>
+      @if (presenter.chapters().length) {
+        <div class="chapter-list outline-card">
+          @for (chapter of presenter.chapters(); track chapter.id; let i = $index) {
+            <button
+              [class.selected]="focusedChapterId() === chapter.id"
+              [attr.aria-pressed]="focusedChapterId() === chapter.id"
+              (click)="presenter.selectChapter(chapter)"
+            >
+              <span
+                class="chapter-color"
+                [style.background]="chapterColors[i % chapterColors.length]"
+              ></span
+              ><span
+                ><span class="chapter-heading"
+                  ><strong>{{ chapter.title }}</strong
+                  ><time
+                    >{{ chapter.startMs | duration }}–{{ chapter.endMs | duration }}</time
+                  ></span
+                ><span class="caption">{{ chapter.summary }}</span></span
+              >
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="ring-empty outline-card">
+          <h3>{{ 'loc.resonanz.session.glance' | translate }}</h3>
+          <p class="caption">
+            {{
+              presenter.hasTranscript()
+                ? ('loc.resonanz.session.createAnalysis' | translate)
+                : ('loc.resonanz.error.transcriptBeforeAnalysis' | translate)
+            }}
+          </p>
+        </div>
+      }
+      @if (presenter.selectedMarker()) {
+        @if (presenter.selectedEvidence(); as evidence) {
+          <div class="ring-context-actions">
+            <mosaik-button
+              [label]="'loc.resonanz.session.original' | translate"
+              icon="play"
+              appearance="plain"
+              [disabled]="!session.audioAvailable || presenter.capturing()"
+              (click)="presenter.playExcerpt(evidence)"
+            />
+          </div>
+        }
+      } @else if (presenter.selectedChapter(); as chapter) {
+        <div class="ring-context-actions">
+          <mosaik-button
+            [label]="'loc.resonanz.session.playHere' | translate"
+            icon="play"
+            appearance="plain"
+            [disabled]="!session.audioAvailable || presenter.capturing()"
+            (click)="presenter.seek(chapter.startMs); presenter.togglePlayback()"
+          />
+        </div>
+      }
+      @if (!session.analysis) {
+        <div class="ring-tools">
+          <mosaik-button
+            test-id="analyze-session"
+            [label]="'loc.resonanz.session.analyze' | translate"
+            icon="sparkle"
+            appearance="solid"
+            fit="width"
+            [disabled]="
+              !presenter.hasTranscript() || presenter.running() || presenter.editingTranscript()
+            "
+            (click)="presenter.analyze()"
+          /><mosaik-button
+            test-id="edit-transcript"
+            [label]="'loc.resonanz.session.openTranscript' | translate"
+            icon="comment"
+            appearance="outline"
+            fit="width"
+            (click)="presenter.selectTab('analysis')"
+          /><mosaik-button
+            test-id="transcribe-session"
+            [label]="'loc.resonanz.session.transcribe' | translate"
+            icon="refresh"
+            appearance="plain"
+            fit="width"
+            [disabled]="!session.audioAvailable || presenter.capturing() || presenter.mutating()"
+            (click)="presenter.transcribe()"
+          />
+        </div>
+        @if (presenter.pendingRunId()) {
+          <p class="caption" role="status">
+            {{
+              presenter.runKind() === 'analysis'
+                ? ('loc.resonanz.capture.analysisPending' | translate)
+                : ('loc.resonanz.question.answering' | translate)
+            }}
+          </p>
+          <mosaik-button
+            [label]="'loc.resonanz.common.cancel' | translate"
+            appearance="plain"
+            (click)="presenter.cancelRun()"
+          />
+        }
+      }
+    </aside>
+  </div>
+}

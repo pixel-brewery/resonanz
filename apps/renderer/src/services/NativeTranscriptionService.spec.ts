@@ -174,7 +174,9 @@ describe('NativeTranscriptionService', () => {
     } as AudioBuffer;
     const test = scope(decoded);
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('64 MiB WAV');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.fileLimitDuration',
+    );
 
     expect(decoded.getChannelData).not.toHaveBeenCalled();
     expect(test.close).toHaveBeenCalledOnce();
@@ -191,7 +193,9 @@ describe('NativeTranscriptionService', () => {
     } as AudioBuffer;
     const test = scope(decoded);
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('zu umfangreich');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.audioDecodeSize',
+    );
 
     expect(decoded.getChannelData).not.toHaveBeenCalled();
     expect(test.close).toHaveBeenCalledOnce();
@@ -207,7 +211,9 @@ describe('NativeTranscriptionService', () => {
   ])('rejects invalid decoded dimensions %j', async (invalid) => {
     const test = scope({ ...audio([[0]]), ...invalid } as AudioBuffer);
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('kein unterstütztes Format');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.audioDecodeFormat',
+    );
 
     expect(test.close).toHaveBeenCalledOnce();
   });
@@ -215,7 +221,9 @@ describe('NativeTranscriptionService', () => {
   it('refuses non-finite samples and closes the decoder without submitting native work', async () => {
     const test = scope(audio([[Number.NaN]]));
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('ungültige Audiosamples');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.audioSamples',
+    );
 
     expect(test.close).toHaveBeenCalledOnce();
     expect(test.api.request.mock.calls.some(([method]) => method === 'transcription.run')).toBe(
@@ -227,7 +235,9 @@ describe('NativeTranscriptionService', () => {
     const test = scope();
     Object.assign(test.session, { audioBytes: MAX_BYTES + 1 });
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('64 MiB');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.fileLimitShorten',
+    );
 
     expect(test.fetchMock).not.toHaveBeenCalled();
     expect(test.contexts).toEqual([]);
@@ -241,7 +251,9 @@ describe('NativeTranscriptionService', () => {
       }),
     );
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('64 MiB');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.fileLimit',
+    );
 
     expect(test.contexts).toEqual([]);
   });
@@ -250,10 +262,14 @@ describe('NativeTranscriptionService', () => {
     const test = scope();
     test.fetchMock.mockResolvedValueOnce(new Response(Uint8Array.of(1, 2, 3, 4, 5)));
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('zulässige Größe');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.fileTooLarge',
+    );
 
     test.fetchMock.mockResolvedValueOnce(new Response(Uint8Array.of(1, 2)));
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('unvollständig');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.audioIncomplete',
+    );
     expect(test.contexts).toEqual([]);
   });
 
@@ -262,7 +278,7 @@ describe('NativeTranscriptionService', () => {
     Object.assign(test.session, { audioUrl: 'https://example.test/audio.webm' });
 
     await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
-      'keine gespeicherte Aufnahme',
+      'loc.resonanz.error.recordingMissing',
     );
 
     expect(test.fetchMock).not.toHaveBeenCalled();
@@ -272,7 +288,9 @@ describe('NativeTranscriptionService', () => {
     const test = scope();
     test.decode.mockRejectedValueOnce(new Error('unsupported codec'));
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('nicht dekodiert');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.audioDecode',
+    );
     await test.service.transcribe(SESSION_ID);
 
     expect(test.close).toHaveBeenCalledTimes(2);
@@ -289,7 +307,7 @@ describe('NativeTranscriptionService', () => {
 
     expect(test.service.transcribe(SESSION_ID)).toBe(first);
     await expect(test.service.transcribe('22222222-2222-4222-8222-222222222222')).rejects.toThrow(
-      'läuft bereits',
+      'loc.resonanz.error.fileTranscriptionRunning',
     );
     decoded.resolve(audio([[0]]));
     await first;
@@ -304,7 +322,9 @@ describe('NativeTranscriptionService', () => {
     const test = scope();
     test.capabilities.set({ ...test.capabilities()!, nativeTranscription: false });
 
-    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow('nicht verfügbar');
+    await expect(test.service.transcribe(SESSION_ID)).rejects.toThrow(
+      'loc.resonanz.error.nativeUnavailable',
+    );
 
     expect(test.api.request).not.toHaveBeenCalled();
     expect(test.fetchMock).not.toHaveBeenCalled();

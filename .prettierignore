@@ -10,3 +10,6 @@ yarn.lock
 resources/icons/png
 
 .angular
+
+# Imported skill content is protected by skills-lock.json.
+.agents/skills/architecture/

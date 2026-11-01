@@ -1,0 +1,23 @@
+<section role="status" aria-live="polite" test-id="silence-reminder">
+  <div>
+    <strong>{{ title() }}</strong>
+    <p>{{ description() }}</p>
+  </div>
+  <div class="actions">
+    <mosaik-button
+      test-id="silence-continue"
+      [label]="continueLabel()"
+      appearance="outline"
+      [disabled]="busy()"
+      (click)="continued.emit()"
+    />
+    <mosaik-button
+      test-id="silence-stop"
+      [label]="stopLabel()"
+      appearance="solid"
+      variant="danger"
+      [disabled]="busy()"
+      (click)="stopped.emit()"
+    />
+  </div>
+</section>

@@ -1,0 +1,13 @@
+:host {
+  display: inline;
+}
+mark {
+  color: inherit;
+  background: color-mix(
+    in oklab,
+    var(--mosaik-color-warning-500) 22%,
+    var(--mosaik-scheme-surface)
+  );
+  border-radius: 2px;
+  padding: 0 1px;
+}

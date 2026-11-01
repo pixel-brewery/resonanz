@@ -49,9 +49,7 @@ export class TranscriptCommitQueue {
     }
 
     if (this._pending.size >= 64 && !this._pending.has(segment.id)) {
-      this.fail(
-        new Error('Die Live-Transkriptablage kann nicht mit der Unterhaltung Schritt halten.'),
-      );
+      this.fail(new Error('loc.resonanz.error.liveTranscriptBackpressure'));
       throw this._failure;
     }
 

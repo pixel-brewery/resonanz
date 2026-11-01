@@ -17,8 +17,8 @@ for (const filename of ['vendor/mosaik/provenance.json', 'vendor/synapse/provena
     const digest = createHash('sha256')
       .update(await readFile(path))
       .digest('hex');
-    if (digest !== entry.sha256) throw new Error(`Archiv-Prüfsumme abweichend: ${path}`);
+    if (digest !== entry.sha256) throw new Error(`Archive digest mismatch: ${path}`);
     checked++;
   }
 }
-console.log(`${checked} Paketarchive stimmen mit den dokumentierten SHA-256-Prüfsummen überein.`);
+console.log(`${checked} package archives match the documented SHA-256 digests.`);

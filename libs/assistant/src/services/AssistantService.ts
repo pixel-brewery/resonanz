@@ -2,6 +2,7 @@
 
 import { AuthManager, ProfileManager } from '@pixel-brewery/synapse-auth';
 import type { AuthState, IAuthHandle } from '@pixel-brewery/synapse-auth';
+import { assistantRetryDelay } from '../assistantRetryDelay.js';
 import {
   AiError,
   encodeSessionReference,
@@ -123,8 +124,7 @@ export class AssistantService {
     options: IAssistantServiceOptions,
     dependencies: IAssistantServiceDependencies = {},
   ) {
-    if (!isAbsolute(options.userDataDirectory))
-      throw new Error('Das Resonanz-Datenverzeichnis muss absolut sein.');
+    if (!isAbsolute(options.userDataDirectory)) throw new Error('loc.resonanz.error.dataRoot');
 
     this._root = options.userDataDirectory;
     this._discoveryEnvironment = Object.freeze({ ...options.environment });
@@ -145,7 +145,7 @@ export class AssistantService {
     ];
 
     if (new Set(drivers.map((driver) => driver.id)).size !== drivers.length)
-      throw new Error('Assistenten müssen eindeutige Kennungen besitzen.');
+      throw new Error('loc.resonanz.error.assistantDuplicate');
 
     this._drivers = new Map(drivers.map((driver) => [driver.id, driver]));
     this._resolver = dependencies.resolveExecutable ?? resolveAssistantExecutable;
@@ -207,17 +207,17 @@ export class AssistantService {
       return {
         provider: configuration.provider,
         installed: false,
+        inspectionComplete: false,
         authenticated: false,
         models: [],
         authMethods: [],
-        message: 'Die ausgewählte Assistenten-CLI wurde nicht gefunden.',
+        message: 'loc.resonanz.error.assistantMissing',
       };
 
     const instance = await this.prepare(configuration, executable);
     const driver = this.driver(configuration.provider);
 
-    if (this._inspections.size >= 8)
-      throw new Error('Es laufen bereits zu viele Assistentenprüfungen.');
+    if (this._inspections.size >= 8) throw new Error('loc.resonanz.error.testLimit');
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15_000);
@@ -235,6 +235,7 @@ export class AssistantService {
         return {
           provider: configuration.provider,
           installed: true,
+          inspectionComplete: true,
           executable,
           authenticated: inspection.auth.authenticated,
           ...(inspection.auth.displayName || inspection.auth.accountId
@@ -257,6 +258,8 @@ export class AssistantService {
         return {
           provider: configuration.provider,
           installed: true,
+          inspectionComplete: false,
+          inspectionRetryDelayMs: assistantRetryDelay(cause, Date.now()),
           executable,
           authenticated: accountStatus?.authenticated ?? false,
           ...(accountStatus?.displayName || accountStatus?.accountId
@@ -264,10 +267,7 @@ export class AssistantService {
             : {}),
           models: [],
           authMethods: (driver.auth?.methods(instance) ?? []).map((method) => ({ ...method })),
-          message:
-            cause instanceof AiError
-              ? cause.message
-              : 'Der Anmeldestatus konnte nicht geprüft werden. Eine native Anmeldung ist weiterhin möglich.',
+          message: cause instanceof AiError ? cause.message : 'loc.resonanz.error.assistantStatus',
         };
       } finally {
         release?.(failure);
@@ -302,16 +302,16 @@ export class AssistantService {
       configuration: Object.freeze({ ...request.configuration }),
     });
     this.assertOpen();
-    validateIdentifier(request.runId, 'Ausführung');
+    validateIdentifier(request.runId, 'Run');
     validateIdentifier(request.sessionId, 'Session');
     this.validateConfiguration(request.configuration);
 
     if (!request.prompt.trim() || Buffer.byteLength(request.prompt, 'utf8') > 1024 * 1024)
-      throw new Error('Der Assistentenauftrag ist leer oder zu groß.');
+      throw new Error('loc.resonanz.error.assistantPromptSize');
 
-    if (this._runs.has(request.runId)) throw new Error('Diese Ausführung läuft bereits.');
+    if (this._runs.has(request.runId)) throw new Error('loc.resonanz.error.runActive');
 
-    if (this._runs.size >= 8) throw new Error('Es laufen bereits zu viele Assistentenaufträge.');
+    if (this._runs.size >= 8) throw new Error('loc.resonanz.error.runLimit');
 
     const state: ActiveRun = { controller: new AbortController() };
     const abort = (): void => state.controller.abort();
@@ -367,16 +367,16 @@ export class AssistantService {
     configuration = Object.freeze({ ...configuration });
     this.assertOpen();
 
-    if (this._logins.size >= 4) throw new Error('Es laufen bereits zu viele Anmeldungen.');
+    if (this._logins.size >= 4) throw new Error('loc.resonanz.error.authLimit');
 
     const instance = await this.prepare(configuration);
     const native = this.driver(configuration.provider).auth;
 
-    if (!native) throw new Error('Dieser Assistent unterstützt keine native Anmeldung.');
+    if (!native) throw new Error('loc.resonanz.error.authUnavailable');
 
     this.assertOpen();
 
-    if (this._logins.size >= 4) throw new Error('Es laufen bereits zu viele Anmeldungen.');
+    if (this._logins.size >= 4) throw new Error('loc.resonanz.error.authLimit');
 
     const operationId = randomUUID();
     const handle = this._auth.start(instance, native, {
@@ -423,7 +423,7 @@ export class AssistantService {
     const state = login?.handle.state;
 
     if (!login || state?.state !== 'waiting' || state.interaction.id !== response.interactionId)
-      throw new Error('Diese Anmeldeinteraktion ist nicht mehr aktuell.');
+      throw new Error('loc.resonanz.error.authObsolete');
 
     login.handle.respond({
       ownerId: authenticationOwner,
@@ -464,7 +464,7 @@ export class AssistantService {
     const instance = await this.prepare(configuration);
     const native = this.driver(configuration.provider).auth;
 
-    if (!native) throw new Error('Dieser Assistent unterstützt keine native Abmeldung.');
+    if (!native) throw new Error('loc.resonanz.error.logoutUnavailable');
 
     await this._auth.logout(instance, native);
   }
@@ -517,7 +517,7 @@ export class AssistantService {
       if (this._backgroundFailure) failures.push(this._backgroundFailure);
 
       if (failures.length)
-        throw new AggregateError(failures, 'Die Assistenten wurden nicht vollständig beendet.');
+        throw new AggregateError(failures, 'loc.resonanz.error.assistantShutdown');
     })();
 
     return this._disposal;
@@ -541,8 +541,7 @@ export class AssistantService {
       ? parseSessionReference(request.continuation)
       : undefined;
 
-    if (request.continuation && !continuation)
-      throw new Error('Die gespeicherte Assistentenfortsetzung ist ungültig.');
+    if (request.continuation && !continuation) throw new Error('loc.resonanz.error.continuation');
 
     state.handle = this._runtime.run({
       target: {
@@ -584,7 +583,7 @@ export class AssistantService {
     const id = `resonanz:${configuration.provider}:${account}`;
     const executable = knownExecutable ?? this.executable(configuration);
 
-    if (!executable) throw new Error('Die ausgewählte Assistenten-CLI wurde nicht gefunden.');
+    if (!executable) throw new Error('loc.resonanz.error.assistantMissing');
 
     const nativeConfiguration =
       configuration.provider === 'opencode'
@@ -604,7 +603,7 @@ export class AssistantService {
     if (existing?.fingerprint === fingerprint && !this._preparing.has(id)) return existing.instance;
 
     if (this._preparing.size >= 16 || (!existing && this._instances.size >= 32))
-      throw new Error('Die maximale Anzahl lokaler Assistentenkonten ist erreicht.');
+      throw new Error('loc.resonanz.error.assistantAccounts');
 
     let instance: IAiInstance | undefined;
     const work = (this._preparing.get(id) ?? Promise.resolve()).then(async () => {
@@ -642,7 +641,7 @@ export class AssistantService {
     try {
       await work;
 
-      if (!instance) throw new Error('Das Assistentenkonto konnte nicht vorbereitet werden.');
+      if (!instance) throw new Error('loc.resonanz.error.assistantPrepare');
 
       return instance;
     } finally {
@@ -670,13 +669,14 @@ export class AssistantService {
   private driver(provider: AssistantProvider): AiDriverBase {
     const driver = this._drivers.get(provider);
 
-    if (!driver) throw new Error('Der ausgewählte Assistent ist nicht registriert.');
+    if (!driver) throw new Error('loc.resonanz.error.assistantUnregistered');
 
     return driver;
   }
 
   private validateConfiguration(configuration: IAssistantConfiguration): void {
-    if (!providers.includes(configuration.provider)) throw new Error('Unbekannter Assistent.');
+    if (!providers.includes(configuration.provider))
+      throw new Error('loc.resonanz.error.assistantUnknown');
 
     validateIdentifier(configuration.accountId ?? 'default', 'Konto');
 
@@ -686,7 +686,7 @@ export class AssistantService {
         configuration.executable.length > 4096 ||
         /\p{Cc}/u.test(configuration.executable))
     )
-      throw new Error('Der Assistentenpfad muss eine absolute ausführbare Datei bezeichnen.');
+      throw new Error('loc.resonanz.error.assistantPath');
 
     for (const value of [
       configuration.model,
@@ -697,7 +697,7 @@ export class AssistantService {
         value !== undefined &&
         (!value.trim() || value.length > 512 || value.startsWith('-') || /\p{Cc}/u.test(value))
       )
-        throw new Error('Die native Assistentenkonfiguration ist ungültig.');
+        throw new Error('loc.resonanz.error.assistantConfig');
 
     this.driver(configuration.provider);
   }
@@ -728,7 +728,7 @@ export class AssistantService {
   }
 
   private assertOpen(): void {
-    if (this._disposed) throw new Error('Die Assistentenanbindung wurde bereits beendet.');
+    if (this._disposed) throw new Error('loc.resonanz.error.assistantDisposed');
   }
 
   // #endregion
@@ -736,5 +736,5 @@ export class AssistantService {
 
 function validateIdentifier(value: string, label: string): void {
   if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/u.test(value) || value === '.' || value === '..')
-    throw new Error(`${label} besitzt eine ungültige Kennung.`);
+    throw new Error(`${label} has an invalid identifier.`);
 }

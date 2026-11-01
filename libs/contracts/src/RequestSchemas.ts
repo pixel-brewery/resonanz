@@ -1,6 +1,11 @@
 // #region Imports
 import { z } from 'zod';
 import { dataSchemas } from './DataSchemas.js';
+import {
+  miniRecorderActionSchema,
+  miniRecorderModeSchema,
+  miniRecorderSchema,
+} from './MiniRecorderSchema.js';
 // #endregion
 
 const empty = z.object({}).strict();
@@ -28,6 +33,20 @@ export const requestSchemas = {
     collectionId: dataSchemas.identifier.nullable().optional(),
   }),
   'sessions.get': sessionId,
+  'sessions.search': z.object({ query: z.string().trim().max(200) }),
+  'sessions.mark': sessionId.extend({ moment: dataSchemas.moment }),
+  'sessions.pause': sessionId.extend({ pause: dataSchemas.pause }),
+  'sessions.clear': z.strictObject({ confirm: z.literal(true) }),
+  'sessions.unmark': sessionId.extend({ momentId: dataSchemas.identifier }),
+  'sessions.pipeline': sessionId.extend({
+    stage: z.enum(['transcription', 'analysis']),
+    step: dataSchemas.processingStep.omit({ retryAt: true }).strict(),
+  }),
+  'sessions.retry.cancel': sessionId,
+  'sessions.task': sessionId.extend({ taskId: z.string().min(1).max(200), completed: z.boolean() }),
+  'sessions.waveform': sessionId.extend({
+    values: dataSchemas.sessionSummary.shape.waveform.unwrap(),
+  }),
   'sessions.update': sessionId.extend({
     title: z.string().trim().min(1).max(200).optional(),
     starred: z.boolean().optional(),
@@ -44,6 +63,7 @@ export const requestSchemas = {
   'sessions.ask': sessionId.extend({
     runId: dataSchemas.identifier,
     question: z.string().trim().min(1).max(12_000),
+    context: z.enum(['transcript', 'transcriptAndMoments']).optional(),
   }),
   'sessions.import': empty,
   'sessions.export': sessionId.extend({ format: z.enum(['json', 'markdown', 'audio']) }),
@@ -83,6 +103,7 @@ export const requestSchemas = {
       .optional(),
   }),
   'assistant.status': empty,
+  'assistant.test': empty,
   'assistant.detect': empty,
   'assistant.login.start': z.object({ methodId: z.string().min(1).max(160) }),
   'assistant.login.respond': z.object({
@@ -103,6 +124,8 @@ export const requestSchemas = {
     })
     .strict(),
   'speech.start': sessionId,
+  'dictation.start': sessionId.extend({ operationId: dataSchemas.identifier }),
+  'dictation.stop': sessionId.extend({ operationId: dataSchemas.identifier }),
   'speech.stop': sessionId,
   'speech.listen': sessionId.extend({ enabled: z.boolean() }),
   'speech.synthesize': sessionId.extend({
@@ -114,6 +137,19 @@ export const requestSchemas = {
   'live.respond': sessionId.extend({ runId: dataSchemas.identifier }),
   'external.open': z.object({ url: z.url().max(4096) }),
   'window.show': empty,
+  'window.present': z.strictObject({ surface: z.enum(['workspace', 'settings', 'onboarding']) }),
+  'capture.reminder': sessionId
+    .extend({ reminderId: dataSchemas.identifier, visible: z.boolean() })
+    .strict(),
+  'mini.update': miniRecorderSchema,
+  'mini.get': empty,
+  'mini.action': miniRecorderActionSchema,
+  'mini.resize': z.strictObject({ mode: miniRecorderModeSchema }),
+  'window.tray': empty,
+  'window.tray.resize': z.strictObject({ height: z.number().int().min(1).max(4096) }),
+  'storage.reveal': empty,
+  'storage.usage': empty,
+  'storage.cleanup': empty,
   'window.hide': empty,
   'app.quit': empty,
 } as const;

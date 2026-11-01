@@ -12,6 +12,10 @@ import type { IAssistantAuthMethod } from './IAssistantAuthMethod.js';
  * @public
  */
 export interface IAssistantStatus extends IAssistantInstallation {
+  /** Host-only evidence: false when metadata inspection failed despite independently verified auth. */
+  readonly inspectionComplete?: boolean;
+  /** Structured recovery metadata for host-only automatic work; never infer it from message text. */
+  readonly inspectionRetryDelayMs?: number | null;
   /**
    * Whether the native CLI verified the selected account as authenticated.
    */

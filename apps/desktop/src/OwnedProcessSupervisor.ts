@@ -105,10 +105,7 @@ export class OwnedProcessSupervisor {
       }
     }
     if (failures.length)
-      throw new Error(
-        'Native Assistentenprozesse konnten nicht sicher bereinigt werden. Der Hintergrunddienst wird nicht automatisch ersetzt.',
-        { cause: new AggregateError(failures) },
-      );
+      throw new Error('loc.resonanz.error.nativeCleanup', { cause: new AggregateError(failures) });
   }
   private target(record: IOwnedRecord): number {
     return record.detached && process.platform !== 'win32' ? -record.pid : record.pid;

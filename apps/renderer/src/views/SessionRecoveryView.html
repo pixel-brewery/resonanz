@@ -1,0 +1,149 @@
+@if (presenter.session(); as session) {
+  <div class="recovery" test-id="session-recovery">
+    <main>
+      <resonanz-pipeline-steps [items]="presenter.pipelineItems()" />
+      <section class="recovery-card">
+        <div>
+          <h2>{{ title() }}</h2>
+          <p>
+            {{
+              (stage() === 'transcription'
+                ? 'loc.resonanz.recovery.transcriptionDescription'
+                : retryAt()
+                  ? 'loc.resonanz.recovery.descriptionAutomatic'
+                  : 'loc.resonanz.recovery.description'
+              ) | translate
+            }}
+          </p>
+        </div>
+        <div class="diagnostics">
+          <div>
+            <span class="status-circle" [class.success]="status()?.installed">{{
+              status()?.installed ? '✓' : '!'
+            }}</span
+            ><span>{{ intl.t('loc.resonanz.recovery.installation', assistant()) }}</span
+            ><small>{{
+              status()?.executable ?? ('loc.resonanz.nav.notChecked' | translate)
+            }}</small>
+          </div>
+          <div>
+            <span class="status-circle" [class.success]="status()?.authenticated">{{
+              status()?.authenticated ? '✓' : '!'
+            }}</span
+            ><span>{{ 'loc.resonanz.recovery.account' | translate }}</span
+            ><small>{{ loginLabel() }}</small>
+          </div>
+          <div>
+            <span class="status-circle">↻</span
+            ><span>{{
+              (retryAt()
+                ? 'loc.resonanz.recovery.nextAutomaticAttempt'
+                : 'loc.resonanz.recovery.nextAttempt'
+              ) | translate
+            }}</span
+            ><small test-id="analysis-retry-deadline">{{ retryWait() }}</small>
+            @if (retryAt()) {
+              <mosaik-button
+                test-id="cancel-analysis-retry"
+                icon="close"
+                size="small"
+                appearance="plain"
+                [attr.aria-label]="'loc.resonanz.recovery.cancelRetry' | translate"
+                [attr.title]="'loc.resonanz.recovery.cancelRetry' | translate"
+                [disabled]="presenter.mutating()"
+                (click)="presenter.cancelAnalysisRetry()"
+              />
+            }
+          </div>
+        </div>
+        @if (error()) {
+          <p class="error" role="status">{{ error() | message }}</p>
+        }
+        <div class="account-action">
+          <span>{{ 'loc.resonanz.recovery.signInHint' | translate }}</span>
+          <div>
+            <span>{{ assistant() }}</span
+            ><mosaik-button
+              icon="copy"
+              appearance="plain"
+              [attr.aria-label]="'loc.resonanz.recovery.copyDiagnostics' | translate"
+              (click)="copyDiagnostics()"
+            />
+          </div>
+        </div>
+        <div class="actions">
+          <mosaik-button
+            test-id="retry-processing"
+            [label]="'loc.resonanz.common.retry' | translate"
+            icon="refresh"
+            appearance="solid"
+            [disabled]="presenter.running() || presenter.mutating()"
+            (click)="retry()"
+          /><mosaik-button
+            routerLink="/settings"
+            [label]="
+              (stage() === 'analysis'
+                ? 'loc.resonanz.auth.connect'
+                : 'loc.resonanz.onboarding.openSettings'
+              ) | translate
+            "
+            icon="open"
+            appearance="outline"
+          /><mosaik-button
+            routerLink="/settings"
+            [label]="'loc.resonanz.recovery.changeAssistant' | translate"
+            appearance="outline"
+          />
+        </div>
+        <p class="caption">{{ 'loc.resonanz.recovery.explicitAccount' | translate }}</p>
+      </section>
+      <section class="available">
+        <h3>{{ 'loc.resonanz.recovery.available' | translate }}</h3>
+        <div class="available-actions">
+          <button
+            class="available-action"
+            [disabled]="!session.audioAvailable || presenter.capturing()"
+            (click)="presenter.togglePlayback()"
+          >
+            <mosaik-icon icon="play" /><strong>{{
+              'loc.resonanz.session.listenRecording' | translate
+            }}</strong
+            ><span>{{ 'loc.resonanz.recovery.audioHint' | translate }}</span>
+          </button>
+          <button
+            class="available-action"
+            test-id="search-recovery-transcript"
+            (click)="transcript.focusSearch()"
+          >
+            <mosaik-icon icon="search" /><strong>{{
+              'loc.resonanz.session.searchTranscript' | translate
+            }}</strong
+            ><span>{{ 'loc.resonanz.recovery.searchHint' | translate }}</span>
+          </button>
+          <button
+            class="available-action"
+            [disabled]="!presenter.hasTranscript()"
+            (click)="presenter.copyTranscript()"
+          >
+            <mosaik-icon icon="copy" /><strong>{{
+              'loc.resonanz.recovery.copyTranscript' | translate
+            }}</strong
+            ><span>{{ 'loc.resonanz.recovery.copyHint' | translate }}</span>
+          </button>
+        </div>
+      </section>
+    </main>
+    <resonanz-transcript-panel
+      #transcript
+      class="transcript"
+      [entries]="presenter.transcriptEntries()"
+      [query]="presenter.transcriptSearch()"
+      (queryChange)="presenter.setTranscriptSearch($event)"
+      [metadata]="presenter.transcriptMetadata()"
+      [selectedId]="presenter.selectedEvidence()?.segmentId ?? null"
+      [showTools]="false"
+      [keepSearchContext]="true"
+      (selected)="presenter.selectTranscript($event)"
+    />
+  </div>
+}

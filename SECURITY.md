@@ -1,33 +1,22 @@
-# Sicherheitsmeldungen
+# Security reporting
 
-Bitte melde Sicherheitslücken über die aktivierte
-[private GitHub-Meldung](https://github.com/pixel-brewery/resonanz/security/advisories/new).
-Veröffentliche Exploitdetails, Zugangsdaten, Anmeldelinks oder persönliche
-Gesprächsinhalte nicht in öffentlichen Issues oder Pull Requests.
+Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/pixel-brewery/resonanz/security/advisories/new).
+Do not publish exploit details, credentials, sign-in links or private recordings in
+public issues or pull requests. Revoke exposed credentials with their provider first.
 
-Hilfreich sind die betroffene Version beziehungsweise der Commit, Betriebssystem,
-CLI-Version, eine minimale Reproduktion mit künstlichen Daten und eine
-Beschreibung von Auswirkung und erwartetem Verhalten. Bereits veröffentlichte
-Zugangsdaten bitte zuerst beim jeweiligen Anbieter widerrufen.
+Include the affected version/commit, OS, CLI version, a minimal reproduction using
+synthetic data and the expected behavior and impact.
 
-## Betroffener Bereich
+## Scope
 
-Resonanz verarbeitet Mikrofonaufnahmen, lokale Sessiondateien und die native
-Kontoanmeldung installierter KI-Assistenten. Relevante Meldungen betreffen etwa
-Dateizugriff und Import/Export, die Renderer-/Host-Grenze, Profiltrennung,
-Prozesslebenszyklen oder den Umgang mit Aufnahmen und Zugangsdaten.
+Relevant areas include local recording/session files, import/export, renderer/host
+boundaries, account isolation, process ownership and handling of native credentials.
+The renderer has no Node or general filesystem access. Validated native operations
+and Synapse/CLI account execution remain separate owners. See
+[architecture](docs/architecture/README.md) and [verification](docs/project/verification.md).
+Passing tests are not a general security guarantee.
 
-Der Renderer besitzt keine Node- oder allgemeinen Dateisystemrechte. Native
-Operationen laufen über validierte Verträge; Assistentenanmeldung und Inferenz
-bleiben bei Synapse und der jeweiligen CLI. Diese Grenzen und ihre aktuellen
-Nachweise stehen in der [Architektur](docs/architecture/README.md) und
-[Abnahme](docs/project/abnahme.md). Bestandene Tests sind keine pauschale
-Sicherheitsgarantie.
-
-## Unterstützter Stand
-
-Resonanz befindet sich im Prototypstadium. Bitte beziehe Meldungen auf den
-aktuellen Hauptbranch oder benenne den geprüften Commit ausdrücklich. Eine
-Wartungszusage für ältere Versionen oder feste Reaktionsfristen ist noch nicht
-festgelegt. Schwachstellen eines externen Dienstes oder einer nativen CLI sollten
-zusätzlich über den Meldeweg des betreffenden Anbieters gemeldet werden.
+Resonanz is a prototype. Report against current main or name the tested commit.
+Older-version maintenance commitments and fixed response deadlines are not established.
+External service or CLI vulnerabilities should also be reported to their respective
+providers.

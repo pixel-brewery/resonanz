@@ -1,0 +1,55 @@
+<div class="backdrop" (click)="cancelled.emit()"></div>
+<section
+  role="alertdialog"
+  aria-modal="true"
+  aria-labelledby="delete-title"
+  aria-describedby="delete-description"
+  [attr.aria-busy]="busy()"
+  resonanzModal
+  (modalDismiss)="cancelled.emit()"
+>
+  <div class="introduction">
+    <h2 id="delete-title">{{ intl.t('loc.resonanz.delete.title', title()) }}</h2>
+    <p id="delete-description">{{ 'loc.resonanz.delete.contentsIntro' | translate }}</p>
+  </div>
+  <div class="contents">
+    <div class="content-row">
+      <mosaik-icon icon="play" size="small" aria-hidden="true" />
+      <span class="content-label">{{ 'loc.resonanz.capture.recording' | translate }}</span>
+      <span class="content-detail">
+        @if (audioAvailable() || audioBytes() > 0) {
+          {{ durationMs() | duration }} · {{ intl.number(audioBytes() / 1048576, 1) }} MB
+        } @else {
+          {{ 'loc.resonanz.delete.none' | translate }}
+        }
+      </span>
+    </div>
+    <div class="content-row">
+      <mosaik-icon icon="comment" size="small" aria-hidden="true" />
+      <span class="content-label">{{ 'loc.resonanz.session.transcript' | translate }}</span>
+      <span class="content-detail">{{ transcriptDetails() }}</span>
+    </div>
+    <div class="content-row">
+      <mosaik-icon icon="sparkle" size="small" aria-hidden="true" />
+      <span class="content-label">{{ 'loc.resonanz.session.analysisFeatures' | translate }}</span>
+      <span class="content-detail">{{ analysisDetails() }}</span>
+    </div>
+  </div>
+  <p class="caption">{{ 'loc.resonanz.delete.external' | translate }}</p>
+  <footer>
+    <mosaik-button
+      [label]="'loc.resonanz.common.cancel' | translate"
+      appearance="outline"
+      [disabled]="busy()"
+      (click)="cancelled.emit()"
+    /><mosaik-button
+      test-id="confirm-delete-session"
+      [label]="'loc.resonanz.delete.final' | translate"
+      icon="trash"
+      appearance="solid"
+      variant="danger"
+      [disabled]="busy()"
+      (click)="confirmed.emit()"
+    />
+  </footer>
+</section>

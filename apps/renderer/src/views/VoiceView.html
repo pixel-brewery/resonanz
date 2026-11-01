@@ -1,0 +1,212 @@
+<div class="voice" test-id="voice-view" [attr.data-state]="presenter.state()">
+  <header class="voice-header">
+    <mosaik-button
+      [routerLink]="
+        presenter.session.session() ? ['/session', presenter.session.session()?.id] : ['/']
+      "
+      [label]="
+        (presenter.session.session()
+          ? 'loc.resonanz.session.toSession'
+          : 'loc.resonanz.session.back'
+        ) | translate
+      "
+      icon="chevronLeft"
+      appearance="plain"
+    />
+    <div>
+      <h1>
+        {{
+          presenter.session.session()
+            ? intl.t('loc.resonanz.voice.sessionTitle', presenter.session.session()?.title ?? '')
+            : ('loc.resonanz.voice.title' | translate)
+        }}
+      </h1>
+      <span class="caption">
+        @if (presenter.session.session()) {
+          {{ presenter.headerMetadata() }}
+        } @else {
+          {{ presenter.assistantName() }} · {{ presenter.recognitionName() }}
+        }
+      </span>
+    </div>
+    <mosaik-button
+      [routerLink]="
+        presenter.session.session() ? ['/session', presenter.session.session()?.id] : ['/settings']
+      "
+      [queryParams]="{ tab: 'questions' }"
+      [label]="'loc.resonanz.voice.type' | translate"
+      icon="comment"
+      appearance="plain"
+    />
+  </header>
+  <div class="voice-stage">
+    <resonanz-radial-timeline
+      class="voice-ring"
+      [values]="presenter.session.waveform()"
+      [markers]="presenter.session.markers()"
+      [chapters]="presenter.voiceChapters()"
+      [durationMs]="presenter.session.session()?.durationMs ?? 0"
+      [positionMs]="presenter.session.positionMs()"
+      [showPlayhead]="false"
+      [state]="presenter.state()"
+      [waveformTone]="'subtle'"
+      [focusEvidence]="presenter.state() !== 'idle' && !presenter.liveHere()"
+      [evidenceMs]="
+        presenter.state() === 'answer' || presenter.state() === 'playing'
+          ? presenter.evidenceMs()
+          : []
+      "
+      [playbackRange]="presenter.state() === 'playing' ? presenter.originalRange() : null"
+      [selectedChapterId]="presenter.session.selectedChapterId()"
+      (chapterSelected)="presenter.session.selectChapter($event)"
+      (markerSelected)="presenter.session.selectMarker($event)"
+    >
+      <div class="voice-response" role="status" aria-live="polite" test-id="voice-response">
+        <span class="voice-status"
+          ><span
+            class="status-dot"
+            [class.recording]="presenter.state() === 'listening'"
+            [class.searching]="presenter.state() === 'searching'"
+            [class.success]="presenter.state() === 'answer' || presenter.state() === 'playing'"
+          ></span
+          >{{ presenter.statusLabel() }}</span
+        >
+        @if (presenter.question()) {
+          <p class="spoken-question">„{{ presenter.question() }}“</p>
+        }
+        @if (
+          presenter.state() === 'answer' ||
+          presenter.state() === 'gap' ||
+          presenter.state() === 'playing'
+        ) {
+          <h2 class="spoken-answer">{{ presenter.answer() }}</h2>
+          @if (presenter.state() === 'playing' && presenter.activeEvidence(); as evidence) {
+            <p class="original-quote">
+              {{
+                intl.t('loc.resonanz.voice.originalQuote', evidence.atMs | duration, evidence.quote)
+              }}
+            </p>
+          }
+        } @else if (presenter.state() === 'idle') {
+          <h2 class="spoken-answer">
+            {{
+              (presenter.session.session() ? 'loc.resonanz.voice.hint' : 'loc.resonanz.voice.start')
+                | translate
+            }}
+          </h2>
+        }
+      </div>
+    </resonanz-radial-timeline>
+  </div>
+  <footer class="voice-footer">
+    <div class="voice-suggestions">
+      @if (presenter.session.hasTranscript() && !presenter.liveHere()) {
+        @for (question of presenter.suggestions(); track question) {
+          <mosaik-chip
+            [label]="question | translate"
+            appearance="outline"
+            role="button"
+            [disabled]="!presenter.canAsk()"
+            [attr.aria-disabled]="!presenter.canAsk()"
+            [attr.tabindex]="presenter.canAsk() ? 0 : -1"
+            (click)="presenter.ask(intl.message(question))"
+            (keydown)="askWithKey($event, question)"
+          />
+        }
+      }
+    </div>
+    <div class="voice-controls">
+      <mosaik-button
+        test-id="voice-original"
+        [label]="
+          (presenter.state() === 'playing'
+            ? 'loc.resonanz.voice.originalPlaying'
+            : 'loc.resonanz.session.original'
+          ) | translate
+        "
+        [icon]="presenter.state() === 'playing' ? 'pause' : 'play'"
+        appearance="outline"
+        [disabled]="!presenter.canPlayOriginal()"
+        (click)="presenter.playOriginal()"
+      />
+      <button
+        class="microphone"
+        test-id="voice-microphone"
+        [class.active]="presenter.interruptible()"
+        [disabled]="presenter.capture.busy()"
+        [attr.aria-label]="
+          (presenter.interruptible() ? 'loc.resonanz.capture.interrupt' : 'loc.resonanz.nav.voice')
+            | translate
+        "
+        (click)="presenter.microphone()"
+      >
+        @if (presenter.interruptible()) {
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+        } @else {
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="3" width="6" height="12" rx="3" />
+            <path d="M5.5 10.5a6.5 6.5 0 0 0 13 0M12 17v4M9 21h6" />
+          </svg>
+        }
+      </button>
+      <mosaik-button
+        test-id="voice-save-note"
+        [label]="
+          (presenter.state() === 'gap'
+            ? presenter.noteSaved()
+              ? 'loc.resonanz.question.openQuestionSaved'
+              : 'loc.resonanz.question.saveOpenQuestion'
+            : presenter.noteSaved()
+              ? 'loc.resonanz.question.noteSaved'
+              : 'loc.resonanz.question.saveNote'
+          ) | translate
+        "
+        icon="save"
+        appearance="outline"
+        [disabled]="!presenter.lastAnswer() || presenter.noteSaved() || presenter.noteSaving()"
+        (click)="presenter.saveNote()"
+      />
+    </div>
+    @if (presenter.liveHere()) {
+      <div class="live-controls">
+        <mosaik-button
+          [label]="'loc.resonanz.capture.interrupt' | translate"
+          test-id="live-interrupt"
+          appearance="plain"
+          (click)="presenter.capture.interrupt()"
+        />
+        <mosaik-button
+          [label]="
+            (presenter.capture.live().microphoneMuted
+              ? 'loc.resonanz.capture.unmute'
+              : 'loc.resonanz.capture.mute'
+            ) | translate
+          "
+          appearance="plain"
+          (click)="presenter.capture.muteMicrophone()"
+        />
+        <mosaik-button
+          test-id="voice-end"
+          [label]="'loc.resonanz.voice.stop' | translate"
+          appearance="plain"
+          variant="danger"
+          (click)="presenter.capture.stop()"
+        />
+      </div>
+    }
+    <span class="caption">{{
+      presenter.interruptible()
+        ? ('loc.resonanz.voice.interruptHint' | translate)
+        : intl.t('loc.resonanz.voice.promptShortcut', presenter.shortcut())
+    }}</span>
+  </footer>
+</div>

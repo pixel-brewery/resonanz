@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.login-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+mosaik-card,
+mosaik-textbox,
+mosaik-passwordbox {
+  width: 100%;
+}

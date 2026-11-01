@@ -1,0 +1,24 @@
+:host {
+  display: inline-flex;
+  vertical-align: baseline;
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 6px;
+  color: inherit;
+  background: var(--mosaik-scheme-surface);
+  font: 500 11px/1.4 var(--mosaik-font-family, Georgia, serif);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  white-space: nowrap;
+}
+button.selected,
+button:focus-visible {
+  outline: none;
+  border-color: var(--mosaik-color-info-500);
+  background: color-mix(in oklab, var(--mosaik-color-info-500) 8%, var(--mosaik-scheme-surface));
+}

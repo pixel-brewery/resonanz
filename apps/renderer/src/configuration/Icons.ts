@@ -23,7 +23,12 @@ import {
   reiconUpload,
   reiconVolumeHigh,
   reiconX,
+  reiconFolderOpen,
+  reiconChevronLeft,
+  reiconEdit,
+  reiconUser,
 } from '@pixel-brewery/mosaik-icons/reicon';
+import { lobeClaude, lobeOpenai } from '@pixel-brewery/mosaik-icons/lobe-icons';
 // #endregion
 
 /** Explicit product icons supplement the complete Foundation Reicon preset. */
@@ -51,4 +56,10 @@ export const icons = {
   import: reiconUpload,
   speaker: reiconVolumeHigh,
   close: reiconX,
+  folderOpen: reiconFolderOpen,
+  chevronLeft: reiconChevronLeft,
+  edit: reiconEdit,
+  person: reiconUser,
+  claude: lobeClaude,
+  openai: lobeOpenai,
 } as const;

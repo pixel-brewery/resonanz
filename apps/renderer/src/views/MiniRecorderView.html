@@ -1,0 +1,20 @@
+@if (snapshot().active) {
+  <resonanz-mini-recorder
+    test-id="native-mini-recorder"
+    [contextKey]="snapshot().sessionId ?? ''"
+    [durationMs]="snapshot().durationMs"
+    [level]="snapshot().level"
+    [paused]="snapshot().paused"
+    [busy]="snapshot().busy"
+    [feedback]="snapshot().feedback"
+    (mark)="act('mark')"
+    (togglePause)="act('pause')"
+    (stop)="act('stop')"
+    (expand)="act('open')"
+    (undo)="act('undo')"
+    (modeChange)="resize($event)"
+  />
+}
+@if (error()) {
+  <span class="surface-error" role="alert" [title]="error()">{{ error() }}</span>
+}

@@ -1,0 +1,58 @@
+article {
+  --evidence-color: var(--mosaik-color-info-500);
+  padding: 14px;
+}
+article[data-kind='task'] {
+  --evidence-color: var(--mosaik-color-warning-500);
+}
+article[data-kind='question'] {
+  --evidence-color: var(--mosaik-color-highlight-500);
+}
+article[data-kind='moment'] {
+  --evidence-color: var(--mosaik-scheme-middlelight);
+}
+header {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+time {
+  margin-left: auto;
+  font: var(--mosaik-typography-caption);
+  color: var(--mosaik-scheme-lowlight);
+  font-variant-numeric: tabular-nums;
+}
+.context {
+  font: var(--mosaik-typography-caption);
+  line-height: 1.5;
+  color: var(--mosaik-scheme-lowlight);
+  margin: 14px 0;
+}
+blockquote {
+  margin: 14px 0;
+  padding: 12px;
+  background: color-mix(in oklab, var(--evidence-color) 11%, var(--mosaik-scheme-surface));
+  border-radius: 8px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+.position {
+  height: 5px;
+  position: relative;
+  border-radius: 3px;
+  background: var(--mosaik-scheme-highlight);
+  margin: 14px 0 10px;
+}
+.position > span {
+  position: absolute;
+  height: 12px;
+  width: 4px;
+  top: -3px;
+  background: var(--mosaik-scheme-foreground);
+  border-radius: 2px;
+}
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--mosaik-scheme-highlight);
+  border-radius: 10px;
+  background: var(--mosaik-scheme-surface);
+}
+mosaik-checkbox {
+  flex: 0 0 auto;
+}
+.task-label {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+.completed .task-label {
+  text-decoration: line-through;
+  color: var(--mosaik-scheme-lowlight);
+}
+.secondary {
+  max-width: 40%;
+  white-space: nowrap;
+  color: var(--mosaik-scheme-lowlight);
+  font: var(--mosaik-typography-caption);
+}
+.warning {
+  color: var(--mosaik-color-warning-600);
+}
+button:focus-visible {
+  outline: 2px solid var(--mosaik-color-info-500);
+  outline-offset: 3px;
+}
