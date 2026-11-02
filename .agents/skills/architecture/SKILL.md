@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Shared engineering foundations for architecture, implementation, refactoring, contracts, lifecycle and testing. Apply with a repository's derived architecture skill and local rules; select only the relevant domain modules.
+description: Shared engineering foundations for repository structure, architecture, implementation, refactoring, contracts, lifecycle and testing. Apply with a repository's derived architecture skill and local rules; select only the relevant domain modules.
 ---
 
 # Architecture foundations
@@ -16,8 +16,11 @@ This is the shared base for repository-specific architecture skills. Read the de
 5. Preserve documented local rules and deliberate adaptations. Resolve a real conflict explicitly against the user's instructions and the most specific applicable project contract; do not silently drop a foundation or waive a structural rule because an example uses another stack. Executable configuration resolves stale paths, versions and tooling assumptions.
 6. Complete the task-scoped owner/drift pass, focused verification and applicable local documentation gates. Ordinary engineering work does not imply a full architecture report, Definition of Done, release, external write or permission to message others.
 
+For repository setup or structural work, read [Repository structure](references/common/repository-structure.md) alongside the relevant production guide. This includes creating applications/packages, placing or extracting owners, relocating code, and organizing documentation, tooling or database lifecycle. Apply the matching application, library or skill profile; existing deliberate layouts change through scoped migration rather than incidental feature work.
+
 | Boundary | Shared foundation |
 | --- | --- |
+| Repository layout, application/package placement, documentation and tooling ownership | [Repository structure](references/common/repository-structure.md) |
 | Solution design, ownership, extraction, refactoring, migration | [Architecture](references/common/architecture.md) |
 | TypeScript abstraction, SOLID, composition, source/API documentation | [OOP and design patterns](references/common/oop.md) |
 | Application services, orchestration, persistence, errors | [Backend](references/common/backend.md) |

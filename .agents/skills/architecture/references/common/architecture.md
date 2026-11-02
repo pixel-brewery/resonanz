@@ -2,6 +2,8 @@
 
 Read for solution design, cross-cutting concerns, refactoring, competing implementations, shared capabilities and migrations. Apply the [workflow](workflow.md) and the local project boundaries.
 
+For repository layout, application/package placement or an owner relocation, also read the [repository structure recommendation](repository-structure.md). Select its applicable profile while preserving deliberate local owners until a scoped migration changes them.
+
 ## Calibrate the design
 
 - Local behavior has one owner and no evidenced substitution, compatibility or operational concern: keep it local.
