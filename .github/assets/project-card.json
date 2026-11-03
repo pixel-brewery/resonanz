@@ -1,24 +1,19 @@
 {
   "schemaVersion": 1,
+  "language": "en",
   "project": {
     "name": "Resonanz",
     "slug": "resonanz",
     "website": "https://github.com/pixel-brewery/resonanz",
     "repository": "https://github.com/pixel-brewery/resonanz"
   },
-  "description": {
-    "en": "Resonanz brings recordings, transcripts and marked decisions together in sessions you can revisit. Use installed assistants for summaries, follow-up questions linked to original passages, and live voice conversations.",
-    "de": "Resonanz verbindet Aufnahmen, Transkripte und markierte Entscheidungen zu wiederauffindbaren Sitzungen. Installierte Assistenten ermöglichen Zusammenfassungen, Rückfragen mit Bezug zu Originalstellen und direkte Sprachgespräche."
-  },
+  "description": "Resonanz brings recordings, transcripts and marked decisions together in sessions you can revisit. Use installed assistants for summaries, follow-up questions linked to original passages, and live voice conversations.",
   "image": {
     "file": "project-card.webp",
     "format": "webp",
     "width": 960,
     "height": 540,
-    "alt": {
-      "en": "Resonanz's acoustic mark beside a circular waveform, chapter markers and transcript panels.",
-      "de": "Resonanz' Akustikmarke neben einer kreisförmigen Wellenform, Kapitelmarkierungen und Transkriptelementen."
-    }
+    "alt": "Resonanz's acoustic mark beside a circular waveform, chapter markers and transcript panels."
   },
   "artwork": {
     "kind": "illustration",
