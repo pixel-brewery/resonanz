@@ -4,9 +4,9 @@
 
 # Resonanz
 
-**Record conversations, talk with AI, and revisit every decision.**
+**Turn scattered meeting knowledge into decisions you can trace.**
 
-Native speech. Local assistant accounts. Session timelines. No additional API keys.
+Keep the conversation, understand the context, and see who is responsible for what.
 
 [![Repository Quality](https://img.shields.io/github/actions/workflow/status/pixel-brewery/resonanz/ci.yml?branch=main&style=flat-square&label=quality)](https://github.com/pixel-brewery/resonanz/actions/workflows/ci.yml)
 [![Continuous Desktop Release](https://img.shields.io/github/actions/workflow/status/pixel-brewery/resonanz/release.yml?branch=main&style=flat-square&label=desktop%20release)](https://github.com/pixel-brewery/resonanz/actions/workflows/release.yml)
@@ -17,6 +17,22 @@ Native speech. Local assistant accounts. Session timelines. No additional API ke
 > **Desktop prototype.** The [verification record](docs/project/verification.md)
 > distinguishes controlled desktop checks, earlier real speech and assistant-account
 > checks, and native installation evidence. A passing fixture is evidence for its own scope.
+
+## Why Resonanz exists
+
+After a meeting, the information rarely stays together. One person has the notes,
+another holds the minutes, documents arrive by email or live on a shared drive,
+and part of the conversation survives only in someone's memory. Finding a file
+does not necessarily tell you what was agreed, why it matters or who owns the next step.
+
+Resonanz grew from the need for one place to understand that meeting context.
+Its vision is to bring the scattered knowledge together and use AI to make
+decisions, responsibilities and original statements easy to follow.
+
+Today's desktop application builds that foundation around recordings, transcripts,
+markers and linked analysis. Summaries, tasks and follow-up answers stay connected
+to their source passages, so you can check what was actually said and return to
+the evidence behind a decision.
 
 ## From conversation to session
 

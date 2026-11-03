@@ -60,8 +60,10 @@ test('skips prose, README text, root notices and documentation artwork without i
     'COPYING',
     'docs/images/example.svg',
     '.github/assets/wortlaut-hero.png',
-    'docs/screen with\na newline.webp',
+    'docs/screen with spaces.webp',
   ];
+  // Windows filenames cannot contain control characters; keep newline-path coverage on POSIX.
+  if (process.platform !== 'win32') files.push('docs/screen with\na newline.webp');
   files.forEach((path) => repository.write(path, 'documentation update\n'));
   const after = repository.commit();
 
