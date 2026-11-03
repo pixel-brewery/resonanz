@@ -32,9 +32,29 @@ env:
   YARN_VERSION: 4.10.3
 
 jobs:
+  changes:
+    name: Classify release changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      documentation_only: ${{ steps.changes.outputs.documentation_only }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Compare the automatic release source
+        id: changes
+        run: node .github/scripts/classifyCiChanges.mjs
+
   configure:
     name: Prepare one immutable release candidate
-    if: github.repository_id == '1440725741' && github.ref == 'refs/heads/main'
+    needs: changes
+    if: github.repository_id == '1440725741' && github.ref == 'refs/heads/main' && needs.changes.outputs.documentation_only == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:

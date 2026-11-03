@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "Resonanz",
+    "slug": "resonanz",
+    "website": "https://github.com/pixel-brewery/resonanz",
+    "repository": "https://github.com/pixel-brewery/resonanz"
+  },
+  "description": {
+    "en": "Resonanz brings recordings, transcripts and marked decisions together in sessions you can revisit. Use installed assistants for summaries, follow-up questions linked to original passages, and live voice conversations.",
+    "de": "Resonanz verbindet Aufnahmen, Transkripte und markierte Entscheidungen zu wiederauffindbaren Sitzungen. Installierte Assistenten ermöglichen Zusammenfassungen, Rückfragen mit Bezug zu Originalstellen und direkte Sprachgespräche."
+  },
+  "image": {
+    "file": "project-card.webp",
+    "format": "webp",
+    "width": 960,
+    "height": 540,
+    "alt": {
+      "en": "Resonanz's acoustic mark beside a circular waveform, chapter markers and transcript panels.",
+      "de": "Resonanz' Akustikmarke neben einer kreisförmigen Wellenform, Kapitelmarkierungen und Transkriptelementen."
+    }
+  },
+  "artwork": {
+    "kind": "illustration",
+    "generator": "Built-in Imagegen",
+    "generatedOn": "2026-11-03",
+    "prompt": "Use case: ads-marketing. Asset: compact portfolio project card in a SEVEN-PROJECT MATCHED SERIES. Image 1 is the Mosaik MASTER CARD: match its 16:9 landscape framing, composition, typography scale, pure white / very light warm-gray seamless background, soft studio lighting, grounded shadows, restrained tactile ceramic/glass materials, generous 7% safe margins and premium editorial quality. Request target 1280x720. Brand lockup occupies LEFT THIRD with large exact black project name and existing mark when available, sculptural product-specific still life occupies RIGHT TWO THIRDS. Match the master; do not repeat its mosaic subject. Physical metaphor artwork, NOT a screenshot or proposed interface; no operating UI controls, dense text or dashboards. The text must remain readable at 600px wide. No tagline, subtitles, other prose, people, robot, brains, stock clip art, watermark, unrelated logos or background gradients.\n\nPROJECT SPECIFICATION:\nImage2 is Resonanz's canonical black app tile with exact white central dot and two pairs of acoustic arcs, preserve it above the large exact black word \"Resonanz\" in the left brand area. Image3 supplies waveform/chapter product context only. Right: an elegant physical circular audio waveform ring with a few muted coral chapter segments, subtly raised from an off-white ceramic session disc, beside a pair of thin translucent transcript panels and a small marked-moment dot. A tiny tasteful tabletop microphone form is optional but secondary. Match Image1's bright WHITE studio scene and materials, with restrained warm charcoal, cream and muted coral accents from the actual app. No full UI, real recordings, private session text, provider logos or exaggerated sound effects."
+  }
+}

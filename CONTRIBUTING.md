@@ -96,8 +96,20 @@ npm publication, deployment or a release. See [distribution](docs/project/distri
 ## Repository planning and quality
 
 Track repository work on the [Resonanz board](https://github.com/orgs/pixel-brewery/projects/9).
-Pull requests must pass the complete macOS/Windows desktop verification. The
-stable `Quality Gate` rejects failed, cancelled or skipped verification; its
+Code and mixed pull requests must pass the complete macOS/Windows desktop verification. The
+stable `Quality Gate` rejects failed, cancelled or unexpectedly skipped verification; its
 remote activation follows the [repository-quality contract](docs/architecture/repository-quality/README.md).
 Run `yarn verify:public-content` when changing examples, documentation, source or
 vendor archives; the complete `yarn verify` command includes it.
+
+CI compares the complete pull-request, merge-queue or push diff before installing dependencies.
+Documentation-only changes skip formatting, tests, builds, speech checks and packaging. Public-content
+checks and `Quality Gate` still run. The two required platform check names remain present as short
+Ubuntu jobs that only explain the skip; they perform no platform verification.
+
+Prose files outside operational directories, README text files, root license notices and static
+images under `docs/` or `.github/assets/` qualify. Agent instructions and provider adapters,
+skills, prompts, configuration, executable files and unknown or mixed changes require full
+verification. Manual CI and release requests always run in full. Documentation-only automatic
+pushes do not prepare a release or publish installers/update feeds; see
+[distribution](docs/architecture/distribution/README.md).

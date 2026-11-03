@@ -4,7 +4,7 @@
 
 Resonanz follows the same repository policy as Symphony, Archipel and Synapse:
 complete verification before an eligible dependency PR merges; a main-branch
-release after a human merge; an explicit, separately retryable release request
+release after a human code merge; an explicit, separately retryable release request
 after a native-token Dependabot merge. Native installers and their update feeds
 replace library package publication for this product.
 
@@ -25,6 +25,16 @@ must equal the workflow's source commit when supplied by automatic merge
 continuation. Release execution is serialized and does not cancel an older run.
 Only the canonical public repository `pixel-brewery/resonanz`, immutable ID
 `1440725741`, and its main branch may publish.
+
+Before preparing an automatic release, the workflow applies the
+[documentation policy](../repository-quality/README.md#documentation-changes-in-this-source-revision)
+to the push's complete previous/next commit range. An explicit documentation-only result skips the
+candidate, native verification/builds, installer publication and update feeds. Manual releases always
+run the full pipeline. Unknown or empty comparisons require verification; an unreadable comparison
+fails classification. Configure consumes a successful explicit full-verification decision; native
+builds depend on configure and publication depends on both, so a skipped candidate cannot publish.
+The dependency-refresh continuation also remains tied to durable publication. No release or updater
+runtime behavior changes for code releases.
 
 The configure job resolves the numeric version, metadata commit and annotated
 `v<version>` tag exactly once through the configured fixed Nx desktop release
