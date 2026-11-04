@@ -332,6 +332,9 @@ async function verifyProcessingStatus() {
 async function verifyDesktopLayout() {
   const before = await request('bootstrap.get');
   const nativeWindow = await application.browserWindow(page);
+  const backgroundThrottling = await nativeWindow.evaluate((window) =>
+    window.webContents.getBackgroundThrottling(),
+  );
   const originalSize = await nativeWindow.evaluate((window) => window.getContentBounds());
   const originalLayout = await page.evaluate(() =>
     Object.fromEntries(
@@ -341,10 +344,20 @@ async function verifyDesktopLayout() {
   const collectionIds = [];
   const evidence = [];
   let fixtureId;
-  const settle = () =>
-    page.evaluate(
-      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  const settle = async () => {
+    const token = randomUUID();
+    await page.evaluate((token) => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          document.documentElement.dataset.layoutFrame = token;
+        }),
+      );
+    }, token);
+    await waitFor(
+      () => page.evaluate((token) => document.documentElement.dataset.layoutFrame === token, token),
+      'hidden native window renders layout frames',
     );
+  };
   const resize = async (size) => {
     await nativeWindow.evaluate(
       (window, target) => window.setContentSize(target.width, target.height),
@@ -518,6 +531,8 @@ async function verifyDesktopLayout() {
   };
 
   try {
+    // Keep the existing test window hidden while rendering layout frames as in a visible window.
+    await nativeWindow.evaluate((window) => window.webContents.setBackgroundThrottling(false));
     const now = new Date().toISOString();
     const source = await session();
     const paragraph =
@@ -884,22 +899,36 @@ async function verifyDesktopLayout() {
     await writeFile(join(artifacts, 'layout-evidence.json'), JSON.stringify(evidence, null, 2));
     throw error;
   } finally {
-    await request('settings.save', {
-      uiLanguage: before.settings.uiLanguage ?? 'en',
-      appearance: before.settings.appearance ?? 'system',
-    });
-    if (fixtureId) await request('sessions.delete', { sessionId: fixtureId });
-    for (const collectionId of collectionIds) await request('collections.delete', { collectionId });
-    await page.evaluate((saved) => {
-      for (const key of Object.keys(localStorage))
-        if (key.startsWith('resonanz.layout.')) localStorage.removeItem(key);
-      for (const [key, value] of Object.entries(saved)) localStorage.setItem(key, value);
-    }, originalLayout);
-    await navigate(`#/session/${recordedId}?tab=analysis`, 'session-analysis-split', originalSize);
-    await page.reload();
-    await control('session-analysis-split').waitFor({ state: 'visible' });
-    await resize(originalSize);
-    await nativeWindow.dispose();
+    try {
+      await request('settings.save', {
+        uiLanguage: before.settings.uiLanguage ?? 'en',
+        appearance: before.settings.appearance ?? 'system',
+      });
+      if (fixtureId) await request('sessions.delete', { sessionId: fixtureId });
+      for (const collectionId of collectionIds)
+        await request('collections.delete', { collectionId });
+      await page.evaluate((saved) => {
+        for (const key of Object.keys(localStorage))
+          if (key.startsWith('resonanz.layout.')) localStorage.removeItem(key);
+        for (const [key, value] of Object.entries(saved)) localStorage.setItem(key, value);
+      }, originalLayout);
+      await navigate(
+        `#/session/${recordedId}?tab=analysis`,
+        'session-analysis-split',
+        originalSize,
+      );
+      await page.reload();
+      await control('session-analysis-split').waitFor({ state: 'visible' });
+      await resize(originalSize);
+    } finally {
+      try {
+        await nativeWindow.evaluate((window, previous) => {
+          window.webContents.setBackgroundThrottling(previous);
+        }, backgroundThrottling);
+      } finally {
+        await nativeWindow.dispose();
+      }
+    }
   }
 }
 

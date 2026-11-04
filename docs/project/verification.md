@@ -26,11 +26,13 @@ minimum; compact toolbars reserve room for their title and date. The Voice check
 covers its idle ring within the actual stage. Long spoken responses, real speech
 recognition and provider inference were not exercised by this layout group.
 Fixture sessions/collections and preference changes are cleaned up by the runner;
-the task-owned Electron instance exits. This is source-app layout evidence, not a
+the task-owned Electron instance exits. Its hidden verification window enables
+unthrottled layout frames for this group and restores that flag afterward; it
+remains hidden and does not change focus. This is source-app layout evidence, not a
 new packaged-app or Windows result.
 
 The final successful layout run is recorded under
-`.codex-work/desktop-smoke-bafBuG/`, including `layout-evidence.json` and native PNGs.
+`.codex-work/desktop-smoke-rbnFBm/`, including `layout-evidence.json` and native PNGs.
 Earlier real media/account evidence below remains separate.
 
 ## Long macOS recording recovery: 2026-11-04
