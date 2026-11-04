@@ -1,3 +1,13 @@
+## 0.1.7 (2026-11-04)
+
+### 🩹 Fixes
+
+- **build:** make package create native installers ([121832c](https://github.com/pixel-brewery/resonanz/commit/121832c))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.6 (2026-11-04)
 
 This was a version bump only, there were no code changes.
