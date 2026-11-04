@@ -188,7 +188,10 @@ async function verifyProcessingStatus() {
       await assertDisabled('analyze-session', true);
       assert.equal(await control('transcript-editor').count(), 0);
       await menu.locator('summary').click();
-      await page.screenshot({ path: join(artifacts, 'transcription-running.png') });
+      await page.screenshot({
+        path: join(artifacts, 'transcription-running.png'),
+        animations: 'disabled',
+      });
     }
   }
   await control('nav-settings').click();
@@ -233,7 +236,10 @@ async function verifyProcessingStatus() {
   assert.match(await globalStatus.innerText(), /Transkription.*fehlgeschlagen/u);
   assert.equal(await progress(globalStatus).count(), 0);
   await control('transcript-processing').waitFor({ state: 'visible' });
-  await page.screenshot({ path: join(artifacts, 'transcription-failed.png') });
+  await page.screenshot({
+    path: join(artifacts, 'transcription-failed.png'),
+    animations: 'disabled',
+  });
   await localStatus.locator('[test-id="processing-open"]').click();
   await control('session-recovery').waitFor({ state: 'visible' });
   await assertNoAccountHelp();

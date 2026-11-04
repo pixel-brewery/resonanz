@@ -42,6 +42,14 @@ controlled UI evidence is under `.codex-work/desktop-smoke-BYtNGV/` and
 Windows native speech were not rerun locally for this change. No new Claude or
 Codex inference is established by these controlled and native-file checks.
 
+The existing owner session was subsequently retried through the actual packaged
+desktop UI and Main/Utility boundary. Native transcription completed with 4,425
+segments, and the already-enabled real Codex analysis completed with four summary
+claims, six decisions, three tasks and six open questions. Both durable stages are
+done and the analysis/transcript are visible in the normal session. No login, CLI
+update or account setting was changed. This establishes that selected Codex path;
+Claude and full transcription/analysis accuracy remain separate evidence.
+
 ## Installer-producing package command: 2026-11-04
 
 On macOS ARM64 with Node 24.21.0 and Yarn 4.10.3, `yarn run package` built the
