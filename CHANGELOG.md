@@ -1,3 +1,13 @@
+## 0.1.10 (2026-11-04)
+
+### 🩹 Fixes
+
+- **i18n:** reject empty nested catalog values ([4cecad0](https://github.com/pixel-brewery/resonanz/commit/4cecad0))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.9 (2026-11-04)
 
 ### 🩹 Fixes
