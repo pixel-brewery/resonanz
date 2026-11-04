@@ -16,6 +16,7 @@ import { TranslatePipe } from '../pipes/TranslatePipe';
 import { MessagePipe } from '../pipes/MessagePipe';
 import { PipelineStepsComponent } from '../components/pipeline-steps/PipelineStepsComponent';
 import { TranscriptPanelComponent } from '../components/transcript-panel/TranscriptPanelComponent';
+import { isTranslationKey } from '@resonanz/intl';
 
 /** Recovery preserves usable source audio/text and offers explicit, account-scoped next actions. */
 @Component({
@@ -55,13 +56,20 @@ export class SessionRecoveryView {
     const clock = setInterval(() => this._now.set(Date.now()), 15_000);
     inject(DestroyRef).onDestroy(() => clearInterval(clock));
   }
-  protected readonly stage = computed(() =>
-    this.presenter.session()?.pipeline?.transcription?.state === 'failed'
-      ? 'transcription'
-      : 'analysis',
+  protected readonly stage = computed(
+    () => this.presenter.processingActivity()?.stage ?? 'analysis',
   );
-  protected readonly title = computed(() =>
-    this.stage() === 'transcription'
+  protected readonly running = computed(
+    () => this.presenter.processingActivity()?.state === 'running',
+  );
+  protected readonly settled = computed(
+    () => !this.presenter.processingActivity() && this.presenter.hasTranscript(),
+  );
+  protected readonly title = computed(() => {
+    const activity = this.presenter.processingActivity();
+    if (activity?.state === 'running') return this.intl.t(activity.label);
+    if (this.settled()) return this.intl.t('loc.resonanz.processing.transcriptReady');
+    return this.stage() === 'transcription'
       ? this.intl.t('loc.resonanz.recovery.transcriptionTitle')
       : !this.status()
         ? this.intl.t('loc.resonanz.recovery.assistantAttention', this.assistant())
@@ -69,10 +77,13 @@ export class SessionRecoveryView {
           ? this.intl.t('loc.resonanz.recovery.assistantMissing', this.assistant())
           : !this.status()?.authenticated
             ? this.intl.t('loc.resonanz.recovery.assistantSignedOut', this.assistant())
-            : this.intl.t('loc.resonanz.recovery.assistantAttention', this.assistant()),
-  );
+            : this.intl.t('loc.resonanz.recovery.assistantAttention', this.assistant());
+  });
   protected readonly error = computed(
     () => this.presenter.session()?.pipeline?.[this.stage()]?.error ?? '',
+  );
+  protected readonly technicalError = computed(
+    () => Boolean(this.error()) && !isTranslationKey(this.error()),
   );
   protected readonly loginLabel = computed(() =>
     !this.status()

@@ -42,6 +42,20 @@ file transcription accepts WAV input up to 64 MiB, roughly 35 minutes at 16 kHz
 mono. The required recognition language must be installed. A failed transcript
 does not discard the recording. Manual editing/import remains available.
 
+On supported macOS 26 systems, file transcription uses Apple's local SpeechAnalyzer.
+The explicit transcription action prepares its selected language model; missing Apple
+language assets may need a download. Earlier supported systems use installed on-device
+dictation. Unsupported local recognition is reported without a cloud audio substitute.
+If the system cannot decode a container such as WebM, an installed FFmpeg is required;
+Resonanz does not install it automatically.
+
+macOS recordings are processed in bounded sections with small overlapping context.
+Confirmed sections are saved privately with their original audio positions. Retry resumes
+the matching recording and language at the first unfinished section, including after restart.
+The new transcript replaces the earlier version only when the complete recording succeeds.
+The status bar and session show processing or a persistent failure after leaving the
+recording panel. Percentages measure confirmed sections; preparation has no invented percentage.
+
 Analysis uses the selected native assistant. Structured output contains summary
 claims, decisions, tasks, open questions and chapters. Evidence is resolved only
 against actual transcript segments. Unknown references remain unverified. Old

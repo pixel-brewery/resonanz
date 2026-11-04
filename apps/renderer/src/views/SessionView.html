@@ -96,6 +96,15 @@
         </div>
       </details>
     </ng-template>
+    @if (presenter.tab() !== 'processing') {
+      @if (presenter.processingActivity(); as activity) {
+        <resonanz-processing-status
+          test-id="processing-status"
+          [activity]="activity"
+          (opened)="presenter.selectTab('processing')"
+        />
+      }
+    }
     @if (presenter.editingMetadata()) {
       <div class="metadata-editor outline-card" test-id="session-metadata-editor">
         <mosaik-textbox

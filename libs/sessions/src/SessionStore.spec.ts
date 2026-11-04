@@ -18,11 +18,429 @@ async function createStore() {
   await store.initialize();
   return { root, store };
 }
+async function createTranscriptionStore() {
+  const context = await createStore();
+  const session = await context.store.create({ kind: 'recording', mimeType: 'audio/wav' });
+  await context.store.appendAudio({
+    sessionId: session.id,
+    sequence: 1,
+    bytes: Uint8Array.of(1, 2, 3),
+    mimeType: session.mimeType,
+    elapsedMs: 135_000,
+  });
+  await context.store.finish(session.id, 135_000);
+  return { ...context, session };
+}
+const transcriptionPlan = {
+  action: 'begin' as const,
+  sourceHash: 'a'.repeat(64),
+  locale: 'de-DE',
+  plan: 'pcm16-v1' as const,
+  totalChunks: 3,
+};
+function recognizedSegment(id: string, startMs = 0) {
+  return {
+    id,
+    speaker: 'participant' as const,
+    text: `Confirmed ${id}`,
+    startMs,
+    endMs: startMs + 1000,
+    final: true,
+  };
+}
 afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
 describe('SessionStore', () => {
+  it('resumes confirmed chunks including silence after restart and rejects the detached generation', async () => {
+    const { root, store, session } = await createTranscriptionStore();
+    const first = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: first.generation,
+      index: 0,
+      segments: [recognizedSegment('first')],
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: first.generation,
+      index: 1,
+      segments: [],
+    });
+    expect(store.get(session.id).transcript).toEqual([]);
+    expect(store.get(session.id).pipeline?.transcription?.progress).toBeCloseTo(200 / 3);
+    expect(JSON.stringify(store.get(session.id))).not.toContain(transcriptionPlan.sourceHash);
+    await store.dispose();
+
+    const reopened = new SessionStore(root);
+    await reopened.initialize();
+    expect(reopened.get(session.id).pipeline?.transcription).toMatchObject({ state: 'failed' });
+    await expect(
+      reopened.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: first.generation,
+        index: 2,
+        segments: [recognizedSegment('last', 90_000)],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    const resumed = await reopened.transcription({ ...transcriptionPlan, sessionId: session.id });
+    expect(resumed.nextChunk).toBe(2);
+    expect(resumed.generation).not.toBe(first.generation);
+    await reopened.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: resumed.generation,
+      index: 2,
+      segments: [recognizedSegment('last', 90_000)],
+    });
+    const completed = await reopened.transcription({
+      action: 'complete',
+      sessionId: session.id,
+      generation: resumed.generation,
+    });
+    expect(completed.transcript.map((segment) => segment.id)).toEqual(['first', 'last']);
+    expect(completed.pipeline?.transcription?.state).toBe('done');
+    const record = JSON.parse(
+      await readFile(join(root, 'library/sessions', `${session.id}.json`), 'utf8'),
+    );
+    expect(record.transcriptionDraft).toBeUndefined();
+    await reopened.dispose();
+  });
+
+  it('retains the previous transcript and evidence until a complete replacement commits atomically', async () => {
+    const { root, store, session } = await createTranscriptionStore();
+    const original = recognizedSegment('original');
+    const evidence = [{ segmentId: original.id, atMs: 0, endMs: 1000, quote: original.text }];
+    await store.replaceTranscript(session.id, [original]);
+    await store.saveSummary(session.id, 'Saved summary', {
+      provider: 'codex',
+      createdAt: session.createdAt,
+      summary: [{ id: 'claim', text: 'Saved claim', evidence }],
+      decisions: [],
+      tasks: [],
+      openQuestions: [],
+      chapters: [],
+    });
+    await store.saveMessage(session.id, {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      text: 'Saved answer',
+      createdAt: session.createdAt,
+      state: 'complete',
+      answer: {
+        kind: 'evidenced',
+        claims: [{ id: 'answer', text: 'Saved claim', evidence }],
+        related: [],
+      },
+    });
+    await store.setContinuation(session.id, 'codex', 'private-continuation');
+    const run = await store.transcription({
+      ...transcriptionPlan,
+      sessionId: session.id,
+      totalChunks: 1,
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [recognizedSegment('replacement')],
+    });
+    expect(store.get(session.id).transcript).toEqual([original]);
+    expect(store.get(session.id).analysis).toBeDefined();
+    expect(store.get(session.id).messages[0]?.answer).toBeDefined();
+    const completed = await store.transcription({
+      action: 'complete',
+      sessionId: session.id,
+      generation: run.generation,
+    });
+    expect(completed.transcript[0]?.id).toBe('replacement');
+    expect(completed.analysis).toBeUndefined();
+    expect(completed.messages[0]).toMatchObject({ text: 'Saved answer' });
+    expect(completed.messages[0]?.answer).toBeUndefined();
+    const record = JSON.parse(
+      await readFile(join(root, 'library/sessions', `${session.id}.json`), 'utf8'),
+    );
+    expect(record.continuations).toEqual({});
+    expect(record.transcriptionDraft).toBeUndefined();
+  });
+
+  it('keeps failed writes from advancing the durable cursor and refuses missing or duplicate chunks', async () => {
+    const { root, store, session } = await createTranscriptionStore();
+    const run = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    const path = join(root, 'library/sessions', `${session.id}.json`);
+    const before = await readFile(path, 'utf8');
+    await expect(
+      store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: run.generation,
+        index: 1,
+        segments: [],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.transcriptionChunkOrder');
+    vi.mocked(rename).mockRejectedValueOnce(new Error('Controlled disk failure'));
+    await expect(
+      store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: run.generation,
+        index: 0,
+        segments: [recognizedSegment('first')],
+      }),
+    ).rejects.toThrow('Controlled disk failure');
+    expect(await readFile(path, 'utf8')).toBe(before);
+    expect(store.get(session.id).pipeline?.transcription?.progress).toBe(0);
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [recognizedSegment('first')],
+    });
+    await expect(
+      store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: run.generation,
+        index: 1,
+        segments: [recognizedSegment('first', 45_000)],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.audioData');
+    await expect(
+      store.transcription({
+        action: 'complete',
+        sessionId: session.id,
+        generation: run.generation,
+      }),
+    ).rejects.toThrow('loc.resonanz.error.transcriptionChunkOrder');
+  });
+
+  it('checks completion without mutation and rechecks its generation after a later manual replacement', async () => {
+    const { root, store, session } = await createTranscriptionStore();
+    const run = await store.transcription({
+      ...transcriptionPlan,
+      sessionId: session.id,
+      totalChunks: 1,
+    });
+    const path = join(root, 'library/sessions', `${session.id}.json`);
+    const incomplete = await readFile(path, 'utf8');
+    await expect(store.assertTranscriptionComplete(session.id, run.generation)).rejects.toThrow(
+      'loc.resonanz.error.transcriptionChunkOrder',
+    );
+    expect(await readFile(path, 'utf8')).toBe(incomplete);
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [recognizedSegment('recognized')],
+    });
+    const ready = await readFile(path, 'utf8');
+    await store.assertTranscriptionComplete(session.id, run.generation);
+    expect(await readFile(path, 'utf8')).toBe(ready);
+    await store.replaceTranscript(session.id, [recognizedSegment('manual')]);
+    const replaced = await readFile(path, 'utf8');
+    await expect(
+      store.transcription({
+        action: 'complete',
+        sessionId: session.id,
+        generation: run.generation,
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    expect(await readFile(path, 'utf8')).toBe(replaced);
+    expect(store.get(session.id).transcript[0]?.id).toBe('manual');
+  });
+
+  it('orders legitimate boundary start inversions and removes the same overlapping word without losing real repetition', async () => {
+    const { store, session } = await createTranscriptionStore();
+    const run = await store.transcription({
+      ...transcriptionPlan,
+      sessionId: session.id,
+      totalChunks: 2,
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [
+        { ...recognizedSegment('earlier', 2000), text: 'Beschluss' },
+        { ...recognizedSegment('boundary', 44_600), endMs: 45_000, text: 'Ｂｅｓｃｈｌｕｓｓ.' },
+      ],
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 1,
+      segments: [
+        { ...recognizedSegment('inverted', 44_400), endMs: 45_800, text: 'Einleitung' },
+        { ...recognizedSegment('duplicate', 44_800), endMs: 45_600, text: '„BESCHLUSS!“' },
+        { ...recognizedSegment('repetition', 46_000), endMs: 46_400, text: 'Beschluss' },
+      ],
+    });
+    const completed = await store.transcription({
+      action: 'complete',
+      sessionId: session.id,
+      generation: run.generation,
+    });
+    expect(completed.transcript.map((segment) => segment.id)).toEqual([
+      'earlier',
+      'inverted',
+      'boundary',
+      'repetition',
+    ]);
+    expect(completed.transcript.map((segment) => segment.startMs)).toEqual([
+      2000, 44_400, 44_600, 46_000,
+    ]);
+    expect(completed.transcript.find((segment) => segment.id === 'boundary')?.text).toBe(
+      'Ｂｅｓｃｈｌｕｓｓ.',
+    );
+  });
+
+  it('retains matching words when their overlap is less than half the shorter interval', async () => {
+    const { store, session } = await createTranscriptionStore();
+    const run = await store.transcription({
+      ...transcriptionPlan,
+      sessionId: session.id,
+      totalChunks: 2,
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [{ ...recognizedSegment('first', 44_600), endMs: 45_000, text: 'Ja.' }],
+    });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 1,
+      segments: [{ ...recognizedSegment('second', 44_900), endMs: 45_500, text: 'JA!' }],
+    });
+    const completed = await store.transcription({
+      action: 'complete',
+      sessionId: session.id,
+      generation: run.generation,
+    });
+    expect(completed.transcript.map((segment) => segment.id)).toEqual(['first', 'second']);
+  });
+
+  it.each([{ sourceHash: 'b'.repeat(64) }, { locale: 'en-US' }, { totalChunks: 2 }])(
+    'starts a fresh draft when its source or recognition plan changes: %j',
+    async (changes) => {
+      const { store, session } = await createTranscriptionStore();
+      const run = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+      await store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: run.generation,
+        index: 0,
+        segments: [],
+      });
+      await store.transcription({
+        action: 'cancel',
+        sessionId: session.id,
+        generation: run.generation,
+      });
+      const next = await store.transcription({
+        ...transcriptionPlan,
+        ...changes,
+        sessionId: session.id,
+      });
+      expect(next.nextChunk).toBe(0);
+      expect(next.generation).not.toBe(run.generation);
+    },
+  );
+
+  it('fences cancelled and manually replaced drafts without importing private resume state', async () => {
+    const { root, store, session } = await createTranscriptionStore();
+    const run = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    await store.transcription({
+      action: 'chunk',
+      sessionId: session.id,
+      generation: run.generation,
+      index: 0,
+      segments: [],
+    });
+    await store.transcription({
+      action: 'cancel',
+      sessionId: session.id,
+      generation: run.generation,
+    });
+    await expect(
+      store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: run.generation,
+        index: 1,
+        segments: [],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    const resumed = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    expect(resumed.nextChunk).toBe(1);
+    const exported = join(root, 'draft-export.json');
+    await writeFile(
+      exported,
+      JSON.stringify({ format: 'resonanz-session', version: 1, session: store.get(session.id) }),
+    );
+    const imported = await store.importFile(exported);
+    const importedRecord = JSON.parse(
+      await readFile(join(root, 'library/sessions', `${imported.id}.json`), 'utf8'),
+    );
+    expect(importedRecord.transcriptionDraft).toBeUndefined();
+    await store.replaceTranscript(session.id, [recognizedSegment('manual')]);
+    await expect(
+      store.transcription({
+        action: 'chunk',
+        sessionId: session.id,
+        generation: resumed.generation,
+        index: 1,
+        segments: [],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    expect(store.get(session.id).transcript[0]?.id).toBe('manual');
+    const fresh = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    expect(fresh.nextChunk).toBe(0);
+  });
+
+  it('rejects native admission during capture or another active file transcription', async () => {
+    const { store, session } = await createTranscriptionStore();
+    const active = await store.create({ kind: 'recording', mimeType: 'audio/wav' });
+    await expect(
+      store.transcription({ ...transcriptionPlan, sessionId: session.id }),
+    ).rejects.toThrow('loc.resonanz.error.transcribeActive');
+    await store.finish(active.id, 0);
+    await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    await expect(
+      store.transcription({ ...transcriptionPlan, sessionId: session.id }),
+    ).rejects.toThrow('loc.resonanz.error.fileTranscriptionRunning');
+  });
+
+  it('admits the first checkpoint after Main has announced native preparation as running', async () => {
+    const { store, session } = await createTranscriptionStore();
+    await store.setPipeline({
+      sessionId: session.id,
+      stage: 'transcription',
+      step: { state: 'running' },
+    });
+    const run = await store.transcription({ ...transcriptionPlan, sessionId: session.id });
+    expect(run.nextChunk).toBe(0);
+    expect(store.get(session.id).pipeline?.transcription).toEqual({
+      state: 'running',
+      progress: 0,
+    });
+    await expect(
+      store.transcription({ ...transcriptionPlan, sessionId: session.id }),
+    ).rejects.toThrow('loc.resonanz.error.fileTranscriptionRunning');
+  });
+
   it('persists authorized retry intent privately and projects only its deadline across restart', async () => {
     const { root, store } = await createStore();
     const session = await store.create({ kind: 'recording', mimeType: 'audio/wav' });

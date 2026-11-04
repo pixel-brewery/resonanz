@@ -1,5 +1,6 @@
 // #region Imports
 import { randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -49,7 +50,7 @@ function recognizer() {
   };
 }
 
-async function setup(overrides: Partial<ISettings> = {}) {
+async function setup(overrides: Partial<ISettings> = {}, macosFileTranscriber?: string) {
   await mkdir('.codex-work/speech-tests', { recursive: true });
   const directory = await mkdtemp(resolve('.codex-work/speech-tests/run-'));
   roots.push(directory);
@@ -86,6 +87,7 @@ async function setup(overrides: Partial<ISettings> = {}) {
   const speech = new NativeSpeechService({
     dataDirectory: directory,
     windowsScript: 'not-used-by-controlled-fixture',
+    ...(macosFileTranscriber ? { macosFileTranscriber } : {}),
     session: sessionPort,
     settings: async () => settings,
     persist,
@@ -95,6 +97,70 @@ async function setup(overrides: Partial<ISettings> = {}) {
   services.push(speech);
   return { session, first, second, createSession, events, persist, sessionPort, speech, settings };
 }
+
+describe('owned native file recognition processes', () => {
+  it('keeps file recognition available when the independent live helper fails', async () => {
+    nativeCommands('darwin');
+    const context = await setup({}, 'controlled-file-recognizer');
+    const native = createRequire(import.meta.url)(
+      'electron-native-speech',
+    ) as typeof import('electron-native-speech');
+    native.setBackend({
+      checkAvailability: async () => {
+        throw new Error('Live helper failed to start');
+      },
+      createSession: context.createSession,
+      transcribeFile: async () => ({ segments: [], locale: 'de-DE' }),
+      dispose: async () => undefined,
+    });
+    const capabilities = await context.speech.capabilities();
+    expect(capabilities.nativeTranscription).toBe(true);
+    expect(capabilities.nativeConversation).toBe(false);
+  });
+  it.each(['cancel', 'timeout'] as const)(
+    'waits for actual process exit after %s',
+    async (reason) => {
+      const context = await setup({}, 'controlled-file-recognizer');
+      const child = new EventEmitter() as ChildProcessWithoutNullStreams;
+      Object.assign(child, {
+        stdin: new PassThrough(),
+        stdout: new PassThrough(),
+        stderr: new PassThrough(),
+        kill: vi.fn(() => true),
+      });
+      vi.mocked(spawn).mockReturnValue(child);
+      const release = await context.speech.fileLease();
+      const controller = new AbortController();
+      const result = context.speech.transcribeChunk(
+        { path: 'controlled.wav', frames: 720_000, dataOffset: 44 },
+        'de-DE',
+        0,
+        720_000,
+        controller.signal,
+      );
+      let settled = false;
+      void result.then(
+        () => {
+          settled = true;
+        },
+        () => {
+          settled = true;
+        },
+      );
+      const rejected = expect(result).rejects.toThrow(
+        reason === 'timeout' ? 'transcriptionTimeout' : 'transcriptionInterrupted',
+      );
+      if (reason === 'timeout') await vi.advanceTimersByTimeAsync(90_000);
+      else controller.abort();
+      await Promise.resolve();
+      expect(child.kill).toHaveBeenCalledWith('SIGKILL');
+      expect(settled).toBe(false);
+      child.emit('close', null, 'SIGKILL');
+      await rejected;
+      await release();
+    },
+  );
+});
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date', 'performance'] });
@@ -146,6 +212,8 @@ function nativeCommands(platform: 'darwin' | 'win32') {
           );
         else if (executable === '/usr/bin/afconvert')
           await writeFile(argumentsList.at(-1)!, silentWave());
+        else if (executable === 'controlled-file-recognizer')
+          output = '{"available":true,"backend":"analyzer"}';
         else {
           const mode = argumentsList[argumentsList.indexOf('-Mode') + 1]!;
           const configuration = JSON.parse(input) as Record<string, unknown>;

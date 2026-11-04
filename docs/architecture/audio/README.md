@@ -61,6 +61,32 @@ mono 16 kHz PCM16 WAV up to 64 MiB. It collects results through RecognizeComplet
 including the final passage at WAV EOF; repeated recognition beyond EOF can fail.
 See the [System.Speech API documentation](https://learn.microsoft.com/en-us/dotnet/api/system.speech.recognition.speechrecognitionengine.setinputtowavefile?view=netframework-4.8.1).
 
+The macOS file path is owned by FileTranscriptionCoordinator and NativeSpeechService,
+with the compiled `resources/speech/macos-file-transcription.swift` helper. It uses
+SpeechAnalyzer/SpeechTranscriber when built with the macOS 26 SDK and running on a
+supported macOS 26 device. Earlier SDK/system combinations use SFSpeechRecognizer
+with `requiresOnDeviceRecognition`; neither path introduces cloud audio fallback.
+Capability probes are read-only. Only explicit transcription invokes model preparation,
+which can download missing Apple language assets. Live recognition retains the installed
+electron-native-speech integration.
+
+Preparation streams system decoding to mono 16 kHz PCM16 WAV; FFmpeg is an optional
+installed decoder when afconvert cannot read the original container. JavaScript inspects
+bounded RIFF metadata instead of loading the complete decoded recording. The 24-hour
+decoded limit is checked without claiming a truncated input is complete. Each native
+process receives a 45-second core and up to two seconds of context on each side.
+Time-marked word midpoints select one owner for overlap, and offsets map back to the
+original recording. Native calls have a 90-second deadline; model preparation has a
+ten-minute deadline. Abort kills and awaits the owned process before releasing its lease.
+
+The Utility stores a private versioned transcription draft bound to audio SHA-256,
+recognition locale and plan. Host-only commands atomically acknowledge each complete
+section and progress, including silent sections. A new generation rejects stale writes;
+retry resumes the durable cursor without automatically restarting recognition after launch.
+Only complete success replaces the public transcript and invalidates old analysis/evidence
+and continuations. Public exports do not contain the private draft. Manual transcript
+replacement, deletion and shutdown cancel and await the entire native request first.
+
 Saved summary/answer reading uses unchanged TextToSpeechService, including its voice,
 rate, pitch, volume and cancellation behavior. Native live clips are separate so
 heard speech can be included in the stereo archive. Selected native voices are mapped

@@ -6,8 +6,12 @@ import {
   requestEnvelopeSchema,
   responseEnvelopeSchema,
   ownedProcessMessageSchema,
+  hostTranscriptionEnvelopeSchema,
+  hostTranscriptionResponseSchemas,
   type AppEvent,
   type RequestMethod,
+  type HostTranscriptionCommand,
+  type HostTranscriptionResult,
 } from '@resonanz/contracts';
 import { OwnedProcessSupervisor } from './OwnedProcessSupervisor.js';
 // #endregion
@@ -165,6 +169,20 @@ export class BackgroundService {
    */
   public async importFile(path: string): Promise<unknown> {
     return this.send({ type: 'host.import-file', correlationId: randomUUID(), path }, 30_000);
+  }
+  /** Sends a validated private transcription checkpoint command only over the parent port. */
+  public async transcription<C extends HostTranscriptionCommand>(
+    command: C,
+  ): Promise<HostTranscriptionResult<C['action']>> {
+    const envelope = hostTranscriptionEnvelopeSchema.parse({
+      type: 'host.transcription',
+      correlationId: randomUUID(),
+      command,
+    });
+    const result = await this.send(envelope, 30_000);
+    return hostTranscriptionResponseSchemas[envelope.command.action].parse(
+      result,
+    ) as HostTranscriptionResult<C['action']>;
   }
   /**
    * Awaits real Utility exit and confirmed native cleanup instead of treating a kill request as completion.

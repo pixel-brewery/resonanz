@@ -2,12 +2,15 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { access, chmod, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { join } from 'node:path';
+import { z } from 'zod';
 import type { LiveSpeechResult, SpeechSession } from 'electron-native-speech';
 import { dataSchemas, type ICapabilities, type ITranscriptSegment } from '@resonanz/contracts';
 import type { INativeSpeechHost } from './INativeSpeechHost.js';
 import { WindowsSpeechSession } from './WindowsSpeechSession.js';
+import type { IPcmWaveFile } from './PcmWaveFile.js';
 // #endregion
 
 const require = createRequire(import.meta.url);
@@ -43,6 +46,7 @@ export class NativeSpeechService {
   private _native: typeof import('electron-native-speech') | undefined;
   private _metadata: Promise<{ locales: string[]; voices: Voice[] }> | undefined;
   private _disposed = false;
+  private _fileLeased = false;
   // #endregion
   // #region Ctor
   public constructor(host: INativeSpeechHost) {
@@ -70,15 +74,32 @@ export class NativeSpeechService {
         (locale) => locale.toLowerCase() === settings.locale.toLowerCase(),
       );
       const availability =
-        process.platform === 'darwin' ? await this.native().getSpeechAvailability() : undefined;
+        process.platform === 'darwin'
+          ? await Promise.resolve()
+              .then(() => this.native().getSpeechAvailability())
+              .catch(() => ({ available: false, mode: undefined }))
+          : undefined;
       const available = availability ? availability.available : metadata.locales.length > 0;
       const voiceAvailable = metadata.voices.some(
         (voice) =>
           voice.locale.toLowerCase().split('-')[0] === settings.locale.toLowerCase().split('-')[0],
       );
+      let fileAvailable = available && localeAvailable;
+      if (process.platform === 'darwin' && this._host.macosFileTranscriber) {
+        const result = JSON.parse(
+          await this.command(
+            this._host.macosFileTranscriber,
+            ['--capabilities', '--locale', settings.locale],
+            undefined,
+            undefined,
+            15_000,
+          ),
+        ) as { available?: boolean };
+        fileAvailable = result.available === true;
+      }
       return {
         platform: process.platform,
-        nativeTranscription: available && localeAvailable,
+        nativeTranscription: fileAvailable,
         nativeConversation:
           available && localeAvailable && voiceAvailable && availability?.mode !== 'file',
         speechLocales: metadata.locales,
@@ -101,6 +122,7 @@ export class NativeSpeechService {
   public async start(sessionId: string, operationId?: string): Promise<void> {
     await this.serial(async () => {
       if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
+      if (this._fileLeased) throw new Error('loc.resonanz.error.fileTranscriptionRunning');
       const session = await this._host.session(dataSchemas.identifier.parse(sessionId));
       if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
       if (!operationId && !['recording', 'paused'].includes(session.status))
@@ -151,9 +173,10 @@ export class NativeSpeechService {
   public async transcribeFile(
     path: string,
     locale: string,
+    signal?: AbortSignal,
   ): Promise<readonly ITranscriptSegment[]> {
     if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
-    const operation = this.transcribeOwnedFile(path, locale);
+    const operation = this.transcribeOwnedFile(path, locale, signal);
     this._transcriptions.add(operation);
     try {
       return await operation;
@@ -165,22 +188,200 @@ export class NativeSpeechService {
   private async transcribeOwnedFile(
     path: string,
     locale: string,
+    signal?: AbortSignal,
   ): Promise<readonly ITranscriptSegment[]> {
-    if (process.platform === 'darwin') {
-      const result = await this.native().transcribeFile({ filePath: path, locale });
-      return result.segments.map((segment) => ({
-        ...segment,
-        speaker: 'participant',
-        final: true,
-      }));
-    }
     if (process.platform !== 'win32') throw new Error('loc.resonanz.error.noFileTranscription');
     if (!path.toLowerCase().endsWith('.wav')) throw new Error('loc.resonanz.error.wavRequired');
     const result = JSON.parse(
-      await this.windows('transcribe', { locale, filePath: path }, undefined, 180_000),
+      await this.windows('transcribe', { locale, filePath: path }, signal, 180_000),
     ) as { segments: { id: string; text: string; startMs: number; endMs: number }[] };
     return result.segments.map((segment) =>
       dataSchemas.transcriptSegment.parse({ ...segment, speaker: 'participant', final: true }),
+    );
+  }
+
+  /** Reserves file recognition across preparation, checkpoints and native chunk boundaries. */
+  public async fileLease(): Promise<() => Promise<void>> {
+    await this.serial(async () => {
+      if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
+      if (this._active || this._fileLeased)
+        throw new Error('loc.resonanz.error.fileTranscriptionRunning');
+      this._fileLeased = true;
+    });
+    return async () => {
+      this._fileLeased = false;
+    };
+  }
+
+  /** Uses bounded native decoding; preparation files remain beneath an operation-owned directory. */
+  public async prepareFile(
+    source: string,
+    destination: string,
+    locale: string,
+    signal: AbortSignal,
+  ): Promise<void> {
+    signal.throwIfAborted();
+    if (this._disposed) throw new Error('loc.resonanz.error.transcriptionInterrupted');
+    const executable = this._host.macosFileTranscriber;
+    if (!executable) throw new Error('loc.resonanz.error.transcriptionUnavailable');
+    const options = { transcription: true, errorOutput: true };
+    const prepared = JSON.parse(
+      await this.command(
+        executable,
+        ['--prepare', '--locale', locale],
+        undefined,
+        signal,
+        600_000,
+        options,
+      ),
+    ) as { prepared?: boolean; error?: unknown };
+    if (!prepared.prepared) throw new Error('loc.resonanz.error.transcriptionUnavailable');
+    try {
+      await this.command(
+        '/usr/bin/afconvert',
+        ['-f', 'WAVE', '-d', 'LEI16@16000', '-c', '1', source, destination],
+        undefined,
+        signal,
+        180_000,
+      );
+    } catch {
+      signal.throwIfAborted();
+      const candidates = [
+        ...new Set([
+          '/opt/homebrew/bin',
+          '/usr/local/bin',
+          '/usr/bin',
+          ...(process.env['PATH'] ?? '').split(':').filter(Boolean),
+        ]),
+      ];
+      let decoder: string | undefined;
+      for (const directory of candidates) {
+        const path = join(directory, 'ffmpeg');
+        if (
+          await access(path, constants.X_OK).then(
+            () => true,
+            () => false,
+          )
+        ) {
+          decoder = path;
+          break;
+        }
+      }
+      if (!decoder) throw new Error('loc.resonanz.error.transcriptionDecoderMissing');
+      await rm(destination, { force: true });
+      try {
+        await this.command(
+          decoder,
+          [
+            '-nostdin',
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-i',
+            source,
+            '-vn',
+            '-ac',
+            '1',
+            '-ar',
+            '16000',
+            '-c:a',
+            'pcm_s16le',
+            '-t',
+            '86401',
+            '-f',
+            'wav',
+            '-y',
+            destination,
+          ],
+          undefined,
+          signal,
+          180_000,
+        );
+      } catch {
+        signal.throwIfAborted();
+        throw new Error('loc.resonanz.error.transcriptionDecode');
+      }
+    }
+    await chmod(destination, 0o600);
+  }
+
+  /** Each native process receives at most 49 seconds and is killed and awaited on timeout/abort. */
+  public async transcribeChunk(
+    source: IPcmWaveFile,
+    locale: string,
+    startFrame: number,
+    frames: number,
+    signal: AbortSignal,
+  ): Promise<readonly ITranscriptSegment[]> {
+    const executable = this._host.macosFileTranscriber;
+    if (!this._fileLeased || !executable || this._disposed)
+      throw new Error('loc.resonanz.error.transcriptionInterrupted');
+    const raw = await this.command(
+      executable,
+      [
+        '--file',
+        source.path,
+        '--locale',
+        locale,
+        '--start-frame',
+        String(startFrame),
+        '--frame-count',
+        String(frames),
+      ],
+      undefined,
+      signal,
+      90_000,
+      { transcription: true, errorOutput: true },
+    );
+    const result = z
+      .object({
+        segments: z
+          .array(
+            z.object({
+              text: z.string().max(40_000),
+              startMs: z.number().finite().min(0),
+              endMs: z.number().finite().min(0),
+            }),
+          )
+          .max(1000)
+          .optional(),
+        error: z
+          .object({
+            code: z.string(),
+            domain: z.string().optional(),
+            nativeCode: z.number().optional(),
+            message: z.string().optional(),
+          })
+          .optional(),
+      })
+      .parse(JSON.parse(raw));
+    if (result.error) {
+      // Keep native identity locally without putting paths or recognized text into diagnostics.
+      const diagnostic = {
+        at: new Date().toISOString(),
+        code: result.error.code,
+        domain: result.error.domain,
+        nativeCode: result.error.nativeCode,
+      };
+      await writeFile(
+        join(this._host.dataDirectory, 'transcription-error.json'),
+        JSON.stringify(diagnostic),
+        { mode: 0o600 },
+      ).catch(() => undefined);
+      throw new Error(
+        result.error.code === 'timeout'
+          ? 'loc.resonanz.error.transcriptionTimeout'
+          : 'loc.resonanz.error.transcriptionInterrupted',
+      );
+    }
+    if (!result.segments) throw new Error('loc.resonanz.error.transcriptionInterrupted');
+    return result.segments.map((segment, index) =>
+      dataSchemas.transcriptSegment.parse({
+        ...segment,
+        id: String(index),
+        speaker: 'participant',
+        final: true,
+      }),
     );
   }
 
@@ -550,19 +751,25 @@ export class NativeSpeechService {
     input?: string,
     signal?: AbortSignal,
     timeoutMs = 90_000,
+    options: { readonly transcription?: boolean; readonly errorOutput?: boolean } = {},
   ): Promise<string> {
     signal?.throwIfAborted();
+    if (this._disposed) throw new Error('loc.resonanz.error.recognitionStopped');
     const child = spawn(executable, [...arguments_], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
     let output = '';
     let failed = false;
+    let timedOut = false;
     const abort = (): void => {
       failed = true;
       child.kill('SIGKILL');
     };
-    const timeout = setTimeout(abort, timeoutMs);
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      abort();
+    }, timeoutMs);
     signal?.addEventListener('abort', abort, { once: true });
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (chunk: string) => {
@@ -586,13 +793,18 @@ export class NativeSpeechService {
         signal?.removeEventListener('abort', abort);
         this._children.delete(child);
         close();
-        if (code === 0 && !failed) resolve(output.trim());
+        if ((code === 0 || (options.errorOutput && output.trim())) && !failed)
+          resolve(output.trim());
         else
           reject(
             new Error(
-              signal?.aborted
-                ? 'loc.resonanz.error.recognitionCancelled'
-                : 'loc.resonanz.error.speechFailed',
+              options.transcription
+                ? timedOut
+                  ? 'loc.resonanz.error.transcriptionTimeout'
+                  : 'loc.resonanz.error.transcriptionInterrupted'
+                : signal?.aborted
+                  ? 'loc.resonanz.error.recognitionCancelled'
+                  : 'loc.resonanz.error.speechFailed',
             ),
           );
       });

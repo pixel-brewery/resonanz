@@ -69,18 +69,23 @@ for (const platform of ['darwin', 'win32', 'linux']) {
         '--eval',
         `
           import assert from 'node:assert/strict';
+          import { fileURLToPath } from 'node:url';
           Object.defineProperty(process, 'platform', { value: ${JSON.stringify(platform)} });
           const { default: config } = await import(${JSON.stringify(new URL('./forge.config.mjs', import.meta.url).href)});
           const options = config.packagerConfig;
+          const nativeResource = fileURLToPath(new URL('./dist/native', ${JSON.stringify(import.meta.url)}));
           assert.equal(options.osxNotarize, undefined);
           assert.equal(options.windowsSign, undefined);
+          assert.ok(options.ignore.some((pattern) => pattern.test('/dist/native/ResonanzFileTranscriber')));
           if (process.platform === 'darwin') {
+            assert.ok(options.extraResource.includes(nativeResource));
             assert.equal(options.osxSign.identity, '-');
             assert.equal(options.osxSign.identityValidation, false);
             assert.equal(options.osxSign.continueOnError, false);
             assert.equal(options.osxSign.optionsForFile('Resonanz.app').hardenedRuntime, false);
           } else {
             assert.equal(options.osxSign, undefined);
+            assert.ok(!options.extraResource.includes(nativeResource));
           }
           const installer = config.makers.find((maker) => maker.name === 'squirrel');
           assert.ok(installer, 'The Windows installer maker must remain configured.');

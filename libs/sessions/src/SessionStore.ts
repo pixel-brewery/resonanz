@@ -21,6 +21,7 @@ import { recordingFileName } from './recordingFileName.js';
 import type { IStoredSession } from './IStoredSession.js';
 import {
   dataSchemas,
+  hostTranscriptionCommandSchema,
   assistantConfigurationKey,
   defaultSettings,
   isUserAssignee,
@@ -35,6 +36,8 @@ import {
   type IStorageUsage,
   type ResponsePayload,
   type IProcessingStep,
+  type HostTranscriptionCommand,
+  type HostTranscriptionResult,
 } from '@resonanz/contracts';
 // #endregion
 
@@ -42,6 +45,19 @@ const recordSchema = z.object({
   version: z.literal(1),
   session: dataSchemas.session,
   continuations: z.record(z.string(), z.string().max(100_000)).default({}),
+  transcriptionDraft: z
+    .strictObject({
+      version: z.literal(1),
+      sourceHash: z.string().regex(/^[a-f0-9]{64}$/u),
+      locale: z.string().min(1).max(80),
+      plan: z.literal('pcm16-v1'),
+      totalChunks: z.number().int().min(1).max(3000),
+      completedChunks: z.number().int().min(0).max(3000),
+      generation: z.uuid().optional(),
+      segments: z.array(dataSchemas.transcriptSegment).max(20_000),
+    })
+    .refine((draft) => draft.completedChunks <= draft.totalChunks)
+    .optional(),
   analysisRetry: z
     .object({
       id: dataSchemas.identifier,
@@ -159,7 +175,10 @@ export class SessionStore {
           await this.materializeAudio(recovered.session.id);
       }
       const current = this.requireRecord(record.session.id);
-      if (Object.values(current.session.pipeline ?? {}).some((step) => step?.state === 'running')) {
+      if (
+        current.transcriptionDraft?.generation ||
+        Object.values(current.session.pipeline ?? {}).some((step) => step?.state === 'running')
+      ) {
         current.session = {
           ...current.session,
           pipeline: Object.fromEntries(
@@ -170,6 +189,8 @@ export class SessionStore {
           ),
           updatedAt: new Date().toISOString(),
         };
+        if (current.transcriptionDraft)
+          current.transcriptionDraft = { ...current.transcriptionDraft, generation: undefined };
         await this.persist(current);
       }
     }
@@ -636,22 +657,107 @@ export class SessionStore {
     return this.serialize(async () => {
       this.assertTranscript(segments);
       const record = this.requireRecord(sessionId);
-      const next = {
-        ...record.session,
-        transcript: segments,
-        analysis: undefined,
-        pipeline: {
-          transcription: { state: 'done' as const },
-          analysis: { state: 'pending' as const },
-        },
-        messages: record.session.messages.map(({ answer: _answer, ...message }) => message),
-        updatedAt: new Date().toISOString(),
-      };
-      await this.persist({ ...record, session: next, continuations: {}, analysisRetry: undefined });
-      record.session = next;
-      record.continuations = {};
-      record.analysisRetry = undefined;
-      return structuredClone(record.session);
+      return this.replaceTranscriptRecord(record, segments);
+    });
+  }
+  /**
+   * Checks durable completion ownership before orchestration cancels any assistant work.
+   * The final commit independently checks the same generation and cursor again.
+   */
+  public assertTranscriptionComplete(sessionId: string, generation: string): Promise<void> {
+    dataSchemas.identifier.parse(sessionId);
+    dataSchemas.identifier.parse(generation);
+    return this.serialize(async () => {
+      const draft = this.requireRecord(sessionId).transcriptionDraft;
+      if (!draft || draft.generation !== generation)
+        throw new Error('loc.resonanz.error.backgroundInterrupted');
+      if (draft.completedChunks !== draft.totalChunks)
+        throw new Error('loc.resonanz.error.transcriptionChunkOrder');
+    });
+  }
+  /**
+   * Atomically journals completed native chunks without exposing an unfinished replacement.
+   * A new explicit begin owns a fresh generation; interrupted generations cannot publish later.
+   */
+  public transcription<C extends HostTranscriptionCommand>(
+    command: C,
+  ): Promise<HostTranscriptionResult<C['action']>> {
+    const input = hostTranscriptionCommandSchema.parse(command);
+    return this.serialize(async () => {
+      const record = this.requireRecord(input.sessionId);
+      if (input.action === 'begin') {
+        if (
+          [...this._records.values()].some((candidate) =>
+            ['recording', 'paused'].includes(candidate.session.status),
+          ) ||
+          record.session.status === 'processing'
+        )
+          throw new Error('loc.resonanz.error.transcribeActive');
+        if (!record.session.audioAvailable) throw new Error('loc.resonanz.error.recordingMissing');
+        if (
+          [...this._records.values()].some(
+            (candidate) =>
+              candidate.session.pipeline?.transcription?.state === 'running' &&
+              (candidate.session.id !== record.session.id ||
+                candidate.transcriptionDraft?.generation !== undefined),
+          )
+        )
+          throw new Error('loc.resonanz.error.fileTranscriptionRunning');
+        const previous = record.transcriptionDraft;
+        const resume =
+          previous?.sourceHash === input.sourceHash &&
+          previous.locale === input.locale &&
+          previous.plan === input.plan &&
+          previous.totalChunks === input.totalChunks;
+        const draft: NonNullable<IStoredSession['transcriptionDraft']> = {
+          version: 1,
+          sourceHash: input.sourceHash,
+          locale: input.locale,
+          plan: input.plan,
+          totalChunks: input.totalChunks,
+          completedChunks: resume ? previous.completedChunks : 0,
+          segments: resume ? previous.segments : [],
+          generation: randomUUID(),
+        };
+        await this.commitTranscriptionDraft(record, draft, {
+          state: 'running',
+          progress: (draft.completedChunks / draft.totalChunks) * 100,
+        });
+        return {
+          generation: draft.generation!,
+          nextChunk: draft.completedChunks,
+        } as HostTranscriptionResult<C['action']>;
+      }
+      const draft = record.transcriptionDraft;
+      if (!draft || draft.generation !== input.generation)
+        throw new Error('loc.resonanz.error.backgroundInterrupted');
+      if (input.action === 'cancel') {
+        await this.commitTranscriptionDraft(
+          record,
+          { ...draft, generation: undefined },
+          {
+            state: 'failed',
+            progress: (draft.completedChunks / draft.totalChunks) * 100,
+            error: 'loc.resonanz.error.backgroundInterrupted',
+          },
+        );
+      } else if (input.action === 'chunk') {
+        if (input.index !== draft.completedChunks || input.index >= draft.totalChunks)
+          throw new Error('loc.resonanz.error.transcriptionChunkOrder');
+        const segments = this.mergeTranscriptionChunk(draft.segments, input.segments);
+        this.assertTranscript(segments);
+        const completedChunks = draft.completedChunks + 1;
+        await this.commitTranscriptionDraft(
+          record,
+          { ...draft, completedChunks, segments },
+          { state: 'running', progress: (completedChunks / draft.totalChunks) * 100 },
+        );
+      } else {
+        if (draft.completedChunks !== draft.totalChunks)
+          throw new Error('loc.resonanz.error.transcriptionChunkOrder');
+        await this.replaceTranscriptRecord(record, draft.segments);
+      }
+      return this.get(input.sessionId) as HostTranscriptionResult<C['action']>;
     });
   }
   /**
@@ -1153,6 +1259,92 @@ export class SessionStore {
   private assertCollection(id: string | null): void {
     if (id !== null && !this._collections.some((item) => item.id === id))
       throw new Error('loc.resonanz.error.collectionMissing');
+  }
+  /** Adjacent recognition windows may disagree on word starts while retaining the same audio. */
+  private mergeTranscriptionChunk(
+    confirmed: readonly ITranscriptSegment[],
+    incoming: readonly ITranscriptSegment[],
+  ): readonly ITranscriptSegment[] {
+    const ids = new Set<string>();
+    for (const segment of [...confirmed, ...incoming]) {
+      if (!segment.final || segment.speaker !== 'participant' || ids.has(segment.id))
+        throw new Error('loc.resonanz.error.audioData');
+      ids.add(segment.id);
+    }
+    const firstStart = incoming.reduce(
+      (value, segment) => Math.min(value, segment.startMs),
+      Infinity,
+    );
+    const lastEnd = incoming.reduce((value, segment) => Math.max(value, segment.endMs), -Infinity);
+    const boundary = new Map<string, ITranscriptSegment[]>();
+    for (const segment of confirmed) {
+      if (segment.endMs <= firstStart || segment.startMs >= lastEnd) continue;
+      const key = this.transcriptionWordKey(segment.text);
+      if (key) boundary.set(key, [...(boundary.get(key) ?? []), segment]);
+    }
+    const additions = incoming.filter((segment) => {
+      const candidates = boundary.get(this.transcriptionWordKey(segment.text)) ?? [];
+      return !candidates.some((previous) => {
+        const overlap =
+          Math.min(previous.endMs, segment.endMs) - Math.max(previous.startMs, segment.startMs);
+        const shorter = Math.min(
+          previous.endMs - previous.startMs,
+          segment.endMs - segment.startMs,
+        );
+        return overlap > 0 && shorter > 0 && overlap >= shorter / 2;
+      });
+    });
+    return [...confirmed, ...additions].toSorted((left, right) => left.startMs - right.startMs);
+  }
+  private transcriptionWordKey(text: string): string {
+    return text
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/^[\p{P}\s]+|[\p{P}\s]+$/gu, '');
+  }
+  private async commitTranscriptionDraft(
+    record: IStoredSession,
+    transcriptionDraft: NonNullable<IStoredSession['transcriptionDraft']>,
+    step: IProcessingStep,
+  ): Promise<void> {
+    const session = {
+      ...record.session,
+      pipeline: { ...record.session.pipeline, transcription: step },
+      updatedAt: new Date().toISOString(),
+    };
+    await this.persist({ ...record, session, transcriptionDraft, analysisRetry: undefined });
+    record.session = session;
+    record.transcriptionDraft = transcriptionDraft;
+    record.analysisRetry = undefined;
+  }
+  private async replaceTranscriptRecord(
+    record: IStoredSession,
+    segments: readonly ITranscriptSegment[],
+  ): Promise<ISession> {
+    this.assertTranscript(segments);
+    const session = {
+      ...record.session,
+      transcript: segments,
+      analysis: undefined,
+      pipeline: {
+        transcription: { state: 'done' as const },
+        analysis: { state: 'pending' as const },
+      },
+      messages: record.session.messages.map(({ answer: _answer, ...message }) => message),
+      updatedAt: new Date().toISOString(),
+    };
+    await this.persist({
+      ...record,
+      session,
+      continuations: {},
+      analysisRetry: undefined,
+      transcriptionDraft: undefined,
+    });
+    record.session = session;
+    record.continuations = {};
+    record.analysisRetry = undefined;
+    record.transcriptionDraft = undefined;
+    return structuredClone(record.session);
   }
   private assertTranscript(segments: readonly ITranscriptSegment[]): void {
     z.array(dataSchemas.transcriptSegment).max(20_000).parse(segments);

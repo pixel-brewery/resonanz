@@ -76,6 +76,27 @@ async function setup() {
 async function getSession(application: OrchestratorApplication, sessionId: string) {
   return dataSchemas.session.parse(await application.request('sessions.get', { sessionId }));
 }
+async function finishTranscriptionAudio(context: Awaited<ReturnType<typeof setup>>) {
+  await context.application.request('audio.append', {
+    sessionId: context.sessionId,
+    sequence: 1,
+    bytes: Uint8Array.of(1, 2, 3),
+    mimeType: 'audio/webm',
+    elapsedMs: 45_000,
+  });
+  await context.application.request('sessions.finish', {
+    sessionId: context.sessionId,
+    durationMs: 45_000,
+  });
+  return {
+    action: 'begin' as const,
+    sessionId: context.sessionId,
+    sourceHash: 'a'.repeat(64),
+    locale: 'de-DE',
+    plan: 'pcm16-v1' as const,
+    totalChunks: 1,
+  };
+}
 async function waitForRun(events: AppEvent[], runId: string) {
   await vi.waitFor(() =>
     expect(
@@ -119,6 +140,162 @@ afterEach(async () => {
   for (const reject of [...unsettled]) reject(new Error('test cleanup'));
   await Promise.allSettled(applications.splice(0).map((application) => application.dispose()));
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
+});
+
+describe('OrchestratorApplication native transcription drafts', () => {
+  it('publishes durable progress, blocks inference against a changing source and commits its final replacement', async () => {
+    const context = await setup();
+    const begin = await finishTranscriptionAudio(context);
+    await seedContinuation(context);
+    const invocations = native.execute.mock.calls.length;
+    const run = await context.application.transcription(begin);
+    expect(await getSession(context.application, context.sessionId)).toMatchObject({
+      pipeline: { transcription: { state: 'running', progress: 0 } },
+    });
+    await expect(
+      context.application.request('sessions.ask', {
+        sessionId: context.sessionId,
+        runId: randomUUID(),
+        question: 'What changed?',
+      }),
+    ).rejects.toThrow('loc.resonanz.error.fileTranscriptionRunning');
+    await context.application.transcription({
+      action: 'chunk',
+      sessionId: context.sessionId,
+      generation: run.generation,
+      index: 0,
+      segments: [
+        {
+          id: 'recognized',
+          speaker: 'participant',
+          text: 'Confirmed new source.',
+          startMs: 100,
+          endMs: 800,
+          final: true,
+        },
+      ],
+    });
+    expect((await getSession(context.application, context.sessionId)).transcript[0]?.id).toBe(
+      'turn-1',
+    );
+    const result = await context.application.transcription({
+      action: 'complete',
+      sessionId: context.sessionId,
+      generation: run.generation,
+    });
+    expect(result.transcript[0]?.id).toBe('recognized');
+    expect(result.pipeline?.transcription?.state).toBe('done');
+    expect(native.execute).toHaveBeenCalledTimes(invocations);
+    const record = JSON.parse(
+      await readFile(join(context.root, 'library/sessions', `${context.sessionId}.json`), 'utf8'),
+    );
+    expect(record.continuations).toEqual({});
+    expect(record.transcriptionDraft).toBeUndefined();
+    expect(
+      context.events.some(
+        (event) => event.type === 'session.updated' && event.sessionId === context.sessionId,
+      ),
+    ).toBe(true);
+  });
+
+  it('rejects an old native completion after restart without cancelling a newer assistant run', async () => {
+    const context = await setup();
+    const begin = await finishTranscriptionAudio(context);
+    const original = await context.application.transcription(begin);
+    await context.application.transcription({
+      action: 'chunk',
+      sessionId: context.sessionId,
+      generation: original.generation,
+      index: 0,
+      segments: [],
+    });
+    await context.application.dispose();
+    const reopened = new OrchestratorApplication(context.root, {}, (event) =>
+      context.events.push(event),
+    );
+    applications.push(reopened);
+    await reopened.initialize();
+    const pending = pendingRun();
+    // A regression must settle rather than hanging while cancellation waits on its native run.
+    native.cancel.mockImplementationOnce(async () =>
+      pending.reject(new Error('Unexpected cancellation')),
+    );
+    const runId = randomUUID();
+    await reopened.request('sessions.ask', {
+      sessionId: context.sessionId,
+      runId,
+      question: 'Use the retained original transcript.',
+    });
+    await vi.waitFor(() => expect(native.execute).toHaveBeenCalledOnce());
+    const path = join(context.root, 'library/sessions', `${context.sessionId}.json`);
+    const before = await readFile(path, 'utf8');
+    await expect(
+      reopened.transcription({
+        action: 'complete',
+        sessionId: context.sessionId,
+        generation: original.generation,
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    expect(native.cancel).not.toHaveBeenCalled();
+    expect(await readFile(path, 'utf8')).toBe(before);
+    pending.resolve({ text: 'The original answer finished.' });
+    await waitForRun(context.events, runId);
+    expect((await getSession(reopened, context.sessionId)).messages.at(-1)).toMatchObject({
+      state: 'complete',
+      text: 'The original answer finished.',
+    });
+  });
+
+  it('does not admit a native replacement while an assistant run owns the same session', async () => {
+    const context = await setup();
+    const begin = await finishTranscriptionAudio(context);
+    const pending = pendingRun();
+    const runId = randomUUID();
+    await context.application.request('sessions.ask', {
+      sessionId: context.sessionId,
+      runId,
+      question: 'A pending question',
+    });
+    await expect(context.application.transcription(begin)).rejects.toThrow(
+      'loc.resonanz.error.fileTranscriptionRunning',
+    );
+    pending.resolve({ text: 'Completed original answer.' });
+    await waitForRun(context.events, runId);
+    expect((await getSession(context.application, context.sessionId)).transcript[0]?.id).toBe(
+      'turn-1',
+    );
+  });
+
+  it('invalidates a private draft on a manual transcript replacement before a late native result arrives', async () => {
+    const context = await setup();
+    const begin = await finishTranscriptionAudio(context);
+    const run = await context.application.transcription(begin);
+    await context.application.request('transcript.replace', {
+      sessionId: context.sessionId,
+      segments: [
+        {
+          id: 'manual',
+          speaker: 'participant',
+          text: 'User edit.',
+          startMs: 0,
+          endMs: 100,
+          final: true,
+        },
+      ],
+    });
+    await expect(
+      context.application.transcription({
+        action: 'chunk',
+        sessionId: context.sessionId,
+        generation: run.generation,
+        index: 0,
+        segments: [],
+      }),
+    ).rejects.toThrow('loc.resonanz.error.backgroundInterrupted');
+    expect((await getSession(context.application, context.sessionId)).transcript[0]?.id).toBe(
+      'manual',
+    );
+  });
 });
 
 describe('OrchestratorApplication automatic analysis recovery', () => {

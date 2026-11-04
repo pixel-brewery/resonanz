@@ -2,6 +2,15 @@ export type { AppEvent } from './AppEvent.js';
 export { appEventSchema } from './AppEventSchema.js';
 export { channels } from './Channels.js';
 export { dataSchemas } from './DataSchemas.js';
+export {
+  hostTranscriptionCommandSchema,
+  hostTranscriptionResponseSchemas,
+  hostTranscriptionEnvelopeSchema,
+} from './HostTranscriptionSchemas.js';
+export type {
+  HostTranscriptionCommand,
+  HostTranscriptionResult,
+} from './HostTranscriptionSchemas.js';
 export { defaultSettings } from './DefaultSettings.js';
 export { assistantConfigurationKey } from './assistantConfigurationKey.js';
 export type { IAppSnapshot } from './IAppSnapshot.js';

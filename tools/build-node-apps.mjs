@@ -2,6 +2,7 @@
 import { build } from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { builtinModules } from 'node:module';
+import { buildMacosSpeech } from './build-macos-speech.mjs';
 // #endregion
 
 const builtins = new Set(
@@ -17,6 +18,7 @@ const lateBound = new Set([
   'electron-native-speech-backend-macos',
 ]);
 const reports = [];
+await buildMacosSpeech();
 const builds = [
   {
     entryPoints: ['apps/desktop/src/main.ts'],

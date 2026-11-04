@@ -215,6 +215,64 @@ async function at(test: ReturnType<typeof scope>, seconds: number): Promise<void
   TestBed.tick();
 }
 
+describe('SessionPresenter durable processing', () => {
+  it('shows persisted transcription and blocks conflicting actions without a local transcription request', async () => {
+    const session: ISession = {
+      ...sessionFixture(),
+      pipeline: { transcription: { state: 'running', progress: 36 } },
+    };
+    const test = await loadedScope(session);
+
+    test.presenter.beginTranscriptEdit();
+    await test.presenter.analyze();
+    await test.presenter.transcribe();
+
+    expect(test.presenter.processingActivity()).toMatchObject({
+      stage: 'transcription',
+      state: 'running',
+      progress: 36,
+    });
+    expect(test.presenter.running()).toBe(true);
+    expect(test.presenter.editingTranscript()).toBe(false);
+    expect(test.api.request).not.toHaveBeenCalled();
+    expect(test.library.report).not.toHaveBeenCalled();
+  });
+
+  it('shows a stored failure on loading and clears attention when refreshed stages finish', async () => {
+    const session: ISession = {
+      ...sessionFixture(),
+      pipeline: { transcription: { state: 'failed', error: 'Native recognition interrupted' } },
+    };
+    const test = await loadedScope(session);
+    expect(test.presenter.processingActivity()).toMatchObject({
+      state: 'failed',
+      error: 'Native recognition interrupted',
+    });
+    expect(test.presenter.running()).toBe(false);
+
+    test.sessions.set(session.id, {
+      ...session,
+      pipeline: { transcription: { state: 'done' }, analysis: { state: 'running' } },
+    });
+    await test.presenter.refresh();
+
+    expect(test.presenter.processingActivity()).toMatchObject({
+      stage: 'analysis',
+      state: 'running',
+    });
+    expect(test.presenter.running()).toBe(true);
+
+    test.sessions.set(session.id, {
+      ...session,
+      pipeline: { transcription: { state: 'done' }, analysis: { state: 'done' } },
+    });
+    await test.presenter.refresh();
+
+    expect(test.presenter.processingActivity()).toBeNull();
+    expect(test.presenter.running()).toBe(false);
+  });
+});
+
 describe('SessionPresenter saved-text speech preferences', () => {
   it('passes the saved rate, recognition locale and matching system voice through the unchanged public TTS API', async () => {
     const test = scope();

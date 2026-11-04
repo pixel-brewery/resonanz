@@ -5,9 +5,21 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "inputs": ["production", "^production", "{workspaceRoot}/tools/build-node-apps.mjs"],
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/tools/build-node-apps.mjs",
+        "{workspaceRoot}/tools/build-macos-speech.mjs",
+        "{workspaceRoot}/resources/speech/macos-file-transcription.swift",
+        "{workspaceRoot}/resources/speech/macos-file-transcription.plist",
+        { "runtime": "node tools/build-macos-speech.mjs --cache-key" }
+      ],
       "options": { "command": "node tools/build-node-apps.mjs" },
-      "outputs": ["{workspaceRoot}/dist/apps/desktop", "{workspaceRoot}/dist/apps/orchestrator"]
+      "outputs": [
+        "{workspaceRoot}/dist/apps/desktop",
+        "{workspaceRoot}/dist/apps/orchestrator",
+        "{workspaceRoot}/dist/native"
+      ]
     }
   }
 }

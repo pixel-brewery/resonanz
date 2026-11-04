@@ -1,6 +1,6 @@
 // #region Imports
 import { constants, accessSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -67,8 +67,36 @@ function compareResource(path, sourcePath) {
   comparedFiles += 1;
 }
 
+/** Compares native code while allowing Forge to replace its ad-hoc signature. */
+async function compareSignedResource(path, sourcePath) {
+  if (!statSync(path).isFile()) throw new Error(`Packaged native resource is not a file: ${path}`);
+  if (!readFileSync(path).equals(readFileSync(sourcePath))) {
+    const scratchRoot = join(root, '.codex-work/package-native-verification');
+    await mkdir(scratchRoot, { recursive: true });
+    const scratch = await mkdtemp(join(scratchRoot, 'run-'));
+    try {
+      const actual = join(scratch, 'actual');
+      const expected = join(scratch, 'expected');
+      await copyFile(path, actual);
+      await copyFile(sourcePath, expected);
+      for (const copy of [actual, expected])
+        execFileSync('/usr/bin/codesign', ['--remove-signature', copy], {
+          timeout: 10_000,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+      if (!readFileSync(actual).equals(readFileSync(expected)))
+        throw new Error(`Packaged native code differs from the current build: ${path}`);
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
+  }
+  comparedFiles += 1;
+}
+
 // A source-workspace link cannot satisfy an application dependency in an installed app.
 for (const path of entries) {
+  if (path === 'dist/native' || path.startsWith('dist/native/'))
+    throw new Error(`The native file recognizer must not be embedded in ASAR: ${path}`);
   if (path === 'package.json' || path === 'dist' || path.startsWith('dist/')) continue;
   if (path === 'node_modules') continue;
   if (!path.startsWith('node_modules/'))
@@ -194,6 +222,9 @@ compareResource(
 
 let nativeSignature = 'not-applicable';
 if (process.platform === 'darwin') {
+  const fileTranscriber = join(resourceRoot, 'native/ResonanzFileTranscriber');
+  accessSync(fileTranscriber, constants.X_OK);
+  await compareSignedResource(fileTranscriber, join(root, 'dist/native/ResonanzFileTranscriber'));
   const helper = join(resourceRoot, 'SpeechHelper.app/Contents/MacOS/SpeechHelper');
   accessSync(helper, constants.X_OK);
   accessSync(join(appRoot, 'Contents/MacOS/Resonanz'), constants.X_OK);

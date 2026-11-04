@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, untracked } from '@
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
 import { ProgressRingComponent } from '@pixel-brewery/mosaik-elements-angular/components/progress-ring';
 import { MiniPlayerComponent } from '../components/mini-player/MiniPlayerComponent';
+import { ProcessingStatusComponent } from '../components/processing-status/ProcessingStatusComponent';
 import { NotificationBellComponent } from '../components/notification-bell/NotificationBellComponent';
 import { DurationPipe } from '../pipes/DurationPipe';
 import { TranslatePipe } from '../pipes/TranslatePipe';
@@ -28,6 +29,7 @@ import { UpdateStore } from '../services/UpdateStore';
     ButtonComponent,
     ProgressRingComponent,
     MiniPlayerComponent,
+    ProcessingStatusComponent,
     NotificationBellComponent,
     DurationPipe,
     DecimalPipe,
