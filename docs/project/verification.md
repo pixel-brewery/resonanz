@@ -28,12 +28,17 @@ recognition and provider inference were not exercised by this layout group.
 Fixture sessions/collections and preference changes are cleaned up by the runner;
 the task-owned Electron instance exits. Its hidden verification window enables
 unthrottled layout frames for this group and restores that flag afterward; it
-remains hidden and does not change focus. This is source-app layout evidence, not a
-new packaged-app or Windows result.
+remains hidden and does not change focus. These local checks do not establish Windows behavior or new speech/provider
+inference.
 
-The final successful layout run is recorded under
-`.codex-work/desktop-smoke-rbnFBm/`, including `layout-evidence.json` and native PNGs.
-Earlier real media/account evidence below remains separate.
+A fresh macOS ARM64 app bundle also passed package verification (189 compared
+files and local signature) and all twelve packaged-executable E2E groups. The
+runner waits for public component updates and stable measured viewport/pane
+geometry, with every scroll, interaction, persistence and native screenshot check
+retained. Source evidence is under `.codex-work/desktop-smoke-dUisO0/`; packaged
+evidence is under `.codex-work/packaged-smoke-0svUys/`. Each includes layout geometry
+and native PNGs. The bundle is in `.codex-work/layout-audit/out/`. Earlier real
+media/account evidence below remains separate.
 
 ## Long macOS recording recovery: 2026-11-04
 

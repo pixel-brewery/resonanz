@@ -347,16 +347,41 @@ async function verifyDesktopLayout() {
   const settle = async () => {
     const token = randomUUID();
     await page.evaluate((token) => {
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => {
-          document.documentElement.dataset.layoutFrame = token;
-        }),
-      );
+      const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
+      void Promise.all(splits.map((split) => split.updateComplete))
+        .then(() => Promise.all(splits.map((split) => split.updateComplete)))
+        .then(() => {
+          document.documentElement.dataset.layoutReady = token;
+        });
     }, token);
-    await waitFor(
-      () => page.evaluate((token) => document.documentElement.dataset.layoutFrame === token, token),
-      'hidden native window renders layout frames',
-    );
+    let previous;
+    await waitFor(async () => {
+      const measured = await page.evaluate((token) => {
+        if (document.documentElement.dataset.layoutReady !== token) return null;
+        const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
+        if (splits.some((split) => split.clientWidth <= 1 || split.clientHeight <= 1)) return null;
+        const boxes = splits
+          .flatMap((split) => [
+            split,
+            ...[...split.children].filter(
+              (child) => child.slot === 'start' || child.slot === 'end',
+            ),
+          ])
+          .map((element) => element.getBoundingClientRect());
+        return [
+          innerWidth,
+          innerHeight,
+          ...boxes.flatMap((box) => [box.x, box.y, box.width, box.height]),
+        ];
+      }, token);
+      const stable =
+        measured &&
+        previous &&
+        measured.length === previous.length &&
+        measured.every((value, index) => Math.abs(value - previous[index]) <= 1);
+      previous = measured;
+      return stable;
+    }, 'native viewport and pane geometry settle');
   };
   const resize = async (size) => {
     await nativeWindow.evaluate(
@@ -1224,6 +1249,7 @@ try {
   );
   const conversationInstructions =
     'Sprich auf Deutsch, kurz und klar. Dies ist ein Einrichtungstest.';
+  process.stdout.write('CHECK native preferences: conversation instructions\n');
   const speechAdvanced = page.locator('.speech-advanced');
   if ((await speechAdvanced.getAttribute('open')) === null)
     await speechAdvanced.locator('summary').click();
@@ -1231,6 +1257,7 @@ try {
   const connectionAdvanced = page.locator('.advanced:not(.speech-advanced)');
   if ((await connectionAdvanced.getAttribute('open')) === null)
     await connectionAdvanced.locator(':scope > summary').click();
+  process.stdout.write('CHECK native preferences: save settings\n');
   await control('save-settings').click();
   await waitFor(
     async () =>
@@ -1240,6 +1267,7 @@ try {
   );
   assert.equal(await control('api-key').count(), 0);
   assert.equal((await request('bootstrap.get')).settings.autoTranscribe, false);
+  process.stdout.write('CHECK native preferences: silence and pause annotations\n');
   await control('silence-reminder').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.silenceReminder === true,
@@ -1250,6 +1278,7 @@ try {
     async () => (await request('bootstrap.get')).settings.markPausesInTranscript === true,
     'recording pause annotation preference',
   );
+  process.stdout.write('CHECK native preferences: speech rate and retention\n');
   const rate = control('speech-rate').getByRole('slider');
   await rate.press('End');
   await waitFor(
@@ -1369,6 +1398,7 @@ try {
   await writeFile(join(artifacts, 'evidence.json'), `${JSON.stringify(evidence, null, 2)}\n`);
   process.stdout.write(`Desktop verification passed. Artifacts: ${artifacts}\n`);
 } catch (error) {
+  process.stderr.write(`${error?.stack ?? String(error)}\n`);
   const ui =
     page && !page.isClosed()
       ? await page
