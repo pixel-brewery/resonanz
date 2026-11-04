@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/nx/schemas/project-schema.json",
+  "name": "resonanz",
+  "targets": {
+    "intl": {
+      "executor": "@pixel-brewery/wortlaut-nx-tasks:wortlaut",
+      "cache": false,
+      "defaultConfiguration": "analyze",
+      "options": {
+        "mode": "analyze",
+        "dryRun": true,
+        "actions": {
+          "detect": {
+            "root": "apps",
+            "resourceRoot": "../libs/intl/src/assets/i18n",
+            "languages": ["en", "de"],
+            "preset": "angular",
+            "type": "json",
+            "resourceKey": { "prefix": "loc.resonanz" }
+          },
+          "analyze": {
+            "baseLocale": "en",
+            "rules": ["duplicate-keys", "empty-values", "key-consistency"],
+            "severities": {
+              "duplicate-keys": "error",
+              "empty-values": "error",
+              "key-consistency": "error"
+            }
+          },
+          "sort": { "order": "asc" }
+        }
+      },
+      "configurations": {
+        "analyze": { "mode": "analyze", "dryRun": true },
+        "detect": { "mode": "detect", "dryRun": true },
+        "sort": { "mode": "sort", "dryRun": false }
+      }
+    }
+  }
+}

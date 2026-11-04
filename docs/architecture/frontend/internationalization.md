@@ -32,6 +32,35 @@ positional `{0}`, `{1}` placeholders. Translate whole phrases rather than joinin
 language-dependent fragments. Catalog tests check key parity, non-empty values and
 matching placeholders. Date/number formatting uses the current interface locale.
 
+## Catalog tooling and CI
+
+The public `@pixel-brewery/wortlaut-nx-tasks` package supplies the `resonanz:intl`
+target. The root `project.json` owns the Angular preset, English base locale,
+English/German JSON resource path and `loc.resonanz` key prefix. The default
+`analyze` configuration is read only. `yarn check:intl` rejects duplicate keys,
+empty values and different key sets with explicit error severities; `yarn verify`
+runs the same gate in the required desktop CI checks and release verification.
+Before analysis, a tested file preflight derives expected locales from the same
+Nx target and rejects missing or empty catalogs, invalid JSON shapes and duplicate
+JSON members. This closes cases that the published 0.2.4 reader can skip before
+analysis and does not implement another translation analyzer.
+The pinned bundled `message-checks` rule pack additionally rejects changed
+placeholders and malformed ICU messages. Its declarative contents and hashes are
+committed in `.wortlaut/rule-packs/message-checks/` and `wortlaut.lock.json`.
+The existing portable catalog tests additionally enforce positional placeholder
+parity and native formatting behavior.
+
+`yarn nx run resonanz:intl:detect` previews source findings without applying them.
+`yarn nx run resonanz:intl:sort` explicitly sorts the JSON catalogs. These commands
+use the same Wortlaut owner; no AI provider is configured for catalog checks.
+Runtime imports remain the bundled JSON catalogs and their typed registry.
+
+Wortlaut and its transitive tooling packages are installed from GitHub Packages.
+Source contributors need a token with package-read access in `GITHUB_TOKEN`;
+native CI uses its read-only package permission for dependency installation.
+This development prerequisite does not introduce a runtime credential or change
+assistant-account authentication.
+
 Application-owned errors cross IPC as stable catalog keys. Resolve them for display;
 external provider/system messages remain verbatim. Do not translate a transcript,
 user title, native challenge, credential field or stored answer by guessing its prose.

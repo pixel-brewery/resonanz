@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: continuous-desktop-release
@@ -87,6 +88,8 @@ jobs:
       - run: corepack enable
       - run: corepack prepare yarn@${YARN_VERSION} --activate
       - run: yarn install --immutable
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Resolve version, changelog, commit and tag once
         id: release
         env:
@@ -186,6 +189,8 @@ jobs:
           if (process.platform !== process.env.EXPECTED_PLATFORM || process.arch !== process.env.EXPECTED_ARCHITECTURE) throw new Error('The release runner does not match the supported native target.');
           NODE
       - run: yarn install --immutable
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: yarn format:check
       - run: yarn verify
       - name: Exercise the Windows speech runtime
