@@ -40,6 +40,16 @@ evidence is under `.codex-work/packaged-smoke-0svUys/`. Each includes layout geo
 and native PNGs. The bundle is in `.codex-work/layout-audit/out/`. Earlier real
 media/account evidence below remains separate.
 
+The macOS CI follow-up exposed an export-test synchronization gap: a nonempty
+destination can still be incomplete while the native owner awaits `copyFile`.
+Audio acceptance now waits for the exact recorded byte count before the existing
+size, WebM-header and import checks. A controlled real-file regression reproduced
+early completion at 81,920 bytes against 92,139 expected bytes, then verified that
+the corrected waiter remains pending until complete and rejects permanent
+truncation. All twelve built-app and packaged-executable groups passed locally
+after the fix; evidence is under `.codex-work/desktop-smoke-7DR5wA/` and
+`.codex-work/packaged-smoke-8V83Ht/`.
+
 ## Long macOS recording recovery: 2026-11-04
 
 The earlier 0.1.6 single-request file path failed on an owner-authorized 38-minute

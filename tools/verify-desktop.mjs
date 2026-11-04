@@ -973,13 +973,21 @@ async function selectFile(path) {
   return request('sessions.get', { sessionId: imported.id });
 }
 
-async function exportFile(format, path, button) {
+async function exportFile(format, path, button, expectedBytes) {
   if (!(await button.isVisible())) await page.locator('.session-menu > summary').click();
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showSaveDialog = async () => ({ canceled: false, filePath });
   }, path);
   await button.click();
-  await waitFor(async () => (await stat(path).catch(() => null))?.size > 0, `${format} export`);
+  // The UI click does not await the native export promise. copyFile can expose a nonempty
+  // destination before the final chunk, so audio checks must wait for its complete size.
+  await waitFor(
+    async () => {
+      const bytes = (await stat(path).catch(() => null))?.size;
+      return expectedBytes === undefined ? bytes > 0 : bytes === expectedBytes;
+    },
+    `${format} export${expectedBytes === undefined ? '' : ` (${expectedBytes} bytes)`}`,
+  );
 }
 
 try {
@@ -1183,6 +1191,7 @@ try {
     'audio',
     audioPath,
     page.getByRole('button', { name: 'Audio exportieren', exact: true }),
+    recording.audioBytes,
   );
   assert.equal((await stat(audioPath)).size, recording.audioBytes);
   assert.equal((await readFile(audioPath)).subarray(0, 4).toString('hex'), '1a45dfa3');
