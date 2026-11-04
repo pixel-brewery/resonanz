@@ -134,6 +134,57 @@ async function openSession(id) {
   await control('session-title').waitFor({ state: 'visible' });
 }
 
+// The native capturer can render the hidden Electron test window without showing or focusing it.
+async function captureDiagnosticImage(name) {
+  let window;
+  let timeout;
+  try {
+    const capture = (async () => {
+      window = await application.browserWindow(page);
+      return window.evaluate(async (nativeWindow) => {
+        const wasVisible = nativeWindow.isVisible();
+        const wasFocused = nativeWindow.isFocused();
+        const image = await nativeWindow.webContents.capturePage(undefined, {
+          stayHidden: true,
+          stayAwake: true,
+        });
+        return {
+          ...image.getSize(),
+          empty: image.isEmpty(),
+          png: image.toPNG().toString('base64'),
+          wasVisible,
+          wasFocused,
+          visible: nativeWindow.isVisible(),
+          focused: nativeWindow.isFocused(),
+        };
+      });
+    })();
+    const result = await Promise.race([
+      capture,
+      new Promise((_, reject) => {
+        timeout = setTimeout(
+          () => reject(new Error(`Native diagnostic capture timed out after 10000ms: ${name}`)),
+          10_000,
+        );
+      }),
+    ]);
+    assert.equal(result.wasVisible, false, 'The test window starts hidden');
+    assert.equal(result.visible, false, 'Diagnostic capture keeps the test window hidden');
+    assert.equal(result.focused, result.wasFocused, 'Diagnostic capture preserves window focus');
+    assert.equal(result.empty, false, 'Diagnostic capture returns a nonempty native image');
+    assert(result.width > 0 && result.height > 0, 'Diagnostic capture has positive dimensions');
+    const png = Buffer.from(result.png, 'base64');
+    assert(png.length > 24, 'Diagnostic capture returns PNG data');
+    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    assert.equal(png.subarray(12, 16).toString('ascii'), 'IHDR');
+    assert(png.readUInt32BE(16) > 0 && png.readUInt32BE(20) > 0, 'PNG dimensions are positive');
+    await writeFile(join(artifacts, name), png);
+  } finally {
+    clearTimeout(timeout);
+    await window?.dispose();
+  }
+}
+
 async function verifyProcessingStatus() {
   const before = await session();
   const globalStatus = control('status-processing');
@@ -188,10 +239,7 @@ async function verifyProcessingStatus() {
       await assertDisabled('analyze-session', true);
       assert.equal(await control('transcript-editor').count(), 0);
       await menu.locator('summary').click();
-      await page.screenshot({
-        path: join(artifacts, 'transcription-running.png'),
-        animations: 'disabled',
-      });
+      await captureDiagnosticImage('transcription-running.png');
     }
   }
   await control('nav-settings').click();
@@ -236,10 +284,7 @@ async function verifyProcessingStatus() {
   assert.match(await globalStatus.innerText(), /Transkription.*fehlgeschlagen/u);
   assert.equal(await progress(globalStatus).count(), 0);
   await control('transcript-processing').waitFor({ state: 'visible' });
-  await page.screenshot({
-    path: join(artifacts, 'transcription-failed.png'),
-    animations: 'disabled',
-  });
+  await captureDiagnosticImage('transcription-failed.png');
   await localStatus.locator('[test-id="processing-open"]').click();
   await control('session-recovery').waitFor({ state: 'visible' });
   await assertNoAccountHelp();
