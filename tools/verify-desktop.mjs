@@ -539,7 +539,7 @@ try {
   );
   assert.equal((await session()).transcript[0].endMs, recording.durationMs);
   await verifyProcessingStatus();
-  await page.screenshot({ path: join(artifacts, 'session.png') });
+  await captureDiagnosticImage('session.png');
   const jsonPath = join(artifacts, 'session.json');
   const markdownPath = join(artifacts, 'session.md');
   const audioPath = join(artifacts, 'audio.webm');
@@ -780,8 +780,7 @@ try {
           })
           .catch(() => null)
       : null;
-  if (page && !page.isClosed())
-    await page.screenshot({ path: join(artifacts, 'failure.png') }).catch(() => undefined);
+  if (page && !page.isClosed()) await captureDiagnosticImage('failure.png').catch(() => undefined);
   await writeFile(
     join(artifacts, 'failure.json'),
     JSON.stringify(
