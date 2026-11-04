@@ -1,3 +1,13 @@
+## 0.1.8 (2026-11-04)
+
+### 🩹 Fixes
+
+- recover long macOS transcriptions and expose processing status ([02c11e6](https://github.com/pixel-brewery/resonanz/commit/02c11e6))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.7 (2026-11-04)
 
 ### 🩹 Fixes
