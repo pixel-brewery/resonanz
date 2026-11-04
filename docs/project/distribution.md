@@ -5,7 +5,7 @@ workspace remains `private: true` to prevent accidental npm publication. Public
 source visibility does not create a release, installer or trusted signature; the
 update check only finds what a release publishes.
 
-## Build a native bundle
+## Build a native installer
 
 Use Node 24 LTS and Yarn 4.10.3 with the pinned vendor archives:
 
@@ -17,10 +17,17 @@ yarn verify:package
 yarn test:e2e --packaged
 ```
 
-`yarn make` runs makers supported by the host. `RESONANZ_OUTPUT_DIR` selects a
-separate local output directory so an existing user app can be preserved. Electron
-Packager stages outside the source tree in the task-owned sibling
-`.resonanz-package-staging/`. Keep the checkout and staging parent outside synced
+`yarn run package` builds the native application and the installers/archives
+supported by the host. On Apple Silicon, the DMG is
+`out/make/dmg/arm64/Resonanz.dmg` and the application is
+`out/Resonanz-darwin-arm64/Resonanz.app`; other architectures use their own
+architecture directory. macOS also produces a ZIP archive.
+
+`yarn make` is a compatibility alias for `yarn package`.
+`yarn package:unpacked` builds only the native application bundle.
+`RESONANZ_OUTPUT_DIR` replaces the default `out` directory so an existing user app
+can be preserved. Electron Packager stages outside the source tree in the task-owned
+sibling `.resonanz-package-staging/`. Keep the checkout and staging parent outside synced
 Documents/iCloud directories.
 
 The bundle includes the built renderer/preload/Main/Utility, required native speech

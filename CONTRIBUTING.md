@@ -65,10 +65,11 @@ Run focused checks before integrated gates and coordinate one heavy job at a tim
 | `yarn build`               | Renderer and native bundles                                |
 | `yarn test:e2e`            | Built Electron, isolated profile and synthetic media       |
 | `yarn verify`              | Configured provenance/type/test/build gates                |
-| `yarn package`             | Host-specific native application bundle                    |
+| `yarn package`             | Host-specific native bundle and installers (DMG on macOS)  |
+| `yarn package:unpacked`    | Host-specific native application bundle only               |
 | `yarn verify:package`      | Actual artifact against current bundles/resources/licenses |
 | `yarn test:e2e --packaged` | The native artifact's actual executable                    |
-| `yarn make`                | Host-supported installer/archive makers                    |
+| `yarn make`                | Compatibility alias for `yarn package`                     |
 
 `--speech` adds an intentional audible reading check with an installed system voice.
 `node tools/verify-windows-speech.mjs` directly compiles the supplied Windows bridge,

@@ -190,17 +190,21 @@ are included; no additional GitHub Packages credential or adjacent checkout is r
 Quality and packaging commands:
 
 ```sh
-yarn verify          # provenance, public content, types, tests and builds
-yarn format:check    # repository formatting
-yarn test:e2e        # built desktop app with isolated synthetic media
-yarn package         # native application bundle for this machine
-yarn verify:package  # compare the artifact with the current build
+yarn verify            # provenance, public content, types, tests and builds
+yarn format:check      # repository formatting
+yarn test:e2e          # built desktop app with isolated synthetic media
+yarn package           # native application bundle and installers (DMG on macOS)
+yarn package:unpacked  # native application bundle only
+yarn verify:package    # compare the artifact with the current build
 yarn test:e2e --packaged
-yarn make            # native installer/archive makers supported by the host
+yarn make              # compatibility alias for yarn package
 ```
 
-`RESONANZ_OUTPUT_DIR` selects a separate artifact directory. Controlled checks use
-synthetic data and isolated profiles. Real microphone capture, native speech,
+On Apple Silicon, `yarn run package` writes the DMG to
+`out/make/dmg/arm64/Resonanz.dmg` and the application to
+`out/Resonanz-darwin-arm64/Resonanz.app`. Other architectures use their own
+architecture directory. `RESONANZ_OUTPUT_DIR` replaces the default `out` directory.
+Controlled checks use synthetic data and isolated profiles. Real microphone capture, native speech,
 assistant-account inference, each operating system and native installation have
 separate evidence in the [verification record](docs/project/verification.md).
 

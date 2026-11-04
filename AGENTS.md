@@ -121,8 +121,9 @@ yarn start:built
 ```
 
 `yarn start` builds then launches Electron. `yarn verify` composes the configured
-checks. `yarn package` and `yarn make` build native bundles/installers for the
-host platform; they do not prove release readiness or another OS's behavior.
+checks. `yarn package` builds the native bundle and installers for the host platform;
+`yarn make` is an alias and `yarn package:unpacked` builds only the application bundle.
+These commands do not prove release readiness or another OS's behavior.
 After packaging, `yarn verify:package` checks the artifact and
 `yarn test:e2e --packaged` exercises its actual executable. Add `--speech` only
 for an intentional audible check with an available system voice.
