@@ -39,8 +39,19 @@ older prose.
   unless the user authorizes a coordinated source change. A reference path is
   not a runtime dependency.
 - Keep all work within the authorized scope. Do not automatically install/update
-  assistant CLIs, initiate native login, change credentials, publish packages,
-  deploy or create releases.
+  assistant CLIs, initiate native login or change credentials. Manual publication,
+  deployments and releases require the owner's specific instruction.
+
+## Git delivery and completion
+
+- Work in the designated primary checkout. Do not create an additional worktree unless the owner specifically requests one.
+- Assign one Git owner per repository for index, branch, commit, push and merge operations. Parallel source edits must have disjoint ownership and preserve concurrent work.
+- An implementation or fix request includes task-scoped commits, pushing the designated development branch and completing the required pull-request integration, unless the owner requests analysis, a draft or local-only work. Follow the repository's normal protected-branch workflow.
+- Preserve unrelated changes and identify their owner and scope before integrating them. Never silently include, overwrite or discard another task's edits.
+- Remain responsible for a requested pull request until GitHub reports `MERGED`. Do not report delivery complete while requested integration is open, task changes have not been committed and pushed, or the designated checkout differs from its own upstream.
+- At completion, verify a clean working tree and zero commits ahead of or behind that upstream. If unrelated work prevents this, report the exact outstanding files and ownership instead of claiming a clean handoff.
+- Remove obsolete branches or worktrees only after proving their work is integrated and preserving any remaining unique commits or files.
+- Manual releases, package publication, deployments, history rewrites and repository visibility changes require the owner's specific instruction. Regular workflows triggered by an authorized merge remain part of that merge.
 
 ## Production owners and boundaries
 

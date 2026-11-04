@@ -57,8 +57,13 @@ service, browser profile or provider process for convenience. Inspect task-owned
 processes before starting helpers, and stop/confirm their cleanup afterwards while
 preserving unrelated processes and user data.
 
+Follow root `AGENTS.md` for Git delivery: an implementation or fix request includes
+task-scoped commit, push and required pull-request integration unless the owner
+requests analysis, a draft or local-only work. Keep one Git owner and preserve
+unrelated edits in the primary checkout. Additional worktrees require a specific request.
+
 Do not automatically install/update assistant CLIs, initiate native login, import
-global credentials, change account configuration, publish, deploy or release.
+global credentials, change account configuration, manually publish, deploy or release.
 Capture and native authentication remain explicit user actions. Neither a generic
 shared backlog instruction nor this skill grants issue/message/PR authority.
 Existing session authorization still applies; do not request it again unnecessarily.
