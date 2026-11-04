@@ -1,9 +1,29 @@
 # Verification and evidence
 
-Updated 2026-11-01. Resonanz uses native Codex/Claude account sign-in, system speech
+Updated 2026-11-04. Resonanz uses native Codex/Claude account sign-in, system speech
 and the provenance-verified upstream audio core. An additional API key or cloud speech provider
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
+
+## Installer-producing package command: 2026-11-04
+
+On macOS ARM64 with Node 24.21.0 and Yarn 4.10.3, `yarn run package` built the
+native application, DMG and ZIP through the existing validated Forge `make`
+operation. The DMG is `out/make/dmg/arm64/Resonanz.dmg`; `yarn make` aliases the same
+command, and `yarn package:unpacked` retains bundle-only creation. The first local
+attempt found a missing installed SpeechHelper app bundle; rebuilding the existing
+`electron-native-speech-backend-macos` dependency restored its install-generated
+helper before the successful run.
+
+All **11 focused Forge/runner tests**, skill inheritance, public-content and
+repository formatting checks passed. Package verification compared **187 files**
+and verified the local signature; DMG checksum and ZIP integrity checks passed.
+The actual packaged executable passed all **ten controlled E2E groups** using
+synthetic media and an isolated unauthenticated profile. Task-owned app/helper
+processes exited. Logs are under `.codex-work/package-command-2026-11-04/` and
+E2E artifacts under `.codex-work/packaged-smoke-xyrht3/`. This local run does not
+establish Windows behavior, physical recording, personal-account inference or a
+real installer/update installation.
 
 ## Repository privacy maintenance: 2026-11-01
 

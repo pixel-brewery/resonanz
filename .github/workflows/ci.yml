@@ -93,7 +93,7 @@ jobs:
         if: needs.changes.outputs.documentation_only == 'false'
         run: yarn test:e2e
 
-      - name: Package the native app
+      - name: Package the native app and installers
         if: needs.changes.outputs.documentation_only == 'false'
         run: yarn package
 

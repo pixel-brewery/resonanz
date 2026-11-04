@@ -35,10 +35,11 @@ global CLI accounts as a test fixture.
 | `yarn verify`              | The configured skill/provenance/type/test/build sequence                           |
 | `yarn format:check`        | Repository formatting, excluding the immutable imported base                       |
 | `yarn test:e2e`            | Built Electron app through the existing controlled desktop harness                 |
-| `yarn package`             | A native application bundle for the host OS                                        |
+| `yarn package`             | Host-native application bundle and installers/archives (DMG on macOS)              |
+| `yarn package:unpacked`    | A native application bundle for the host OS only                                   |
 | `yarn verify:package`      | Actual artifact contents/resources/dependencies/licenses against the current build |
 | `yarn test:e2e --packaged` | The packaged artifact's actual executable                                          |
-| `yarn make`                | Host-supported installer/archive makers                                            |
+| `yarn make`                | Compatibility alias for `yarn package`                                             |
 
 Run focused checks first, then the broader configured gates required for the
 affected change. A skill/documentation-only change needs inheritance/link/content

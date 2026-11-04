@@ -17,6 +17,21 @@ coordinator, installer adapter and typed renderer contract remain the runtime
 owners. The manifest tools use that existing transport contract; native
 installation is separately verified.
 
+## Local packaging commands
+
+`yarn package` builds the application and invokes the validated Forge wrapper's
+`make` operation. `yarn make` aliases that same command; `yarn package:unpacked`
+retains the bundle-only Forge `package` operation. Desktop quality CI uses
+`yarn package`, exercising the installer entry point on each native host.
+
+Forge writes outputs under `out` unless `RESONANZ_OUTPUT_DIR` selects another
+directory. On macOS ARM64, the application is
+`out/Resonanz-darwin-arm64/Resonanz.app` and the DMG is
+`out/make/dmg/arm64/Resonanz.dmg`. Other host architectures use their own
+architecture directory. The wrapper validates the packaged executable, ASAR and
+returned nonempty installer/archive files before reporting success. These commands
+require the pinned Node 24 toolchain and do not publish a release.
+
 ## Release identity and verification
 
 `.github/workflows/release.yml` accepts a push to `main` or a manual semantic
