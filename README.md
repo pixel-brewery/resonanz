@@ -179,18 +179,22 @@ Start with the [architecture index](docs/architecture/README.md),
 Requires Node.js **24 LTS, at least 24.15.0 and below 25**, Corepack and
 Yarn **4.10.3**, as pinned by `.nvmrc` and `package.json`.
 Development verification also requires Python 3 for the offline skill check.
+The public Wortlaut development packages are hosted on GitHub Packages, which
+requires a token with `read:packages` access in `GITHUB_TOKEN` when installing.
 
 ```sh
 git clone https://github.com/pixel-brewery/resonanz.git
 cd resonanz
 corepack enable
+export GITHUB_TOKEN=YOUR_GITHUB_PACKAGE_READ_TOKEN
 yarn install --immutable
 yarn start
 ```
 
 `yarn start` builds the renderer and native processes, then launches Electron.
 `yarn start:built` reuses an existing build. Pinned Mosaik and Synapse archives
-are included; no additional GitHub Packages credential or adjacent checkout is required.
+are included. Wortlaut is resolved from its public registry packages; an adjacent
+checkout is unnecessary.
 
 Quality and packaging commands:
 

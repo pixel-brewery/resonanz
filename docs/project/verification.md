@@ -5,6 +5,18 @@ and the provenance-verified upstream audio core. An additional API key or cloud 
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
 
+## Public catalog validation: 2026-11-04
+
+The English/German catalogs pass the published Wortlaut 0.2.4 analysis, pinned message rules and
+15 file/shape regression cases. The complete local verification and immutable dependency installation
+also pass. These checks validate translation resources and build behavior; they do not add new physical
+media or assistant-account evidence.
+
+[The initial Windows CI run](https://github.com/pixel-brewery/resonanz/actions/runs/41901884654)
+failed during deferred Electron runtime setup before the desktop app launched. CI and release platform
+builds now prepare the pinned runtime explicitly before native checks. That failed run establishes no
+Windows desktop acceptance; subsequent platform runs provide their own app and package evidence.
+
 ## Native desktop layout: 2026-11-04
 
 The built Electron app on macOS ARM64 passed the controlled desktop suite with

@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: desktop-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
@@ -75,7 +76,13 @@ jobs:
 
       - name: Install the immutable dependency graph
         if: needs.changes.outputs.documentation_only == 'false'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: yarn install --immutable
+
+      - name: Prepare the pinned Electron runtime
+        if: needs.changes.outputs.documentation_only == 'false'
+        run: yarn exec install-electron --no
 
       - name: Check formatting
         if: needs.changes.outputs.documentation_only == 'false'
