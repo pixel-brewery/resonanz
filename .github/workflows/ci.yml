@@ -15,9 +15,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Classify changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      documentation_only: ${{ steps.changes.outputs.documentation_only }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+      - name: Compare the complete event diff
+        id: changes
+        run: node .github/scripts/classifyCiChanges.mjs
+      - name: Check public content without installing dependencies
+        run: node tools/verify-public-content.mjs
+
   verify:
     name: Build and exercise desktop (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    needs: changes
+    # Preserve required platform check names without allocating native runners for documentation.
+    runs-on: ${{ needs.changes.outputs.documentation_only == 'true' && 'ubuntu-latest' || matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -27,49 +50,63 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Explain documentation-only verification skip
+        if: needs.changes.outputs.documentation_only == 'true'
+        run: echo "Documentation-only change. Tests, builds and packaging are skipped; this preserves the required platform check name."
+
       - name: Checkout
+        if: needs.changes.outputs.documentation_only == 'false'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
       - name: Set up Node.js
+        if: needs.changes.outputs.documentation_only == 'false'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 24.15.0
           package-manager-cache: false
 
       - name: Enable pinned Yarn
+        if: needs.changes.outputs.documentation_only == 'false'
         run: |
           corepack enable
           corepack prepare yarn@4.10.3 --activate
 
       - name: Install the immutable dependency graph
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn install --immutable
 
       - name: Check formatting
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn format:check
 
       - name: Verify provenance, types, behavior and builds
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn verify
 
       - name: Exercise the installed Windows speech runtime
-        if: runner.os == 'Windows'
+        if: needs.changes.outputs.documentation_only == 'false' && runner.os == 'Windows'
         run: node tools/verify-windows-speech.mjs
 
       - name: Exercise the built app with synthetic audio
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn test:e2e
 
       - name: Package the native app
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn package
 
       - name: Check the package contents
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn verify:package
 
       - name: Exercise the actual packaged executable
+        if: needs.changes.outputs.documentation_only == 'false'
         run: yarn test:e2e --packaged
 
       - name: Upload bounded verification evidence
-        if: always()
+        if: always() && needs.changes.outputs.documentation_only == 'false'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: desktop-evidence-${{ matrix.os }}
@@ -89,16 +126,19 @@ jobs:
   quality-gate:
     name: Quality Gate
     if: always()
-    needs: verify
+    needs: [changes, verify]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
     steps:
-      - name: Require successful desktop verification on every platform
+      - name: Require verification or a confirmed documentation-only diff
         env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          DOCUMENTATION_ONLY: ${{ needs.changes.outputs.documentation_only }}
           VERIFY_RESULT: ${{ needs.verify.result }}
         run: |
-          if [[ "$VERIFY_RESULT" != "success" ]]; then
-            echo "Desktop verification failed, was cancelled or was skipped."
-            exit 1
-          fi
+          case "$CHANGES_RESULT:$DOCUMENTATION_ONLY:$VERIFY_RESULT" in
+            success:true:success) echo "Documentation-only change: required check names preserved; desktop verification skipped." ;;
+            success:false:success) echo "Verification succeeded on every platform." ;;
+            *) echo "Change classification or required verification did not succeed."; exit 1 ;;
+          esac

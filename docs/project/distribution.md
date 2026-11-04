@@ -34,8 +34,10 @@ physical microphone quality.
 
 The prepared release workflow follows the same merge-to-release policy as the
 other Pixel Brewery products. A verified eligible dependency PR merges
-automatically and requests a release for that exact merged source; a human merge
-to `main` starts the normal release workflow. Failed release requests can be
+automatically and requests a release for that exact merged source; a human code merge
+to `main` starts the normal release workflow. Documentation-only automatic pushes skip the release,
+so they produce no new installers or update feed. Explicit manual release requests still run the
+complete release pipeline. Failed release requests can be
 retried separately from the successful merge.
 
 Each release builds and exercises macOS ARM64 and Windows x64 installers, then

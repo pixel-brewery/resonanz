@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "language": "en",
+  "project": {
+    "name": "Resonanz",
+    "slug": "resonanz",
+    "website": "https://github.com/pixel-brewery/resonanz",
+    "repository": "https://github.com/pixel-brewery/resonanz"
+  },
+  "description": "Resonanz gives scattered meeting knowledge a central context. Recordings, transcripts and marked moments ground AI analysis of what was said, which decisions followed and who owns the next steps.",
+  "image": {
+    "file": "project-card.webp",
+    "format": "webp",
+    "width": 960,
+    "height": 540,
+    "alt": "Resonanz's acoustic mark beside a circular waveform, chapter markers and transcript panels."
+  },
+  "artwork": {
+    "kind": "illustration",
+    "generator": "Built-in Imagegen",
+    "generatedOn": "2026-11-03",
+    "prompt": "Use case: ads-marketing. Asset: compact portfolio project card in a SEVEN-PROJECT MATCHED SERIES. Image 1 is the Mosaik MASTER CARD: match its 16:9 landscape framing, composition, typography scale, pure white / very light warm-gray seamless background, soft studio lighting, grounded shadows, restrained tactile ceramic/glass materials, generous 7% safe margins and premium editorial quality. Request target 1280x720. Brand lockup occupies LEFT THIRD with large exact black project name and existing mark when available, sculptural product-specific still life occupies RIGHT TWO THIRDS. Match the master; do not repeat its mosaic subject. Physical metaphor artwork, NOT a screenshot or proposed interface; no operating UI controls, dense text or dashboards. The text must remain readable at 600px wide. No tagline, subtitles, other prose, people, robot, brains, stock clip art, watermark, unrelated logos or background gradients.\n\nPROJECT SPECIFICATION:\nImage2 is Resonanz's canonical black app tile with exact white central dot and two pairs of acoustic arcs, preserve it above the large exact black word \"Resonanz\" in the left brand area. Image3 supplies waveform/chapter product context only. Right: an elegant physical circular audio waveform ring with a few muted coral chapter segments, subtly raised from an off-white ceramic session disc, beside a pair of thin translucent transcript panels and a small marked-moment dot. A tiny tasteful tabletop microphone form is optional but secondary. Match Image1's bright WHITE studio scene and materials, with restrained warm charcoal, cream and muted coral accents from the actual app. No full UI, real recordings, private session text, provider logos or exaggerated sound effects."
+  },
+  "blogDescription": "Meeting knowledge often ends up scattered across personal notes, minutes, shared documents and conversations. Resonanz was created to give that context a central home, so decisions and responsibilities remain understandable after the meeting. Recordings, transcripts and marked moments provide the material for evidence-linked AI analysis.\n\n- **Original context:** revisit the passage behind an answer or decision.\n- **Clear responsibility:** extract tasks, assignees and next steps.\n- **Connected knowledge:** organize sessions and follow topics across meetings."
+}
