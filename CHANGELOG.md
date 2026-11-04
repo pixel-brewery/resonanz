@@ -1,3 +1,13 @@
+## 0.1.9 (2026-11-04)
+
+### 🩹 Fixes
+
+- make desktop panes resizable and constrain scrolling ([1a78862](https://github.com/pixel-brewery/resonanz/commit/1a78862))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.8 (2026-11-04)
 
 ### 🩹 Fixes
