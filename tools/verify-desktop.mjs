@@ -134,6 +134,149 @@ async function openSession(id) {
   await control('session-title').waitFor({ state: 'visible' });
 }
 
+async function verifyProcessingStatus() {
+  const before = await session();
+  const globalStatus = control('status-processing');
+  const localStatus = control('processing-status');
+  const progress = (status) => status.locator('[test-id="processing-progress"]');
+  const setStage = (stage, step) =>
+    request('sessions.pipeline', { sessionId: recordedId, stage, step });
+  const assertDisabled = (id, disabled) =>
+    waitFor(
+      async () => (await control(id).getByRole('button').isDisabled()) === disabled,
+      `${id} ${disabled ? 'blocked during processing' : 'available after processing'}`,
+    );
+  const assertNoAccountHelp = async () => {
+    for (const id of [
+      'processing-account-diagnostics',
+      'processing-account-action',
+      'processing-change-assistant',
+    ])
+      await control(id).waitFor({ state: 'hidden' });
+  };
+  const openTranscriptMenu = async () => {
+    const menu = control('transcript-panel').locator('.transcript-menu');
+    if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click();
+    return menu;
+  };
+
+  await globalStatus.waitFor({ state: 'hidden' });
+  await localStatus.waitFor({ state: 'hidden' });
+  // These are typed, persisted stage fixtures; no native recognition or inference starts.
+  await setStage('transcription', { state: 'running', progress: 37 });
+  await globalStatus.waitFor({ state: 'visible' });
+  await waitFor(
+    async () => (await progress(globalStatus).getAttribute('aria-valuenow')) === '37',
+    'confirmed transcription progress in global status',
+  );
+  assert((await globalStatus.innerText()).includes(before.title));
+  for (const tab of ['ring', 'analysis', 'questions']) {
+    await control(`tab-${tab}`).click();
+    await page.waitForURL((url) => url.hash.includes(`tab=${tab}`));
+    await localStatus.waitFor({ state: 'visible' });
+    assert.equal(await progress(localStatus).getAttribute('aria-valuenow'), '37');
+    if (tab === 'ring') {
+      await assertDisabled('analyze-session', true);
+      await assertDisabled('transcribe-session', true);
+    }
+    if (tab === 'analysis') {
+      await control('transcript-processing').waitFor({ state: 'visible' });
+      assert((await control('transcript-panel').innerText()).includes(before.transcript[0].text));
+      const menu = await openTranscriptMenu();
+      await assertDisabled('edit-transcript', true);
+      await assertDisabled('transcribe-session', true);
+      await assertDisabled('analyze-session', true);
+      assert.equal(await control('transcript-editor').count(), 0);
+      await menu.locator('summary').click();
+      await page.screenshot({ path: join(artifacts, 'transcription-running.png') });
+    }
+  }
+  await control('nav-settings').click();
+  await control('settings-view').waitFor({ state: 'visible' });
+  await globalStatus.waitFor({ state: 'visible' });
+  await page.reload();
+  await control('settings-view').waitFor({ state: 'visible' });
+  await globalStatus.waitFor({ state: 'visible' });
+  await waitFor(
+    async () => (await progress(globalStatus).getAttribute('aria-valuenow')) === '37',
+    'durable processing state after renderer reload on another screen',
+  );
+  await globalStatus.locator('[test-id="processing-open"]').click();
+  await page.waitForURL((url) => url.hash.includes(`session/${recordedId}?tab=processing`));
+  await control('session-recovery').waitFor({ state: 'visible' });
+  assert.match(await control('processing-title').innerText(), /Transkript/u);
+  await assertNoAccountHelp();
+  await assertDisabled('retry-processing', true);
+
+  await setStage('transcription', { state: 'running' });
+  await waitFor(
+    async () => (await progress(globalStatus).getAttribute('aria-valuenow')) === null,
+    'unknown transcription progress stays indeterminate',
+  );
+  await control('tab-analysis').click();
+  await localStatus.waitFor({ state: 'visible' });
+  assert.equal(await progress(localStatus).getAttribute('aria-valuenow'), null);
+  assert.doesNotMatch(await globalStatus.innerText(), /%/u);
+
+  const failure = 'loc.resonanz.error.transcriptionUnavailable';
+  await setStage('transcription', { state: 'failed', error: failure });
+  await waitFor(
+    async () => (await localStatus.innerText()).includes('gewählte Sprache'),
+    'actionable system speech failure in the normal session',
+  );
+  assert.equal((await session()).pipeline.transcription.error, failure);
+  assert.doesNotMatch(await localStatus.innerText(), /loc\.resonanz|kAFAssistantErrorDomain/u);
+  await waitFor(
+    async () => (await globalStatus.innerText()).includes('fehlgeschlagen'),
+    'durable failure in global status',
+  );
+  assert.match(await globalStatus.innerText(), /Transkription.*fehlgeschlagen/u);
+  assert.equal(await progress(globalStatus).count(), 0);
+  await control('transcript-processing').waitFor({ state: 'visible' });
+  await page.screenshot({ path: join(artifacts, 'transcription-failed.png') });
+  await localStatus.locator('[test-id="processing-open"]').click();
+  await control('session-recovery').waitFor({ state: 'visible' });
+  await assertNoAccountHelp();
+  await assertDisabled('retry-processing', false);
+  await page.reload();
+  await control('session-recovery').waitFor({ state: 'visible' });
+  await globalStatus.waitFor({ state: 'visible' });
+  await assertNoAccountHelp();
+
+  await setStage('transcription', { state: 'done' });
+  await globalStatus.waitFor({ state: 'hidden' });
+  await control('open-processing-result').waitFor({ state: 'visible' });
+  await control('open-processing-result').click();
+  await page.waitForURL((url) => url.hash.includes('tab=analysis'));
+  await localStatus.waitFor({ state: 'hidden' });
+  await control('transcript-processing').waitFor({ state: 'hidden' });
+  const menu = await openTranscriptMenu();
+  await assertDisabled('edit-transcript', false);
+  await assertDisabled('transcribe-session', false);
+  await menu.locator('summary').click();
+  await assertDisabled('analyze-session', false);
+
+  await setStage('analysis', { state: 'running' });
+  await globalStatus.waitFor({ state: 'visible' });
+  await waitFor(
+    async () => (await globalStatus.innerText()).includes('analysiert'),
+    'analysis remains a separate visible stage',
+  );
+  await control('tab-questions').click();
+  await localStatus.waitFor({ state: 'visible' });
+  await setStage('analysis', { state: 'done' });
+  await globalStatus.waitFor({ state: 'hidden' });
+  await localStatus.waitFor({ state: 'hidden' });
+  await control('tab-analysis').click();
+  const after = await session();
+  assert.deepEqual(after.transcript, before.transcript);
+  assert.equal(after.audioBytes, before.audioBytes);
+  assert.equal(after.audioAvailable, true);
+  passed(
+    'durable processing UI from typed stage fixtures: global and session progress, navigation/reload, preserved transcript, blocked edits and actionable speech errors without account advice',
+  );
+}
+
 async function selectFile(path) {
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
@@ -344,6 +487,7 @@ try {
     'transcript edit',
   );
   assert.equal((await session()).transcript[0].endMs, recording.durationMs);
+  await verifyProcessingStatus();
   await page.screenshot({ path: join(artifacts, 'session.png') });
   const jsonPath = join(artifacts, 'session.json');
   const markdownPath = join(artifacts, 'session.md');
@@ -563,6 +707,7 @@ try {
       'native dialogs select controlled paths',
       'no provider login/inference/live call',
       'no physical microphone or native speech recognition',
+      'processing UI uses typed persisted stage fixtures without native transcription',
     ],
   };
   await writeFile(join(artifacts, 'evidence.json'), `${JSON.stringify(evidence, null, 2)}\n`);

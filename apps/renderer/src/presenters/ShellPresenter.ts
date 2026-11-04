@@ -8,6 +8,7 @@ import { DesktopApi } from '../services/DesktopApi';
 import type { ResponsePayload, RequestPayload } from '@resonanz/contracts';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { sessionProcessingActivities } from './sessionProcessing';
 // #endregion
 
 /** Owns shell commands while views remain declarative Mosaik composition. */
@@ -31,6 +32,9 @@ export class ShellPresenter {
   );
   /** The status bar accompanies every surface except first-run setup. */
   public readonly statusBarVisible = computed(() => !/^\/onboarding(?:[/?]|$)/u.test(this._url()));
+  public readonly processingActivities = computed(() =>
+    sessionProcessingActivities(this.library.sessions()),
+  );
   private readonly _windowSurface = computed<RequestPayload<'window.present'>['surface']>(() =>
     /^\/settings(?:[/?]|$)/u.test(this._url())
       ? 'settings'
@@ -112,6 +116,17 @@ export class ShellPresenter {
     this.nativeTray.set(false);
     await this._api.request('window.show', {});
     await this._router.navigate(['/']);
+  }
+  /** Opens durable processing details without disturbing capture or playback. */
+  public async openProcessing(sessionId: string): Promise<void> {
+    this.capturePanelOpen.set(false);
+    this.nativeTray.set(false);
+    try {
+      await this._api.request('window.show', {});
+      await this._router.navigate(['/session', sessionId], { queryParams: { tab: 'processing' } });
+    } catch (error) {
+      this.library.report(error);
+    }
   }
   public async openVoice(): Promise<void> {
     this.capturePanelOpen.set(false);

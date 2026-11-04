@@ -97,6 +97,29 @@
       (opened)="playback.open()"
     />
   }
+  @if (shell.processingActivities()[0]; as activity) {
+    <resonanz-processing-status
+      test-id="status-processing"
+      [activity]="activity"
+      [compact]="true"
+      (opened)="shell.openProcessing(activity.sessionId)"
+    />
+    @if (shell.processingActivities().length > 1) {
+      <mosaik-button
+        test-id="more-processing"
+        size="small"
+        appearance="plain"
+        [label]="'+' + (shell.processingActivities().length - 1)"
+        [attr.aria-label]="
+          intl.t('loc.resonanz.processing.moreSessions', shell.processingActivities().length - 1)
+        "
+        [attr.title]="
+          intl.t('loc.resonanz.processing.moreSessions', shell.processingActivities().length - 1)
+        "
+        (click)="shell.openLibrary()"
+      />
+    }
+  }
   <span class="flex-spacer"></span>
   <resonanz-notification-bell
     [notices]="notifications.notices()"

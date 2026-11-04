@@ -19,6 +19,7 @@ import { SessionRingView } from './SessionRingView';
 import { SessionAnalysisView } from './SessionAnalysisView';
 import { SessionQuestionsView } from './SessionQuestionsView';
 import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolbarDirective';
+import { ProcessingStatusComponent } from '../components/processing-status/ProcessingStatusComponent';
 /** Hosts one session lifecycle across the three independently rendered feature views. */
 @Component({
   selector: 'resonanz-session',
@@ -41,6 +42,7 @@ import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolb
     SessionAnalysisView,
     SessionQuestionsView,
     WindowToolbarDirective,
+    ProcessingStatusComponent,
   ],
   templateUrl: './SessionView.html',
   styleUrl: './SessionView.scss',

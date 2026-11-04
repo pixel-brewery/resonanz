@@ -55,6 +55,16 @@
   @if (editing()) {
     <ng-content />
   } @else {
+    @if (transcription()?.state === 'running' || transcription()?.state === 'failed') {
+      <p class="caption transcription-state" test-id="transcript-processing" role="status">
+        {{
+          (transcription()?.state === 'running'
+            ? 'loc.resonanz.processing.transcriptPending'
+            : 'loc.resonanz.processing.transcriptUnavailable'
+          ) | translate
+        }}
+      </p>
+    }
     <div class="transcript-segments" test-id="transcript-segments">
       @for (entry of visible(); track entry.id) {
         @if (entry.kind === 'pause') {
@@ -85,12 +95,16 @@
           </button>
         }
       } @empty {
-        <p class="caption">
-          {{
-            (query() ? 'loc.resonanz.session.noPassage' : 'loc.resonanz.session.transcriptEmpty')
-              | translate
-          }}
-        </p>
+        @if (
+          query() || (transcription()?.state !== 'running' && transcription()?.state !== 'failed')
+        ) {
+          <p class="caption">
+            {{
+              (query() ? 'loc.resonanz.session.noPassage' : 'loc.resonanz.session.transcriptEmpty')
+                | translate
+            }}
+          </p>
+        }
       }
     </div>
   }

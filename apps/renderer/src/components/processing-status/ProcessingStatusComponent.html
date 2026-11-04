@@ -1,0 +1,75 @@
+@let current = activity();
+<section class="processing-status" [class.failed]="current.state === 'failed'" role="status">
+  @if (current.state === 'running') {
+    <span
+      class="progress"
+      test-id="processing-progress"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="current.progress ?? null"
+      [attr.aria-label]="current.label | message"
+    >
+      <mosaik-progress-ring
+        variant="primary"
+        [radius]="compact() ? 8 : 13"
+        [thickness]="2"
+        [min]="0"
+        [max]="100"
+        [value]="current.progress ?? 0"
+        [isIndeterminate]="current.progress === undefined"
+      />
+    </span>
+  } @else {
+    <mosaik-icon icon="warning" size="small" />
+  }
+  @if (compact()) {
+    <button
+      class="open-processing"
+      type="button"
+      test-id="processing-open"
+      [attr.aria-label]="openLabel()"
+      [attr.title]="openLabel()"
+      (click)="opened.emit()"
+    >
+      <strong>{{ current.label | message }}</strong>
+      @if (current.state === 'running' && current.progress !== undefined) {
+        <span class="percentage">{{
+          intl.t('loc.resonanz.processing.percent', intl.number(current.progress))
+        }}</span>
+      }
+      <span class="session-title">{{ current.sessionTitle }}</span>
+    </button>
+  } @else {
+    <div class="description">
+      <strong>{{ current.label | message }}</strong>
+      <p>{{ errorMessage() ?? (current.description | message) }}</p>
+      @if (current.audioAvailable) {
+        <span class="caption">{{ 'loc.resonanz.processing.recordingSaved' | translate }}</span>
+      }
+      @if (current.state === 'running' && current.progress !== undefined) {
+        <span class="percentage">{{
+          intl.t('loc.resonanz.processing.percent', intl.number(current.progress))
+        }}</span>
+      }
+      @if (current.state === 'failed' && current.error && !errorMessage()) {
+        <details class="diagnostics">
+          <summary>{{ 'loc.resonanz.processing.technicalDetails' | translate }}</summary>
+          <p>{{ current.error | message }}</p>
+        </details>
+      }
+    </div>
+    <mosaik-button
+      test-id="processing-open"
+      size="small"
+      appearance="outline"
+      [label]="
+        (current.state === 'failed'
+          ? 'loc.resonanz.processing.reviewFailure'
+          : 'loc.resonanz.processing.openDetails'
+        ) | translate
+      "
+      (click)="opened.emit()"
+    />
+  }
+</section>

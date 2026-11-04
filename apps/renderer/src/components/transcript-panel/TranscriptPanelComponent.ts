@@ -15,6 +15,7 @@ import { form } from '@angular/forms/signals';
 import { FormFieldDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { SearchBoxComponent } from '@pixel-brewery/mosaik-elements-angular/components/search-box';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
+import type { IProcessingStep } from '@resonanz/contracts';
 import { TranslatePipe } from '../../pipes/TranslatePipe';
 import { DurationPipe } from '../../pipes/DurationPipe';
 import { MarkerComponent } from '../marker/MarkerComponent';
@@ -64,6 +65,7 @@ export class TranscriptPanelComponent {
   public readonly showTools = input(true);
   public readonly canEdit = input(true);
   public readonly canTranscribe = input(false);
+  public readonly transcription = input<IProcessingStep | undefined>();
   public readonly queryChange = output<string>();
   public readonly selected = output<ITranscriptEntry>();
   public readonly editRequested = output<void>();

@@ -13,11 +13,14 @@ import {
   requestSchemas,
   assistantConfigurationKey,
   dataSchemas,
+  hostTranscriptionCommandSchema,
   type RequestMethod,
   type AppEvent,
   type ISession,
   type IQuestionMessage,
   type ResponsePayload,
+  type HostTranscriptionCommand,
+  type HostTranscriptionResult,
 } from '@resonanz/contracts';
 // #endregion
 
@@ -43,6 +46,7 @@ export class OrchestratorApplication {
   private _bindingEpoch = 0;
   private _testController: AbortController | null = null;
   private readonly _bindingTransitions = new Set<symbol>();
+  private readonly _transcriptionTransitions = new Set<string>();
   private _retentionTimer: ReturnType<typeof setTimeout> | null = null;
   private _retentionWork: Promise<ResponsePayload<'storage.cleanup'>> | null = null;
   private _analysisRetryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -366,6 +370,33 @@ export class OrchestratorApplication {
     this.changed(session.id);
     return session;
   }
+  /** Coordinates private native drafts and publishes only committed processing projections. */
+  public async transcription<C extends HostTranscriptionCommand>(
+    command: C,
+  ): Promise<HostTranscriptionResult<C['action']>> {
+    const input = hostTranscriptionCommandSchema.parse(command);
+    if (this._clearing || this._disposed) throw new Error('loc.resonanz.error.libraryBusy');
+    if (this._transcriptionTransitions.has(input.sessionId))
+      throw new Error('loc.resonanz.error.fileTranscriptionRunning');
+    this._transcriptionTransitions.add(input.sessionId);
+    try {
+      if (input.action === 'begin') {
+        if ([...this._runs.values()].some((run) => run.sessionId === input.sessionId))
+          throw new Error('loc.resonanz.error.fileTranscriptionRunning');
+        this.invalidateAnalysisRetry(input.sessionId);
+      }
+      if (input.action === 'complete') {
+        await this._store.assertTranscriptionComplete(input.sessionId, input.generation);
+        this.invalidateAnalysisRetry(input.sessionId);
+        await this.cancelSession(input.sessionId);
+      }
+      const result = await this._store.transcription(command);
+      this.changed(input.sessionId);
+      return result;
+    } finally {
+      this._transcriptionTransitions.delete(input.sessionId);
+    }
+  }
   /**
    * Cancels provider work and drains admitted writes before shutdown.
    *
@@ -598,6 +629,11 @@ export class OrchestratorApplication {
     if ([...this._runs.values()].some((run) => run.sessionId === sessionId))
       throw new Error('loc.resonanz.error.assistantWait');
     const session = this._store.get(sessionId);
+    if (
+      this._transcriptionTransitions.has(sessionId) ||
+      session.pipeline?.transcription?.state === 'running'
+    )
+      throw new Error('loc.resonanz.error.fileTranscriptionRunning');
     if (!session.transcript.some((segment) => segment.text.trim()))
       throw new Error('loc.resonanz.error.transcriptFirst');
     const controller = new AbortController();

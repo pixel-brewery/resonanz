@@ -63,6 +63,16 @@ The supervisor admits at most 100 pending requests, with 30-second ordinary and
 Registered native children must be safely cleaned up before up to three automatic
 restarts. Saved recordings survive; recognition/playback never silently resumes.
 
+FileTranscriptionCoordinator reserves the complete file-transcription request before its
+first asynchronous read. NativeSpeechService owns the compiled macOS file helper,
+decoder processes and exclusive speech lease. The private `host.transcription` parent-port
+envelope has separate runtime command/result validation and is absent from the renderer
+request catalog. The Utility journals confirmed sections and exposes ordinary session
+pipeline progress. Cancellation is awaited before manual replacement/deletion and before
+Speech/Utility shutdown. Temporary-file cleanup cannot revoke a committed transcript or
+strand its speech lease. Global and in-session processing indicators project the same
+durable pipeline, independently of playback controls.
+
 ## Updates
 
 `UpdateCoordinator` follows Symphony's installer update path. Only packaged macOS and

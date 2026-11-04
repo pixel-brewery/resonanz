@@ -84,6 +84,11 @@ own discretion, under the [MIT license](LICENSE). See the
 - A microphone, microphone permission and an audio output device for recording
 - An installed recognition language and system voice for transcription and spoken conversation;
   Windows uses the corresponding System.Speech/SAPI language components
+- On supported macOS 26 devices, file transcription uses Apple's local SpeechAnalyzer.
+  Starting transcription prepares its language model and may download missing Apple
+  language assets. Older systems use installed on-device dictation for short sections.
+  Containers that the system decoder cannot read, including WebM on some Macs, require
+  an installed FFmpeg. Resonanz reports missing support rather than installing a decoder.
 - An installed Codex or Claude Code CLI and an authenticated account for AI features
 
 System-audio capture is unavailable and shown as such. The interface supports

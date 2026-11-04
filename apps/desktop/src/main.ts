@@ -42,6 +42,7 @@ import {
 import { recordingFileName } from '@resonanz/sessions';
 import { BackgroundService } from './BackgroundService.js';
 import { NativeSpeechService } from './NativeSpeechService.js';
+import { FileTranscriptionCoordinator } from './FileTranscriptionCoordinator.js';
 import { parseAudioRange } from './parseAudioRange.js';
 import { MiniRecorderWindow } from './MiniRecorderWindow.js';
 import { WindowPresentation } from './WindowPresentation.js';
@@ -124,6 +125,9 @@ const speech = new NativeSpeechService({
   windowsScript: app.isPackaged
     ? join(process.resourcesPath, 'speech/windows-speech.ps1')
     : join(app.getAppPath(), 'resources/speech/windows-speech.ps1'),
+  macosFileTranscriber: app.isPackaged
+    ? join(process.resourcesPath, 'native/ResonanzFileTranscriber')
+    : join(app.getAppPath(), 'dist/native/ResonanzFileTranscriber'),
   session: async (sessionId) =>
     (await background.request('sessions.get', { sessionId })) as ISession,
   settings: async () => ((await background.request('bootstrap.get', {})) as IAppSnapshot).settings,
@@ -131,6 +135,11 @@ const speech = new NativeSpeechService({
     await background.request('transcript.append', { sessionId, ...segment });
   },
   publish,
+});
+const fileTranscription = new FileTranscriptionCoordinator({
+  directory: join(dataRoot, 'transcription'),
+  speech,
+  store: background,
 });
 const captureReminder = new CaptureReminderNotification({
   current: () => miniRecorder.snapshot,
@@ -258,6 +267,7 @@ async function createWindow(): Promise<void> {
     }
   });
   mainWindow.webContents.on('render-process-gone', () => {
+    void fileTranscription.cancel();
     stopTrayPulse();
     captureReminder.reset();
     miniRecorder.reset();
@@ -664,6 +674,7 @@ async function quitApplication(): Promise<void> {
           error: 'loc.resonanz.error.quitSaved',
         });
     }
+    await fileTranscription.cancel();
     await speech.dispose();
     if (updateCheckTimer) clearTimeout(updateCheckTimer);
     updates.dispose();
@@ -817,7 +828,13 @@ async function nativeRequest(method: RequestMethod, payload: unknown): Promise<u
       await speech.flush(input.sessionId);
       return background.request(method, input);
     }
+    case 'transcript.replace': {
+      const input = requestSchemas[method].parse(payload);
+      await fileTranscription.cancel(input.sessionId);
+      return background.request(method, input);
+    }
     case 'sessions.delete':
+      await fileTranscription.cancel(requestSchemas[method].parse(payload).sessionId);
       await speech.closeSession(requestSchemas[method].parse(payload).sessionId);
       return background.request(method, payload);
     case 'sessions.finish': {
@@ -830,76 +847,101 @@ async function nativeRequest(method: RequestMethod, payload: unknown): Promise<u
     }
     case 'transcription.run': {
       const input = requestSchemas[method].parse(payload);
-      const session = (await background.request('sessions.get', {
-        sessionId: input.sessionId,
-      })) as ISession;
-      if (!session.audioAvailable) throw new Error('loc.resonanz.error.transcribeActive');
-      const snapshot = (await background.request('bootstrap.get', {})) as IAppSnapshot;
-      const settings = snapshot.settings;
-      await background.request('sessions.pipeline', {
-        sessionId: session.id,
-        stage: 'transcription',
-        step: { state: 'running' },
-      });
-      let preparedPath: string | undefined;
-      let transcriptStored = false;
-      try {
-        if (input.wavBytes) {
-          const bytes = Buffer.from(
-            input.wavBytes instanceof Uint8Array ? input.wavBytes : new Uint8Array(input.wavBytes),
-          );
-          if (bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WAVE')
-            throw new Error('loc.resonanz.error.invalidWav');
-          await mkdir(join(dataRoot, 'transcription'), { recursive: true, mode: 0o700 });
-          preparedPath = join(dataRoot, 'transcription', `${randomUUID()}.wav`);
-          await writeFile(preparedPath, bytes, { mode: 0o600, flag: 'wx' });
-        }
-        const segments = await speech.transcribeFile(
-          preparedPath ?? privateAudioPath(session),
-          settings.locale,
-        );
-        const transcribed = await background.request('transcript.replace', {
-          sessionId: session.id,
-          segments,
-        });
-        transcriptStored = true;
-        if (settings.autoAnalyze && segments.some((segment) => segment.text.trim()))
-          await background.request('sessions.analyze', {
-            sessionId: session.id,
-            runId: randomUUID(),
-          });
-        return transcribed;
-      } catch (error) {
-        if (transcriptStored) {
-          await background.request('sessions.pipeline', {
-            sessionId: session.id,
-            stage: 'analysis',
-            step: {
-              state: 'failed',
-              provider: settings.assistant.provider,
-              error:
-                error instanceof Error
-                  ? error.message.slice(0, 1000)
-                  : 'loc.resonanz.error.assistantFailed',
-            },
-          });
-          return background.request('sessions.get', { sessionId: session.id });
-        }
+      return fileTranscription.request(input.sessionId, async (signal, transcribe) => {
+        const session = (await background.request('sessions.get', {
+          sessionId: input.sessionId,
+        })) as ISession;
+        if (!session.audioAvailable) throw new Error('loc.resonanz.error.transcribeActive');
+        const snapshot = (await background.request('bootstrap.get', {})) as IAppSnapshot;
+        const settings = snapshot.settings;
+        signal.throwIfAborted();
+        if (session.status === 'processing' || (await activeRecordings()).length > 0)
+          throw new Error('loc.resonanz.error.transcribeActive');
         await background.request('sessions.pipeline', {
           sessionId: session.id,
           stage: 'transcription',
-          step: {
-            state: 'failed',
-            error:
-              error instanceof Error
-                ? error.message.slice(0, 1000)
-                : 'loc.resonanz.error.operation',
-          },
+          step: { state: 'running' },
         });
-        throw error;
-      } finally {
-        if (preparedPath) await rm(preparedPath, { force: true });
-      }
+        let preparedPath: string | undefined;
+        let transcriptStored = false;
+        try {
+          if (input.wavBytes && process.platform === 'win32') {
+            const bytes = Buffer.from(
+              input.wavBytes instanceof Uint8Array
+                ? input.wavBytes
+                : new Uint8Array(input.wavBytes),
+            );
+            if (
+              bytes.toString('ascii', 0, 4) !== 'RIFF' ||
+              bytes.toString('ascii', 8, 12) !== 'WAVE'
+            )
+              throw new Error('loc.resonanz.error.invalidWav');
+            await mkdir(join(dataRoot, 'transcription'), { recursive: true, mode: 0o700 });
+            preparedPath = join(dataRoot, 'transcription', `${randomUUID()}.wav`);
+            await writeFile(preparedPath, bytes, { mode: 0o600, flag: 'wx' });
+          }
+          const transcribed =
+            process.platform === 'darwin'
+              ? await transcribe(session, privateAudioPath(session), settings.locale)
+              : ((await background.request('transcript.replace', {
+                  sessionId: session.id,
+                  segments: await speech.transcribeFile(
+                    preparedPath ?? privateAudioPath(session),
+                    settings.locale,
+                    signal,
+                  ),
+                })) as ISession);
+          transcriptStored = true;
+          signal.throwIfAborted();
+          if (settings.autoAnalyze && transcribed.transcript.some((segment) => segment.text.trim()))
+            await background.request('sessions.analyze', {
+              sessionId: session.id,
+              runId: randomUUID(),
+            });
+          return transcribed;
+        } catch (error) {
+          if (transcriptStored) {
+            await background.request('sessions.pipeline', {
+              sessionId: session.id,
+              stage: 'analysis',
+              step: {
+                state: 'failed',
+                provider: settings.assistant.provider,
+                error:
+                  error instanceof Error
+                    ? error.message.slice(0, 1000)
+                    : 'loc.resonanz.error.assistantFailed',
+              },
+            });
+            return (await background.request('sessions.get', {
+              sessionId: session.id,
+            })) as ISession;
+          }
+          const failed = (await background.request('sessions.get', {
+            sessionId: session.id,
+          })) as ISession;
+          await background.request('sessions.pipeline', {
+            sessionId: session.id,
+            stage: 'transcription',
+            step: {
+              state: 'failed',
+              ...(failed.pipeline?.transcription?.progress === undefined
+                ? {}
+                : { progress: failed.pipeline.transcription.progress }),
+              error:
+                error instanceof Error
+                  ? error.message.slice(0, 1000)
+                  : 'loc.resonanz.error.operation',
+            },
+          });
+          throw error;
+        } finally {
+          if (preparedPath)
+            await rm(preparedPath, { force: true }).catch(() => {
+              process.stderr.write('[resonanz] Transcription temporary-file cleanup failed.\n');
+            });
+        }
+      });
     }
     case 'sessions.import': {
       const { dialog } = await import('electron');
@@ -1023,7 +1065,12 @@ async function reportStartupFailure(cause: unknown): Promise<void> {
   miniRecorder.dispose();
   mainWindow?.destroy();
   let timeout: NodeJS.Timeout | undefined;
-  const cleanup = Promise.allSettled([background.dispose(), speech.dispose()]);
+  const cleanup = (async () => {
+    const files = await Promise.allSettled([fileTranscription.cancel()]);
+    const native = await Promise.allSettled([speech.dispose()]);
+    const utility = await Promise.allSettled([background.dispose()]);
+    return [...files, ...native, ...utility];
+  })();
   const result = await Promise.race([
     cleanup.then((results) => results.every((item) => item.status === 'fulfilled')),
     new Promise<false>((resolve) => {

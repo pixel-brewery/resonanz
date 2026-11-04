@@ -32,6 +32,7 @@ export default {
         'node_modules/electron-native-speech-preload/dist/index.js',
         ...(platform === 'darwin'
           ? [
+              'dist/native/ResonanzFileTranscriber',
               'node_modules/electron-native-speech-backend-macos/bin/SpeechHelper.app/Contents/MacOS/SpeechHelper',
             ]
           : []),
@@ -101,11 +102,15 @@ export default {
       resolve(root, 'LICENSE'),
       resolve(root, 'resources/speech'),
       ...(process.platform === 'darwin'
-        ? [resolve(root, 'node_modules/electron-native-speech-backend-macos/bin/SpeechHelper.app')]
+        ? [
+            resolve(root, 'node_modules/electron-native-speech-backend-macos/bin/SpeechHelper.app'),
+            resolve(root, 'dist/native'),
+          ]
         : []),
     ],
     ignore: [
       /^\/(?!dist(?:\/|$)|package\.json$|node_modules(?:\/|$))/,
+      /^\/dist\/native(?:\/|$)/,
       /^\/node_modules\/(?!(?:electron-native-speech|electron-native-speech-backend-macos|electron-native-speech-preload)(?:\/|$))/,
       /^\/node_modules\/electron-native-speech-backend-macos\/(?:bin|scripts)(?:\/|$)/,
     ],

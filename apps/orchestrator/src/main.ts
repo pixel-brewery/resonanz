@@ -6,6 +6,8 @@ import {
   requestSchemas,
   responseSchemas,
   appEventSchema,
+  hostTranscriptionEnvelopeSchema,
+  hostTranscriptionResponseSchemas,
 } from '@resonanz/contracts';
 import { OrchestratorApplication } from './OrchestratorApplication.js';
 import { ProcessOwnershipObserver } from './ProcessOwnershipObserver.js';
@@ -42,6 +44,40 @@ await application.initialize();
 port.on('message', ({ data }) => {
   if (data && typeof data === 'object' && 'type' in data && data.type === 'host.shutdown') {
     void shutdown().catch(() => process.exit(1));
+    return;
+  }
+  if (closing) return;
+  const transcription = hostTranscriptionEnvelopeSchema.safeParse(data);
+  if (transcription.success) {
+    const { correlationId, command } = transcription.data;
+    void application
+      .transcription(command)
+      .then((result) =>
+        port.postMessage(
+          responseEnvelopeSchema.parse({
+            correlationId,
+            ok: true,
+            data: hostTranscriptionResponseSchemas[command.action].parse(result),
+          }),
+        ),
+      )
+      .catch((cause: unknown) =>
+        port.postMessage(
+          responseEnvelopeSchema.parse({
+            correlationId,
+            ok: false,
+            error: {
+              code: 'TRANSCRIPTION_FAILED',
+              message:
+                cause instanceof z.ZodError
+                  ? 'loc.resonanz.error.responseFormat'
+                  : cause instanceof Error
+                    ? cause.message.slice(0, 2000)
+                    : 'loc.resonanz.error.operation',
+            },
+          }),
+        ),
+      );
     return;
   }
   const imported = hostRequest.safeParse(data);

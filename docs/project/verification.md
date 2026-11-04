@@ -5,6 +5,43 @@ and the provenance-verified upstream audio core. An additional API key or cloud 
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
 
+## Long macOS recording recovery: 2026-11-04
+
+The earlier 0.1.6 single-request file path failed on an owner-authorized 38-minute
+recording. Local logs establish CPU-budget violations in its old local recognition
+service and subsequent signal-9 termination, followed by Apple error 1107. They do
+not identify the signal sender or prove that the CPU warning caused termination.
+The recording remained available; no private audio, transcript or raw system log
+is included in repository evidence.
+
+The replacement file path uses the host-owned SpeechAnalyzer helper on this macOS
+26.5 ARM64 system. A first run of the production coordinator with an isolated session
+store processed all 52 sections in 20.4 seconds. The final packaged helper was then
+tested with deliberate native cancellation after two acknowledged sections, store
+reinitialization and explicit retry. It resumed at section three and completed all
+52 sections in 24.4 seconds including interruption/preparation. The final transcript
+contains 4,425 word segments, unique IDs and monotonically ordered start times; its
+last recognized passage ends at 38:33.760 against 38:34.790 recorded duration. The
+source SHA-256 remained unchanged. Native helper processes exited and temporary
+decoded audio was removed. This is real file-recognition evidence with an isolated
+catalog, not physical microphone, provider inference or complete transcript-accuracy
+ground truth.
+
+Node 24 verification passed **485 behavior tests in 59 files**, **105 tooling tests**,
+native/Angular type checks, provenance/content checks and both builds. Formatting
+passed. Built-app and actual packaged-executable E2E passed all eleven groups,
+including persisted transcription progress/failure across navigation and reload,
+blocked concurrent edits and preserved audio/transcript. Package verification compared
+189 files and checked the local signature. The native executable includes its own
+usage description and stable identity. This local package check created the app
+bundle; installer generation remains covered by the required platform CI.
+
+Detailed private artifacts are under `.codex-work/recording-analysis-2026-11-04/`;
+controlled UI evidence is under `.codex-work/desktop-smoke-BYtNGV/` and
+`.codex-work/packaged-smoke-1VBQXf/`. Older macOS local-dictation compatibility and
+Windows native speech were not rerun locally for this change. No new Claude or
+Codex inference is established by these controlled and native-file checks.
+
 ## Installer-producing package command: 2026-11-04
 
 On macOS ARM64 with Node 24.21.0 and Yarn 4.10.3, `yarn run package` built the

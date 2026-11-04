@@ -3,6 +3,7 @@ import type { IPipelineItem } from '../components/pipeline-steps/PipelineStepsCo
 import { TranslateFacade } from '../services/TranslateFacade';
 import { transcriptEntriesWithPauses } from './transcriptEntriesWithPauses';
 import { sessionDeletionDetails } from './sessionDeletionDetails';
+import { sessionProcessingActivity } from './sessionProcessing';
 import { DurationPipe } from '../pipes/DurationPipe';
 // #region Imports
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
@@ -184,6 +185,7 @@ export class SessionPresenter {
       this._intl.languageName(this.library.settings().locale),
     ),
   );
+  public readonly processingActivity = computed(() => sessionProcessingActivity(this.session()));
   public readonly pipelineItems = computed<readonly IPipelineItem[]>(() => {
     const session = this.session();
     const transcription = session?.pipeline?.transcription ?? {
@@ -330,6 +332,8 @@ export class SessionPresenter {
     () =>
       this._runId() !== null ||
       this._session()?.status === 'processing' ||
+      this._session()?.pipeline?.transcription?.state === 'running' ||
+      this._session()?.pipeline?.analysis?.state === 'running' ||
       (!!this._session()?.id &&
         this._transcriptionService.activeSessionId() === this._session()?.id),
   );
@@ -626,7 +630,7 @@ export class SessionPresenter {
   /** Edits each transcript segment while preserving speaker and original time marks. */
   public beginTranscriptEdit(): void {
     const session = this.session();
-    if (!session || this.capturing()) return;
+    if (!session || this.capturing() || this.running()) return;
     this._transcript.set({
       segments: session.transcript.length
         ? session.transcript.map((segment) => ({ ...segment }))
@@ -661,7 +665,7 @@ export class SessionPresenter {
   /** Transcribes saved audio with native speech and bounded Windows WAV preparation. */
   public async transcribe(): Promise<void> {
     const session = this.session();
-    if (!session || this.capturing()) return;
+    if (!session || this.capturing() || this.running()) return;
     await this.perform(async () => {
       await this._transcriptionService.transcribe(session.id);
       await this.refresh();

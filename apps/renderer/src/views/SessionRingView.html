@@ -199,7 +199,12 @@
             icon="refresh"
             appearance="plain"
             fit="width"
-            [disabled]="!session.audioAvailable || presenter.capturing() || presenter.mutating()"
+            [disabled]="
+              !session.audioAvailable ||
+              presenter.capturing() ||
+              presenter.mutating() ||
+              presenter.running()
+            "
             (click)="presenter.transcribe()"
           />
         </div>

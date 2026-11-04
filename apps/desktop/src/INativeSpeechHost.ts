@@ -7,6 +7,8 @@ import type { AppEvent, ISession, ISettings, ITranscriptSegment } from '@resonan
 export interface INativeSpeechHost {
   readonly dataDirectory: string;
   readonly windowsScript: string;
+  /** Compiled host-owned file recognizer; absent in controlled live-only fixtures. */
+  readonly macosFileTranscriber?: string;
   readonly session: (id: string) => Promise<ISession>;
   readonly settings: () => Promise<ISettings>;
   readonly persist: (sessionId: string, segment: ITranscriptSegment) => Promise<void>;

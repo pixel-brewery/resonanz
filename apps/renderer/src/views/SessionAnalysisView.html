@@ -180,8 +180,14 @@
       [metadata]="presenter.transcriptMetadata()"
       [selectedId]="presenter.selectedEvidence()?.segmentId ?? null"
       [editing]="presenter.editingTranscript()"
-      [canEdit]="!presenter.capturing()"
-      [canTranscribe]="session.audioAvailable && !presenter.capturing() && !presenter.mutating()"
+      [transcription]="session.pipeline?.transcription"
+      [canEdit]="!presenter.capturing() && !presenter.running()"
+      [canTranscribe]="
+        session.audioAvailable &&
+        !presenter.capturing() &&
+        !presenter.mutating() &&
+        !presenter.running()
+      "
       (selected)="presenter.selectTranscript($event)"
       (editRequested)="presenter.beginTranscriptEdit()"
       (transcribeRequested)="presenter.transcribe()"
