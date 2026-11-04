@@ -1,6 +1,11 @@
+:host {
+  display: block;
+  min-width: 0;
+}
 article {
   --evidence-color: var(--mosaik-color-info-500);
   padding: 14px;
+  overflow-wrap: anywhere;
 }
 article[data-kind='task'] {
   --evidence-color: var(--mosaik-color-warning-500);
@@ -16,7 +21,11 @@ header {
   gap: 6px;
   align-items: center;
 }
+header > strong {
+  min-width: 0;
+}
 time {
+  flex: none;
   margin-left: auto;
   font: var(--mosaik-typography-caption);
   color: var(--mosaik-scheme-lowlight);

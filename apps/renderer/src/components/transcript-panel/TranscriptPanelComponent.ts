@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -52,7 +53,12 @@ export interface ITranscriptEntry {
 export class TranscriptPanelComponent {
   protected readonly intl = inject(TranslateFacade);
   private readonly _query = signal({ text: '' });
-  private readonly _searchElement = viewChild('searchBox', { read: ElementRef<HTMLElement> });
+  private readonly _searchElement = viewChild<unknown, ElementRef<HTMLElement>>('searchBox', {
+    read: ElementRef,
+  });
+  private readonly _body = viewChild<unknown, ElementRef<HTMLElement>>('transcriptBody', {
+    read: ElementRef,
+  });
   public focusSearch(): void {
     this._searchElement()?.nativeElement.focus();
   }
@@ -87,6 +93,20 @@ export class TranscriptPanelComponent {
       untracked(() => {
         if (text !== this.query()) this.queryChange.emit(text);
       });
+    });
+    afterRenderEffect(() => {
+      const id = this.selectedId();
+      const body = this._body()?.nativeElement;
+      this.visible();
+      if (!id || !body || this.editing()) return;
+      const selected = body.querySelector<HTMLElement>(`#${CSS.escape('segment-' + id)}`);
+      if (!selected) return;
+      const viewport = body.getBoundingClientRect();
+      const bounds = selected.getBoundingClientRect();
+      // Reveal evidence within its pane without moving the surrounding window layout.
+      if (bounds.top < viewport.top || bounds.height > body.clientHeight)
+        body.scrollTop += bounds.top - viewport.top;
+      else if (bounds.bottom > viewport.bottom) body.scrollTop += bounds.bottom - viewport.bottom;
     });
   }
   protected request(event: Event, kind: 'edit' | 'transcribe'): void {

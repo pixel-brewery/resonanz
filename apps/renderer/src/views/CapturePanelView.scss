@@ -12,9 +12,11 @@
   position: absolute;
   right: 16px;
   top: 38px;
-  width: 368px;
+  width: min(368px, calc(100% - 32px));
   max-height: calc(100% - 54px);
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--mosaik-scheme-highlight);
   border-radius: 14px;
   background: var(--mosaik-scheme-surface);
@@ -40,6 +42,8 @@ header > div {
   flex: 1;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 header strong {
   font: var(--mosaik-typography-subtitle2);

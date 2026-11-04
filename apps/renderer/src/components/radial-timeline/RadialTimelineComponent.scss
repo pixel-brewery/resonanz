@@ -9,6 +9,7 @@
   height: 100%;
 }
 svg {
+  display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -41,6 +42,9 @@ svg {
 }
 .chapter-label {
   flex-shrink: 0;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   padding: 3px 8px;
   border-radius: 999px;
   color: var(--mosaik-scheme-lowlight);

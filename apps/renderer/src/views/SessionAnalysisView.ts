@@ -1,8 +1,10 @@
+import { SplitComponent } from '@pixel-brewery/mosaik-elements-angular/components/split';
+import { SplitLayoutDirective } from '../components/split-layout/SplitLayoutDirective';
 import { TranscriptPanelComponent } from '../components/transcript-panel/TranscriptPanelComponent';
 import { MessagePipe } from '../pipes/MessagePipe';
 import { TranslateFacade } from '../services/TranslateFacade';
 import { TranslatePipe } from '../pipes/TranslatePipe';
-import { ChangeDetectionStrategy, Component, afterRenderEffect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormFieldDirective, TextFormatterDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
 import { TextBoxComponent } from '@pixel-brewery/mosaik-elements-angular/components/text-box';
@@ -17,6 +19,8 @@ import { EvidenceChipComponent } from '../components/evidence-chip/EvidenceChipC
   selector: 'resonanz-session-analysis',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    SplitComponent,
+    SplitLayoutDirective,
     TranscriptPanelComponent,
     MessagePipe,
     TranslatePipe,
@@ -57,10 +61,4 @@ export class SessionAnalysisView {
       empty: 'loc.resonanz.session.noQuestions',
     },
   ] as const;
-  public constructor() {
-    afterRenderEffect(() => {
-      const id = this.presenter.selectedEvidence()?.segmentId;
-      if (id) document.getElementById('segment-' + id)?.scrollIntoView({ block: 'nearest' });
-    });
-  }
 }

@@ -157,8 +157,20 @@
       />
     </div>
   } @else {
-    <div class="library-columns">
-      <section class="session-list-pane">
+    <mosaik-split
+      class="library-columns"
+      test-id="library-split"
+      resonanzSplitLayout="library-preview"
+      splitInitialPosition="380px"
+      [splitLayoutActive]="presenter.selected() !== null"
+      [class.without-preview]="presenter.selected() === null"
+      [intl]="{ resizeLabel: ('loc.resonanz.layout.resizeLibrary' | translate) }"
+      lock="end"
+      min="280px"
+      max="55%"
+      fit="both"
+    >
+      <section slot="start" class="session-list-pane">
         <div class="filters" [attr.aria-label]="'loc.resonanz.library.filter' | translate">
           @for (filter of filters; track filter.id) {
             <button
@@ -171,277 +183,294 @@
             </button>
           }
         </div>
-        @if (!presenter.sessions().length) {
-          <div class="empty-state" test-id="no-search-results">
-            <h2>{{ 'loc.resonanz.library.noMatch' | translate }}</h2>
-            <p>{{ 'loc.resonanz.library.adjustSearch' | translate }}</p>
-          </div>
-        }
-        <div class="groups" test-id="session-list">
-          @for (group of presenter.groups(); track group.title) {
-            <section>
-              <h2>{{ group.title | message }}</h2>
-              <div class="group-rows">
-                @for (session of group.sessions; track session.id) {
-                  <article
-                    class="session-row"
-                    [class.selected]="presenter.selectedId() === session.id"
-                    [attr.test-id]="'session-row-' + session.id"
-                    (click)="presenter.select(session.id)"
-                    (keydown.enter)="presenter.select(session.id)"
-                    tabindex="0"
-                    role="button"
-                    [attr.aria-pressed]="presenter.selectedId() === session.id"
-                    (keydown.space)="$event.preventDefault(); presenter.select(session.id)"
-                    [attr.aria-label]="
-                      session.title + ('loc.resonanz.library.previewSuffix' | translate)
-                    "
-                  >
-                    <resonanz-waveform
-                      class="fingerprint"
-                      [values]="presenter.waveform(session.id)"
-                      [markers]="presenter.rowMarkers(session.id)"
-                      [durationMs]="session.durationMs"
-                      [count]="36"
-                    />
-                    <div class="row-text">
-                      <strong>{{ session.title }}</strong
-                      ><span class="caption"
-                        >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
-                        {{
-                          session.kind === 'conversation'
-                            ? ('loc.resonanz.capture.live' | translate)
-                            : ('loc.resonanz.capture.microphone' | translate)
-                        }}
-                        @if (session.insightCounts?.decisions) {
-                          ·
-                          {{
-                            intl.t(
-                              'loc.resonanz.marker.decisionCount',
-                              session.insightCounts.decisions
-                            )
-                          }}
-                        }
-                      </span>
-                    </div>
-                    <span
-                      class="row-status"
-                      [class.failed]="presenter.displayState(session) === 'error'"
-                      [class.processing]="
-                        presenter.displayState(session) === 'transcribing' ||
-                        presenter.displayState(session) === 'analyzing'
-                      "
-                      [class.attention]="
-                        presenter.displayState(session) === 'error' ||
-                        presenter.displayState(session) === 'interrupted' ||
-                        presenter.displayState(session) === 'analysisWaiting'
-                      "
-                      ><span
-                        class="status-dot"
-                        [class.success]="
-                          presenter.displayState(session) === 'ready' ||
-                          presenter.displayState(session) === 'saved'
-                        "
-                        [class.recording]="session.status === 'recording'"
-                      ></span
-                      >{{ presenter.status(session) | message }}</span
-                    ><span class="row-duration">{{ session.durationMs | duration }}</span
-                    ><mosaik-button
-                      class="row-star"
-                      [attr.test-id]="'star-' + session.id"
-                      icon="star"
-                      [appearance]="session.starred ? 'soft' : 'plain'"
-                      size="small"
-                      [attr.aria-label]="
-                        session.starred
-                          ? ('loc.resonanz.nav.removeFavorite' | translate)
-                          : ('loc.resonanz.nav.addFavorite' | translate)
-                      "
-                      (click)="$event.stopPropagation(); presenter.toggleStar(session)"
-                    />
-                  </article>
-                }
-              </div>
-            </section>
-          }
-        </div>
-      </section>
-      @if (presenter.selected(); as selected) {
-        <aside
-          class="session-preview"
-          [attr.aria-label]="'loc.resonanz.library.preview' | translate"
-        >
-          <h2>{{ selected.title }}</h2>
-          <p class="preview-meta">
-            {{ selected.createdAt | date: 'EEEE, dd. MMMM, HH:mm' : undefined : intl.locale() }} ·
-            {{ selected.durationMs | duration }} ·
-            {{
-              selected.kind === 'conversation'
-                ? ('loc.resonanz.capture.live' | translate)
-                : ('loc.resonanz.capture.microphone' | translate)
-            }}
-            · {{ intl.languageName(presenter.library.settings().locale) }}
-          </p>
-          <div class="preview-wave outline-card">
-            <resonanz-waveform
-              [values]="presenter.previewWaveform()"
-              [markers]="presenter.markers()"
-              [durationMs]="selected.durationMs"
-              [count]="64"
-              [showTimes]="true"
-            />
-          </div>
-          @if (
-            presenter.previewState() === 'transcribing' ||
-            presenter.previewState() === 'analyzing' ||
-            presenter.previewState() === 'busy'
-          ) {
-            <section class="processing-card" role="status" test-id="preview-processing">
-              <strong>{{
-                (presenter.previewState() === 'transcribing'
-                  ? 'loc.resonanz.library.transcriptCreating'
-                  : 'loc.resonanz.pipeline.analysisRunning'
-                ) | translate
-              }}</strong>
-              <progress
-                max="100"
-                [attr.value]="
-                  selected.pipeline?.transcription?.state === 'running'
-                    ? (selected.pipeline?.transcription?.progress ?? null)
-                    : null
-                "
-                [attr.aria-label]="presenter.status(selected)"
-              ></progress>
-              <span class="caption"
-                >{{ presenter.status(selected) }} ·
-                {{ 'loc.resonanz.library.processingSaved' | translate }}</span
-              >
-            </section>
-          } @else if (presenter.previewState() === 'analysisWaiting') {
-            <mosaik-message
-              test-id="preview-analysis-waiting"
-              variant="warning"
-              appearance="soft"
-              icon="warning"
-              [header]="intl.t('loc.resonanz.library.waitingFor', presenter.previewAssistant())"
-              [content]="'loc.resonanz.library.waitingDescription' | translate"
-            />
-            <div class="preview-recovery-actions">
-              <mosaik-button
-                test-id="preview-processing-details"
-                [label]="'loc.resonanz.library.details' | translate"
-                appearance="solid"
-                fit="width"
-                (click)="presenter.open(selected.id, 'processing')"
-              /><mosaik-button
-                [label]="'loc.resonanz.library.readTranscript' | translate"
-                appearance="outline"
-                fit="width"
-                (click)="presenter.open(selected.id, 'analysis')"
-              />
+        <div class="session-list-content" test-id="session-list-content">
+          @if (!presenter.sessions().length) {
+            <div class="empty-state" test-id="no-search-results">
+              <h2>{{ 'loc.resonanz.library.noMatch' | translate }}</h2>
+              <p>{{ 'loc.resonanz.library.adjustSearch' | translate }}</p>
             </div>
-          } @else if (
-            presenter.previewState() === 'error' || presenter.previewState() === 'interrupted'
-          ) {
-            <mosaik-message
-              test-id="preview-transcription-error"
-              variant="danger"
-              appearance="soft"
-              icon="warning"
-              [header]="'loc.resonanz.library.transcriptionFailed' | translate"
-              [content]="
-                (presenter.previewError() | message) ||
-                ('loc.resonanz.library.recordingPreserved' | translate)
-              "
-            />
-            <mosaik-button
-              test-id="preview-retry-transcription"
-              [label]="'loc.resonanz.library.retryTranscription' | translate"
-              icon="refresh"
-              appearance="solid"
-              fit="width"
-              [disabled]="!selected.audioAvailable || presenter.mutating()"
-              (click)="presenter.retryTranscription(selected.id)"
-            />
-          } @else {
-            @if (selected.analysis; as analysis) {
-              <p class="preview-summary">
-                @for (claim of analysis.summary; track claim.id) {
-                  {{ claim.text }}
-                }
-              </p>
-              <resonanz-insight-statistics
-                [decisions]="analysis.decisions.length"
-                [tasks]="analysis.tasks.length"
-                [questions]="analysis.openQuestions.length"
-              />
-              @if (presenter.myTasks().length) {
-                <h3 class="caption for-you-heading">
-                  {{ 'loc.resonanz.marker.forYou' | translate }}
-                </h3>
-                <div class="my-tasks">
-                  @for (task of presenter.myTasks(); track task.id) {
-                    <resonanz-task-row
-                      [label]="task.text"
-                      [secondary]="task.due ? intl.dueLabel(task.due) : ''"
-                      [completed]="task.completed ?? false"
-                      [disabled]="presenter.mutating()"
-                      (completedChange)="presenter.setTaskCompleted(task.id, $event)"
-                      (selected)="presenter.open(selected.id, 'analysis')"
-                    />
+          }
+          <div class="groups" test-id="session-list">
+            @for (group of presenter.groups(); track group.title) {
+              <section>
+                <h2>{{ group.title | message }}</h2>
+                <div class="group-rows">
+                  @for (session of group.sessions; track session.id) {
+                    <article
+                      class="session-row"
+                      [class.selected]="presenter.selectedId() === session.id"
+                      [attr.test-id]="'session-row-' + session.id"
+                      (click)="presenter.select(session.id)"
+                      (keydown.enter)="presenter.select(session.id)"
+                      tabindex="0"
+                      role="button"
+                      [attr.aria-pressed]="presenter.selectedId() === session.id"
+                      (keydown.space)="$event.preventDefault(); presenter.select(session.id)"
+                      [attr.aria-label]="
+                        session.title + ('loc.resonanz.library.previewSuffix' | translate)
+                      "
+                    >
+                      <resonanz-waveform
+                        class="fingerprint"
+                        [values]="presenter.waveform(session.id)"
+                        [markers]="presenter.rowMarkers(session.id)"
+                        [durationMs]="session.durationMs"
+                        [count]="36"
+                      />
+                      <div class="row-text">
+                        <strong>{{ session.title }}</strong
+                        ><span class="caption"
+                          >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
+                          {{
+                            session.kind === 'conversation'
+                              ? ('loc.resonanz.capture.live' | translate)
+                              : ('loc.resonanz.capture.microphone' | translate)
+                          }}
+                          @if (session.insightCounts?.decisions) {
+                            ·
+                            {{
+                              intl.t(
+                                'loc.resonanz.marker.decisionCount',
+                                session.insightCounts.decisions
+                              )
+                            }}
+                          }
+                        </span>
+                      </div>
+                      <span
+                        class="row-status"
+                        [class.failed]="presenter.displayState(session) === 'error'"
+                        [class.processing]="
+                          presenter.displayState(session) === 'transcribing' ||
+                          presenter.displayState(session) === 'analyzing'
+                        "
+                        [class.attention]="
+                          presenter.displayState(session) === 'error' ||
+                          presenter.displayState(session) === 'interrupted' ||
+                          presenter.displayState(session) === 'analysisWaiting'
+                        "
+                        ><span
+                          class="status-dot"
+                          [class.success]="
+                            presenter.displayState(session) === 'ready' ||
+                            presenter.displayState(session) === 'saved'
+                          "
+                          [class.recording]="session.status === 'recording'"
+                        ></span
+                        >{{ presenter.status(session) | message }}</span
+                      ><span class="row-duration">{{ session.durationMs | duration }}</span
+                      ><mosaik-button
+                        class="row-star"
+                        [attr.test-id]="'star-' + session.id"
+                        icon="star"
+                        [appearance]="session.starred ? 'soft' : 'plain'"
+                        size="small"
+                        [attr.aria-label]="
+                          session.starred
+                            ? ('loc.resonanz.nav.removeFavorite' | translate)
+                            : ('loc.resonanz.nav.addFavorite' | translate)
+                        "
+                        (click)="$event.stopPropagation(); presenter.toggleStar(session)"
+                      />
+                    </article>
                   }
                 </div>
-              }
-            } @else if (selected.summary) {
-              <p class="preview-summary">{{ selected.summary }}</p>
-            } @else {
-              <p class="caption preview-hint">
-                {{
-                  (selected.transcript.length
-                    ? 'loc.resonanz.capture.transcriptReady'
-                    : 'loc.resonanz.capture.audioSaved'
-                  ) | translate
-                }}
-              </p>
+              </section>
             }
-            <div class="preview-actions">
+          </div>
+        </div>
+      </section>
+      <div slot="end" class="preview-pane">
+        @if (presenter.selected(); as selected) {
+          <aside
+            class="session-preview"
+            [attr.aria-label]="'loc.resonanz.library.preview' | translate"
+          >
+            <h2>{{ selected.title }}</h2>
+            <p class="preview-meta">
+              {{ selected.createdAt | date: 'EEEE, dd. MMMM, HH:mm' : undefined : intl.locale() }} ·
+              {{ selected.durationMs | duration }} ·
+              {{
+                selected.kind === 'conversation'
+                  ? ('loc.resonanz.capture.live' | translate)
+                  : ('loc.resonanz.capture.microphone' | translate)
+              }}
+              · {{ intl.languageName(presenter.library.settings().locale) }}
+            </p>
+            <div class="preview-content" test-id="preview-content">
+              <div class="preview-wave outline-card">
+                <resonanz-waveform
+                  [values]="presenter.previewWaveform()"
+                  [markers]="presenter.markers()"
+                  [durationMs]="selected.durationMs"
+                  [count]="64"
+                  [showTimes]="true"
+                />
+              </div>
+              @if (
+                presenter.previewState() === 'transcribing' ||
+                presenter.previewState() === 'analyzing' ||
+                presenter.previewState() === 'busy'
+              ) {
+                <section class="processing-card" role="status" test-id="preview-processing">
+                  <strong>{{
+                    (presenter.previewState() === 'transcribing'
+                      ? 'loc.resonanz.library.transcriptCreating'
+                      : 'loc.resonanz.pipeline.analysisRunning'
+                    ) | translate
+                  }}</strong>
+                  <progress
+                    max="100"
+                    [attr.value]="
+                      selected.pipeline?.transcription?.state === 'running'
+                        ? (selected.pipeline?.transcription?.progress ?? null)
+                        : null
+                    "
+                    [attr.aria-label]="presenter.status(selected)"
+                  ></progress>
+                  <span class="caption"
+                    >{{ presenter.status(selected) }} ·
+                    {{ 'loc.resonanz.library.processingSaved' | translate }}</span
+                  >
+                </section>
+              } @else if (presenter.previewState() === 'analysisWaiting') {
+                <mosaik-message
+                  test-id="preview-analysis-waiting"
+                  variant="warning"
+                  appearance="soft"
+                  icon="warning"
+                  [header]="intl.t('loc.resonanz.library.waitingFor', presenter.previewAssistant())"
+                  [content]="'loc.resonanz.library.waitingDescription' | translate"
+                />
+              } @else if (
+                presenter.previewState() === 'error' || presenter.previewState() === 'interrupted'
+              ) {
+                <mosaik-message
+                  test-id="preview-transcription-error"
+                  variant="danger"
+                  appearance="soft"
+                  icon="warning"
+                  [header]="'loc.resonanz.library.transcriptionFailed' | translate"
+                  [content]="
+                    (presenter.previewError() | message) ||
+                    ('loc.resonanz.library.recordingPreserved' | translate)
+                  "
+                />
+              } @else {
+                @if (selected.analysis; as analysis) {
+                  <p class="preview-summary">
+                    @for (claim of analysis.summary; track claim.id) {
+                      {{ claim.text }}
+                    }
+                  </p>
+                  <resonanz-insight-statistics
+                    [decisions]="analysis.decisions.length"
+                    [tasks]="analysis.tasks.length"
+                    [questions]="analysis.openQuestions.length"
+                  />
+                  @if (presenter.myTasks().length) {
+                    <h3 class="caption for-you-heading">
+                      {{ 'loc.resonanz.marker.forYou' | translate }}
+                    </h3>
+                    <div class="my-tasks">
+                      @for (task of presenter.myTasks(); track task.id) {
+                        <resonanz-task-row
+                          [label]="task.text"
+                          [secondary]="task.due ? intl.dueLabel(task.due) : ''"
+                          [completed]="task.completed ?? false"
+                          [disabled]="presenter.mutating()"
+                          (completedChange)="presenter.setTaskCompleted(task.id, $event)"
+                          (selected)="presenter.open(selected.id, 'analysis')"
+                        />
+                      }
+                    </div>
+                  }
+                } @else if (selected.summary) {
+                  <p class="preview-summary">{{ selected.summary }}</p>
+                } @else {
+                  <p class="caption preview-hint">
+                    {{
+                      (selected.transcript.length
+                        ? 'loc.resonanz.capture.transcriptReady'
+                        : 'loc.resonanz.capture.audioSaved'
+                      ) | translate
+                    }}
+                  </p>
+                }
+              }
+            </div>
+            @if (presenter.previewState() === 'analysisWaiting') {
+              <div class="preview-recovery-actions">
+                <mosaik-button
+                  test-id="preview-processing-details"
+                  [label]="'loc.resonanz.library.details' | translate"
+                  appearance="solid"
+                  fit="width"
+                  (click)="presenter.open(selected.id, 'processing')"
+                /><mosaik-button
+                  [label]="'loc.resonanz.library.readTranscript' | translate"
+                  appearance="outline"
+                  fit="width"
+                  (click)="presenter.open(selected.id, 'analysis')"
+                />
+              </div>
+            } @else if (
+              presenter.previewState() === 'error' || presenter.previewState() === 'interrupted'
+            ) {
               <mosaik-button
-                [label]="'loc.resonanz.common.open' | translate"
-                test-id="preview-open"
+                test-id="preview-retry-transcription"
+                [label]="'loc.resonanz.library.retryTranscription' | translate"
+                icon="refresh"
                 appearance="solid"
                 fit="width"
-                (click)="presenter.open(selected.id)"
+                [disabled]="!selected.audioAvailable || presenter.mutating()"
+                (click)="presenter.retryTranscription(selected.id)"
+              />
+            } @else if (
+              presenter.previewState() === 'ready' ||
+              presenter.previewState() === 'saved' ||
+              presenter.previewState() === 'recording' ||
+              presenter.previewState() === 'paused'
+            ) {
+              <div class="preview-actions">
+                <mosaik-button
+                  [label]="'loc.resonanz.common.open' | translate"
+                  test-id="preview-open"
+                  appearance="solid"
+                  fit="width"
+                  (click)="presenter.open(selected.id)"
+                /><mosaik-button
+                  [label]="'loc.resonanz.question.questions' | translate"
+                  appearance="outline"
+                  fit="width"
+                  (click)="presenter.open(selected.id, 'questions')"
+                /><mosaik-button
+                  [label]="'loc.resonanz.nav.voice' | translate"
+                  appearance="outline"
+                  fit="width"
+                  [routerLink]="['/voice', selected.id]"
+                />
+              </div>
+            }
+            <div class="preview-footer">
+              <mosaik-button
+                [label]="'loc.resonanz.session.rename' | translate"
+                icon="edit"
+                appearance="plain"
+                (click)="presenter.open(selected.id, 'ring', true)"
               /><mosaik-button
-                [label]="'loc.resonanz.question.questions' | translate"
-                appearance="outline"
-                fit="width"
-                (click)="presenter.open(selected.id, 'questions')"
-              /><mosaik-button
-                [label]="'loc.resonanz.nav.voice' | translate"
-                appearance="outline"
-                fit="width"
-                [routerLink]="['/voice', selected.id]"
+                [label]="'loc.resonanz.common.delete' | translate"
+                icon="trash"
+                appearance="plain"
+                variant="danger"
+                [disabled]="selected.status === 'recording' || selected.status === 'paused'"
+                (click)="presenter.deleting.set(true)"
               />
             </div>
-          }
-          <div class="preview-footer">
-            <mosaik-button
-              [label]="'loc.resonanz.session.rename' | translate"
-              icon="edit"
-              appearance="plain"
-              (click)="presenter.open(selected.id, 'ring', true)"
-            /><mosaik-button
-              [label]="'loc.resonanz.common.delete' | translate"
-              icon="trash"
-              appearance="plain"
-              variant="danger"
-              [disabled]="selected.status === 'recording' || selected.status === 'paused'"
-              (click)="presenter.deleting.set(true)"
-            />
-          </div>
-        </aside>
-      }
-    </div>
+          </aside>
+        }
+      </div>
+    </mosaik-split>
   }
 </div>
 @if (presenter.deleting() && presenter.selected(); as selected) {

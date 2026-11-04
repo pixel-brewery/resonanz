@@ -29,6 +29,7 @@ outputs communicate intent. Session DTO conversion belongs to presenters and
 | SilenceReminder    | Localized reminder and explicit continue/stop intent; no timer or media ownership                            |
 | StorageBreakdown   | Measured byte categories, SI-unit labels and public Mosaik SegmentBar                                        |
 | ConfirmationDialog | Reviewed details, busy/blocked state and confirm/cancel intent with modal focus                              |
+| SplitLayout        | Stable pane key, initial size and active state; optional device-local size memory over public Mosaik Split   |
 
 `VisualizationModels.ts` exposes focused presentation interfaces and pure peak,
 ratio, polar-coordinate and arc helpers. Empty or silent waveforms remain honest.

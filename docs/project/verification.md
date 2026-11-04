@@ -5,6 +5,51 @@ and the provenance-verified upstream audio core. An additional API key or cloud 
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
 
+## Native desktop layout: 2026-11-04
+
+The built Electron app on macOS ARM64 passed the controlled desktop suite with
+isolated synthetic recordings and an unauthenticated test profile. Its layout group
+exercises nine views, including both library presentations, at 1440×900 and 960×640
+in English/German and light/dark mode: **72 view/size/language/theme combinations**.
+Long imported transcripts, summaries, chapter titles and question history plus
+twenty temporary collections provide actual overflow. Geometry assertions verify
+fixed window frames/actions, usable content height, vertical content scrolling and
+no horizontal overflow. The six Mosaik splitters were resized by keyboard and
+pointer, restored after navigation/reload and checked again in a compact window.
+An oversized 5,000-pixel stored pane preference also restores without collapsing
+either pane; modal bounds cover the full native window, including navigation.
+Setup steps and confirmation/deletion dialogs retain their action controls.
+
+Native screenshots were visually reviewed, including the compact German dark
+session and weekly views. The weekly layout no longer forces a 680-pixel content
+minimum; compact toolbars reserve room for their title and date. The Voice check
+covers its idle ring within the actual stage. Long spoken responses, real speech
+recognition and provider inference were not exercised by this layout group.
+Fixture sessions/collections and preference changes are cleaned up by the runner;
+the task-owned Electron instance exits. Its hidden verification window enables
+unthrottled layout frames for this group and restores that flag afterward; it
+remains hidden and does not change focus. These local checks do not establish Windows behavior or new speech/provider
+inference.
+
+A fresh macOS ARM64 app bundle also passed package verification (189 compared
+files and local signature) and all twelve packaged-executable E2E groups. The
+runner waits for public component updates and stable measured viewport/pane
+geometry, with every scroll, interaction, persistence and native screenshot check
+retained. Source evidence is under `.codex-work/desktop-smoke-dUisO0/`; packaged
+evidence is under `.codex-work/packaged-smoke-0svUys/`. Each includes layout geometry
+and native PNGs. The bundle is in `.codex-work/layout-audit/out/`. Earlier real
+media/account evidence below remains separate.
+
+The macOS CI follow-up exposed an export-test synchronization gap: a nonempty
+destination can still be incomplete while the native owner awaits `copyFile`.
+Audio acceptance now waits for the exact recorded byte count before the existing
+size, WebM-header and import checks. A controlled real-file regression reproduced
+early completion at 81,920 bytes against 92,139 expected bytes, then verified that
+the corrected waiter remains pending until complete and rejects permanent
+truncation. All twelve built-app and packaged-executable groups passed locally
+after the fix; evidence is under `.codex-work/desktop-smoke-7DR5wA/` and
+`.codex-work/packaged-smoke-8V83Ht/`.
+
 ## Long macOS recording recovery: 2026-11-04
 
 The earlier 0.1.6 single-request file path failed on an owner-authorized 38-minute

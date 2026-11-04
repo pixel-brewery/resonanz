@@ -17,15 +17,28 @@ section {
   box-sizing: border-box;
   width: min(440px, calc(100% - 48px));
   max-height: calc(100% - 48px);
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px;
   border: 1px solid var(--mosaik-scheme-highlight);
   border-radius: 14px;
   background: var(--mosaik-scheme-surface);
   box-shadow: var(--mosaik-elevation-bold);
+}
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 22px 22px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+}
+.dialog-content > * {
+  flex: 0 0 auto;
 }
 .introduction {
   display: flex;
@@ -70,7 +83,9 @@ p {
 }
 footer {
   display: flex;
+  flex: 0 0 auto;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 16px 22px 22px;
 }

@@ -1,8 +1,13 @@
 :host {
   display: block;
-  min-width: 680px;
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: week-landscape;
 }
 .landscape-grid {
+  width: 100%;
+  min-width: 0;
   position: relative;
 }
 .connections {
@@ -52,11 +57,15 @@
 .hours > div > span {
   position: absolute;
   transform: translateX(-50%);
+  white-space: nowrap;
 }
 .day {
   height: 88px;
 }
 .day-label {
+  min-width: 0;
+  padding-right: 8px;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -75,6 +84,9 @@
   color: var(--mosaik-color-danger-500);
 }
 .track {
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
   position: relative;
   border-top: 1px solid var(--mosaik-scheme-highlight);
   margin-right: 24px;
@@ -130,7 +142,10 @@
   text-align: right;
 }
 .ribbon-label > span {
+  max-width: 100%;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ribbon-label > span {
   font-size: 10px;
@@ -188,5 +203,19 @@
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
+  }
+}
+
+@container week-landscape (max-width: 560px) {
+  .hours > div > span:nth-child(even):not(:last-child),
+  .hours > div > span:nth-last-child(2) {
+    visibility: hidden;
+  }
+}
+@container week-landscape (max-width: 760px) {
+  .day-label strong {
+    font: var(--mosaik-typography-caption);
+    font-weight: 600;
+    white-space: nowrap;
   }
 }

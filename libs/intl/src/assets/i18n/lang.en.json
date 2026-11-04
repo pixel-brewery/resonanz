@@ -880,5 +880,11 @@
   "loc.resonanz.voice.title": "Talk to Resonanz",
   "loc.resonanz.voice.type": "Type instead of speaking",
   "loc.resonanz.voice.what": "What would you like to know?",
-  "loc.resonanz.voice.withoutLooking": "without looking"
+  "loc.resonanz.voice.withoutLooking": "without looking",
+  "loc.resonanz.layout.resizeNavigation": "Resize navigation and workspace",
+  "loc.resonanz.layout.resizeLibrary": "Resize session list and preview",
+  "loc.resonanz.layout.resizeRing": "Resize session overview and chapters",
+  "loc.resonanz.layout.resizeAnalysis": "Resize analysis and transcript",
+  "loc.resonanz.layout.resizeQuestions": "Resize questions and evidence",
+  "loc.resonanz.layout.resizeRecovery": "Resize processing details and transcript"
 }

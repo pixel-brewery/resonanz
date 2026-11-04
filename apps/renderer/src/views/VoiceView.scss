@@ -38,9 +38,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  container-type: size;
 }
 .voice-ring {
-  width: min(710px, calc(100vh - 210px));
+  width: min(710px, 100cqw, 100cqh);
   max-height: 100%;
 }
 .voice-response {
@@ -49,7 +52,25 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: min(360px, 54cqw, 54cqh);
   position: relative;
+}
+.voice-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+}
+.voice-copy > * {
+  flex: 0 0 auto;
 }
 .voice-response::before {
   content: '';
@@ -73,6 +94,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  flex: 0 0 auto;
+  max-width: 100%;
   font: 600 11px/1.5 var(--mosaik-font-family, Georgia, serif);
   background: var(--mosaik-scheme-highlight);
   border-radius: 999px;
@@ -97,8 +120,6 @@
   margin: 0;
   font: 400 14px/1.4 var(--mosaik-font-family, Georgia, serif);
   color: var(--mosaik-scheme-lowlight);
-  max-height: 60px;
-  overflow-y: auto;
   text-wrap: balance;
 }
 .spoken-answer {
@@ -106,20 +127,17 @@
   letter-spacing: -0.01em;
   margin: 0;
   text-wrap: balance;
-  max-height: 210px;
-  overflow-y: auto;
 }
 .original-quote {
   margin: 0;
   font: 400 12px/1.45 var(--mosaik-font-family, Georgia, serif);
   color: var(--mosaik-scheme-lowlight);
-  max-height: 100px;
-  overflow-y: auto;
   text-wrap: balance;
 }
 .voice-footer {
   display: flex;
   flex-direction: column;
+  flex: 0 0 auto;
   align-items: center;
   gap: 12px;
   padding: 0 24px 22px;
@@ -142,6 +160,8 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 .microphone {
   width: 72px;
@@ -174,6 +194,8 @@
 .live-controls {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 button:focus-visible {
   outline: 2px solid var(--mosaik-color-info-500);
@@ -190,10 +212,6 @@ button:focus-visible {
   }
   .spoken-answer {
     font-size: 17px;
-    max-height: 120px;
-  }
-  .original-quote {
-    max-height: 70px;
   }
 }
 @media (max-width: 1080px) {

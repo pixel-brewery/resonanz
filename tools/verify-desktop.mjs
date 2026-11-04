@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { access, mkdir, mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -328,6 +329,634 @@ async function verifyProcessingStatus() {
   );
 }
 
+async function verifyDesktopLayout() {
+  const before = await request('bootstrap.get');
+  const nativeWindow = await application.browserWindow(page);
+  const backgroundThrottling = await nativeWindow.evaluate((window) =>
+    window.webContents.getBackgroundThrottling(),
+  );
+  const originalSize = await nativeWindow.evaluate((window) => window.getContentBounds());
+  const originalLayout = await page.evaluate(() =>
+    Object.fromEntries(
+      Object.entries(localStorage).filter(([key]) => key.startsWith('resonanz.layout.')),
+    ),
+  );
+  const collectionIds = [];
+  const evidence = [];
+  let fixtureId;
+  const settle = async () => {
+    const token = randomUUID();
+    await page.evaluate((token) => {
+      const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
+      void Promise.all(splits.map((split) => split.updateComplete))
+        .then(() => Promise.all(splits.map((split) => split.updateComplete)))
+        .then(() => {
+          document.documentElement.dataset.layoutReady = token;
+        });
+    }, token);
+    let previous;
+    await waitFor(async () => {
+      const measured = await page.evaluate((token) => {
+        if (document.documentElement.dataset.layoutReady !== token) return null;
+        const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
+        if (splits.some((split) => split.clientWidth <= 1 || split.clientHeight <= 1)) return null;
+        const boxes = splits
+          .flatMap((split) => [
+            split,
+            ...[...split.children].filter(
+              (child) => child.slot === 'start' || child.slot === 'end',
+            ),
+          ])
+          .map((element) => element.getBoundingClientRect());
+        return [
+          innerWidth,
+          innerHeight,
+          ...boxes.flatMap((box) => [box.x, box.y, box.width, box.height]),
+        ];
+      }, token);
+      const stable =
+        measured &&
+        previous &&
+        measured.length === previous.length &&
+        measured.every((value, index) => Math.abs(value - previous[index]) <= 1);
+      previous = measured;
+      return stable;
+    }, 'native viewport and pane geometry settle');
+  };
+  const resize = async (size) => {
+    await nativeWindow.evaluate(
+      (window, target) => window.setContentSize(target.width, target.height),
+      size,
+    );
+    await page.waitForFunction(
+      ({ width, height }) => innerWidth === width && innerHeight === height,
+      size,
+    );
+    await settle();
+  };
+  const navigate = async (route, marker, size) => {
+    await page.evaluate((hash) => {
+      location.hash = hash;
+    }, route);
+    await control(marker).waitFor({ state: 'visible' });
+    // Route presentation adjusts the existing native window. Size it after that IPC work.
+    await request('bootstrap.get');
+    await resize(size);
+  };
+  const visibleGeometry = (selector) =>
+    page.locator(selector).evaluateAll((elements) =>
+      elements
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            tag: element.tagName,
+            id: element.getAttribute('test-id') ?? element.className,
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+            clientWidth: element.clientWidth,
+            clientHeight: element.clientHeight,
+            scrollWidth: element.scrollWidth,
+            scrollHeight: element.scrollHeight,
+          };
+        })
+        .filter((item) => item.width > 0 && item.height > 0),
+    );
+  const assertInside = async (selector, description) => {
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+    const items = await visibleGeometry(selector);
+    assert(items.length > 0, `${description}: visible controls`);
+    for (const item of items) {
+      assert(
+        item.x >= -1 &&
+          item.y >= -1 &&
+          item.x + item.width <= viewport.width + 1 &&
+          item.y + item.height <= viewport.height + 1,
+        `${description}: control stays inside native content ${JSON.stringify(item)}`,
+      );
+    }
+  };
+  const assertFrame = async (description, extra = '') => {
+    const selectors = [
+      'html',
+      'body',
+      'resonanz-shell',
+      '.app-shell',
+      '.app-body',
+      '.workspace',
+      '.workspace-outlet',
+      '.window-toolbar',
+      '.status-bar',
+      'mosaik-split[resonanzSplitLayout]',
+      extra,
+    ]
+      .filter(Boolean)
+      .join(',');
+    const frames = await visibleGeometry(selectors);
+    for (const frame of frames) {
+      assert(
+        frame.scrollWidth <= frame.clientWidth + 1,
+        `${description}: frame has no horizontal overflow ${JSON.stringify(frame)}`,
+      );
+      assert(
+        frame.scrollHeight <= frame.clientHeight + 1,
+        `${description}: frame does not scroll ${JSON.stringify(frame)}`,
+      );
+    }
+    await assertInside(
+      '.status-bar, .window-toolbar-actions > *, .voice-header > mosaik-button, .setup-titlebar',
+      description,
+    );
+    evidence.push({
+      description,
+      viewport: await page.evaluate(() => ({ width: innerWidth, height: innerHeight })),
+      frames,
+    });
+  };
+  const scrollBody = async (selector, fixed, requireOverflow = true) => {
+    const body = page.locator(selector).first();
+    const beforeFixed = await visibleGeometry(fixed);
+    const range = await body.evaluate((element) => {
+      element.scrollTop = 0;
+      return {
+        height: element.clientHeight,
+        vertical: element.scrollHeight - element.clientHeight,
+        horizontal: element.scrollWidth - element.clientWidth,
+      };
+    });
+    assert(range.height > 32, `${selector}: content retains usable height`);
+    assert(range.horizontal <= 1, `${selector}: content has no horizontal scrollbar`);
+    if (requireOverflow)
+      assert(range.vertical > 1, `${selector}: long fixture has reachable overflow`);
+    await body.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await settle();
+    if (range.vertical > 1)
+      assert(
+        await body.evaluate((element) => element.scrollTop > 0),
+        `${selector}: content scrolls`,
+      );
+    const afterFixed = await visibleGeometry(fixed);
+    assert.equal(afterFixed.length, beforeFixed.length, `${selector}: chrome stays mounted`);
+    for (let index = 0; index < beforeFixed.length; index++) {
+      assert(
+        Math.abs(beforeFixed[index].y - afterFixed[index].y) <= 1 &&
+          Math.abs(beforeFixed[index].height - afterFixed[index].height) <= 1,
+        `${selector}: scrolling content preserves fixed controls`,
+      );
+    }
+  };
+  const split = (key) => page.locator(`mosaik-split[resonanzSplitLayout="${key}"]`);
+  const paneWidths = (key) =>
+    split(key).evaluate((element) =>
+      ['start', 'end'].map(
+        (slot) => element.querySelector(`[slot="${slot}"]`).getBoundingClientRect().width,
+      ),
+    );
+  const splitSeparator = async (key) =>
+    split(key).getByRole('separator', {
+      name: await split(key).evaluate((element) => element.intl.resizeLabel),
+      exact: true,
+    });
+  const adjustSplit = async (key) => {
+    const separator = await splitSeparator(key);
+    const initial = await paneWidths(key);
+    await separator.press('ArrowRight');
+    await waitFor(
+      async () => Math.abs((await paneWidths(key))[0] - initial[0]) > 1,
+      `${key}: keyboard resizes panels`,
+    );
+    const keyboard = await paneWidths(key);
+    const divider = await separator.boundingBox();
+    assert(divider, `${key}: divider has a pointer target`);
+    await page.mouse.move(divider.x + divider.width / 2, divider.y + divider.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(divider.x + divider.width / 2 + 24, divider.y + divider.height / 2, {
+      steps: 6,
+    });
+    await page.mouse.up();
+    await waitFor(
+      async () => Math.abs((await paneWidths(key))[0] - keyboard[0]) > 1,
+      `${key}: pointer resizes panels`,
+    );
+    const preferred = await paneWidths(key);
+    assert(
+      preferred.every((width) => width > 100),
+      `${key}: both panes remain available`,
+    );
+    return preferred;
+  };
+  const assertRestoredSplit = async (key, expected) => {
+    await waitFor(async () => {
+      const widths = await paneWidths(key);
+      return widths.every((width, index) => Math.abs(width - expected[index]) <= 2);
+    }, `${key}: user panel size survives remount/reload`);
+  };
+
+  try {
+    // Keep the existing test window hidden while rendering layout frames as in a visible window.
+    await nativeWindow.evaluate((window) => window.webContents.setBackgroundThrottling(false));
+    const now = new Date().toISOString();
+    const source = await session();
+    const paragraph =
+      'Controlled layout fixture: a long conversation with decisions, follow-up questions and original transcript passages. '.repeat(
+        8,
+      );
+    const fixture = {
+      ...source,
+      id: randomUUID(),
+      title: `Layout fixture — ${'a long desktop session title '.repeat(7)}`.slice(0, 200),
+      createdAt: now,
+      updatedAt: now,
+      durationMs: 180_000,
+      status: 'ready',
+      audioBytes: 0,
+      audioAvailable: false,
+      audioUrl: null,
+      nextAudioSequence: 1,
+      collectionId: null,
+      starred: false,
+      tags: [],
+      moments: [],
+      pauses: [],
+      waveform: [],
+      summary: Array.from({ length: 18 }, () => paragraph).join('\n\n'),
+      transcript: Array.from({ length: 48 }, (_, index) => ({
+        id: `layout-segment-${index}`,
+        speaker: 'participant',
+        text: `${index + 1}. ${paragraph}`,
+        startMs: index * 3000,
+        endMs: (index + 1) * 3000,
+        final: true,
+      })),
+      messages: [
+        { id: randomUUID(), role: 'user', text: paragraph, createdAt: now, state: 'complete' },
+        {
+          id: randomUUID(),
+          role: 'assistant',
+          text: paragraph.repeat(8),
+          createdAt: now,
+          state: 'complete',
+        },
+      ],
+      pipeline: { transcription: { state: 'done' }, analysis: { state: 'done' } },
+    };
+    delete fixture.analysis;
+    delete fixture.insightCounts;
+    delete fixture.error;
+    const evidenceFor = (index) => {
+      const segment = fixture.transcript[index];
+      return {
+        segmentId: segment.id,
+        atMs: segment.startMs,
+        endMs: segment.endMs,
+        quote: segment.text,
+      };
+    };
+    fixture.analysis = {
+      provider: 'Controlled layout fixture',
+      createdAt: now,
+      summary: Array.from({ length: 18 }, (_, index) => ({
+        id: `layout-summary-${index}`,
+        text: paragraph,
+        evidence: [evidenceFor(index)],
+      })),
+      decisions: [],
+      tasks: [],
+      openQuestions: [],
+      chapters: Array.from({ length: 6 }, (_, index) => ({
+        id: `layout-chapter-${index}`,
+        title: `Chapter ${index + 1}: ${'A long chapter title for compact panes '.repeat(6)}`.slice(
+          0,
+          200,
+        ),
+        summary: paragraph,
+        startMs: index * 30_000,
+        endMs: (index + 1) * 30_000,
+      })),
+    };
+    const fixturePath = join(artifacts, 'layout-fixture.json');
+    await writeFile(
+      fixturePath,
+      JSON.stringify({ format: 'resonanz-session', version: 1, session: fixture }),
+    );
+    fixtureId = (await selectFile(fixturePath)).id;
+    for (let index = 0; index < 20; index++) {
+      const collection = await request('collections.create', {
+        name: `Layout collection ${index + 1} — controlled scroll fixture`,
+      });
+      collectionIds.push(collection.id);
+    }
+    const large = { width: 1440, height: 900 };
+    const compact = { width: 960, height: 640 };
+    const routes = [
+      {
+        name: 'library',
+        route: '#/',
+        marker: 'library-view',
+        frames: '[test-id="library-view"], .session-list-pane, .session-preview',
+        actions: '.filters, .preview-actions, .preview-footer',
+      },
+      {
+        name: 'landscape',
+        route: '#/',
+        marker: 'library-view',
+        frames: '[test-id="library-view"]',
+        actions: '.week-navigation',
+      },
+      {
+        name: 'ring',
+        route: `#/session/${fixtureId}?tab=ring`,
+        marker: 'session-ring-split',
+        frames: '[test-id="session-view"], .ring-stage, .ring-sidebar',
+      },
+      {
+        name: 'analysis',
+        route: `#/session/${fixtureId}?tab=analysis`,
+        marker: 'session-analysis-split',
+        frames:
+          '[test-id="session-view"], .analysis-pane, .transcript-pane, resonanz-transcript-panel',
+        actions: '[test-id="recording-player"]',
+      },
+      {
+        name: 'questions',
+        route: `#/session/${fixtureId}?tab=questions`,
+        marker: 'session-questions',
+        frames: '[test-id="session-view"], .question-pane, .evidence-sidebar',
+        actions: '.context-bar, .question-composer',
+      },
+      {
+        name: 'recovery',
+        route: `#/session/${fixtureId}?tab=processing`,
+        marker: 'session-recovery',
+        frames: '[test-id="session-view"], .recovery > main, .recovery > resonanz-transcript-panel',
+        actions: '.recovery > main > resonanz-pipeline-steps',
+      },
+      {
+        name: 'settings',
+        route: '#/settings',
+        marker: 'settings-view',
+        frames: '.settings, .settings-sidebar, .settings-main',
+        actions:
+          '.settings-sidebar > .window-drag-region, [test-id="settings-search"], .settings-sidebar > mosaik-button, .settings-main > header',
+      },
+      {
+        name: 'onboarding',
+        route: '#/onboarding',
+        marker: 'onboarding-view',
+        frames: '.setup, .setup-body, .setup-main, .setup-body > aside',
+        actions: '.setup-main > footer, .setup-later',
+      },
+      {
+        name: 'voice',
+        route: `#/voice/${fixtureId}`,
+        marker: 'voice-view',
+        frames: '.voice, .voice-stage',
+        actions: '.voice-footer, .voice-controls > *',
+      },
+    ];
+
+    for (const uiLanguage of ['en', 'de']) {
+      for (const appearance of ['light', 'dark']) {
+        await request('settings.save', { uiLanguage, appearance });
+        await waitFor(
+          () =>
+            page.evaluate(
+              ({ uiLanguage, appearance }) =>
+                document.documentElement.lang === uiLanguage &&
+                document.documentElement.dataset.appearance === appearance,
+              { uiLanguage, appearance },
+            ),
+          'layout locale and theme applied',
+        );
+        for (const size of [large, compact]) {
+          for (const route of routes) {
+            await navigate(route.route, route.marker, size);
+            if (route.name === 'library') {
+              await control('tab-list').click();
+              await control(`session-row-${fixtureId}`).click();
+              await control('preview-open').waitFor({ state: 'visible' });
+            }
+            if (route.name === 'landscape') {
+              await control('tab-landscape').click();
+              await page.locator('.landscape').waitFor({ state: 'visible' });
+            }
+            const description = `${route.name}, ${uiLanguage}/${appearance}, ${size.width}x${size.height}`;
+            await assertFrame(description, route.frames);
+            if (route.actions) await assertInside(route.actions, description);
+            if (route.name === 'analysis') {
+              await scrollBody(
+                '.analysis-content',
+                '.section-heading, [test-id="recording-player"]',
+              );
+              await scrollBody(
+                'resonanz-transcript-panel .body',
+                'resonanz-transcript-panel > header, resonanz-transcript-panel > .search',
+              );
+            }
+            if (route.name === 'ring') {
+              await page.locator('.chapter-list button').first().click();
+              await scrollBody('.ring-details', '.digest-card, .section-heading, .ring-tools');
+            }
+            if (route.name === 'questions')
+              await scrollBody('[test-id="question-messages"]', '.context-bar, .question-composer');
+            if (route.name === 'library') {
+              await scrollBody('[test-id="preview-content"]', '.preview-actions, .preview-footer');
+              await scrollBody(
+                '[test-id="sidebar-collections"]',
+                '.sidebar > .window-drag-region, .sidebar > .brand, .primary-nav, .assistant-card',
+              );
+            }
+            if (route.name === 'settings')
+              await scrollBody(
+                '[test-id="settings-content"]',
+                '.settings-sidebar > .window-drag-region, [test-id="settings-search"], .settings-sidebar > mosaik-button, .settings-main > header',
+              );
+            if (route.name === 'landscape')
+              await scrollBody('.landscape', '.window-toolbar', false);
+            if (route.name === 'voice') {
+              const boxes = await page.locator('.voice-stage').evaluate((stage) => {
+                const ring = stage.querySelector('.voice-ring').getBoundingClientRect();
+                const area = stage.getBoundingClientRect();
+                return {
+                  ring: { x: ring.x, y: ring.y, right: ring.right, bottom: ring.bottom },
+                  area: { x: area.x, y: area.y, right: area.right, bottom: area.bottom },
+                };
+              });
+              assert(
+                boxes.ring.x >= boxes.area.x - 1 &&
+                  boxes.ring.y >= boxes.area.y - 1 &&
+                  boxes.ring.right <= boxes.area.right + 1 &&
+                  boxes.ring.bottom <= boxes.area.bottom + 1,
+                `${description}: ring fits actual stage`,
+              );
+            }
+            if (
+              (uiLanguage === 'en' && appearance === 'light' && size === large) ||
+              (uiLanguage === 'de' && appearance === 'dark' && size === compact)
+            ) {
+              await captureDiagnosticImage(
+                `layout-${route.name}-${uiLanguage}-${appearance}-${size.width}x${size.height}.png`,
+              );
+            }
+          }
+        }
+      }
+    }
+
+    await navigate('#/', 'library-view', large);
+    await control(`session-row-${fixtureId}`).click();
+    await adjustSplit('workspace-navigation');
+    await adjustSplit('library-preview');
+    // Wide windows can still have narrow lists after dragging both adjacent panes.
+    await (await splitSeparator('workspace-navigation')).press('End');
+    await (await splitSeparator('library-preview')).press('Home');
+    await control(`session-row-${fixtureId}`).hover();
+    const rowTitle = control(`session-row-${fixtureId}`).locator('.row-text');
+    assert((await rowTitle.boundingBox()).width > 80, 'Narrow list retains readable title space');
+    await assertInside(`[test-id="star-${fixtureId}"]`, 'Narrow list favourite action');
+    await assertFrame('Narrow list at wide window', '.session-list-pane, .session-preview');
+    // Continue restoration checks with the newly chosen legal limits.
+    const boundedNavigation = await paneWidths('workspace-navigation');
+    const boundedPreview = await paneWidths('library-preview');
+    await navigate(`#/session/${fixtureId}?tab=ring`, 'session-ring-split', large);
+    await navigate('#/', 'library-view', large);
+    await control(`session-row-${fixtureId}`).click();
+    await assertRestoredSplit('workspace-navigation', boundedNavigation);
+    await assertRestoredSplit('library-preview', boundedPreview);
+    await page.reload();
+    await control('library-view').waitFor({ state: 'visible' });
+    await resize(large);
+    await control(`session-row-${fixtureId}`).click();
+    await assertRestoredSplit('workspace-navigation', boundedNavigation);
+    await assertRestoredSplit('library-preview', boundedPreview);
+    for (const [tab, key, marker] of [
+      ['ring', 'session-ring', 'session-ring-split'],
+      ['analysis', 'session-analysis', 'session-analysis-split'],
+      ['questions', 'session-questions', 'session-questions'],
+      ['processing', 'session-recovery', 'session-recovery'],
+    ]) {
+      const route = `#/session/${fixtureId}?tab=${tab}`;
+      await navigate(route, marker, large);
+      const preferred = await adjustSplit(key);
+      await navigate('#/', 'library-view', large);
+      await navigate(route, marker, large);
+      await assertRestoredSplit(key, preferred);
+      await page.reload();
+      await control(marker).waitFor({ state: 'visible' });
+      await resize(large);
+      await assertRestoredSplit(key, preferred);
+      await resize(compact);
+      assert(
+        (await paneWidths(key)).every((width) => width >= 200),
+        `${key}: compact resize preserves both panes`,
+      );
+      await assertFrame(`${key}: compact after stored resize`);
+      if (key === 'session-analysis') {
+        await page.evaluate((pane) => {
+          localStorage.setItem(`resonanz.layout.${pane}.pixels`, '5000');
+        }, key);
+        await page.reload();
+        await control(marker).waitFor({ state: 'visible' });
+        await resize(compact);
+        assert(
+          (await paneWidths(key)).every((width) => width >= 200),
+          'A preference larger than the compact window cannot collapse either pane',
+        );
+        await assertFrame('Compact restoration of oversized pane preference');
+      }
+    }
+
+    await navigate('#/onboarding', 'onboarding-view', compact);
+    for (let step = 0; step < 3; step++) {
+      await assertInside(
+        '.setup-main > footer, [test-id="onboarding-next"]',
+        `onboarding step ${step + 1}`,
+      );
+      await scrollBody(
+        '[test-id="onboarding-content"]',
+        '.setup-titlebar, .setup-main > footer',
+        false,
+      );
+      if (step < 2) {
+        const previous = await control('onboarding-content').innerText();
+        await control('onboarding-next').click();
+        await waitFor(
+          async () => (await control('onboarding-content').innerText()) !== previous,
+          `onboarding step ${step + 2}`,
+        );
+      }
+    }
+    await navigate(`#/session/${fixtureId}?tab=ring`, 'session-ring-split', compact);
+    await menuAction('delete-session');
+    await control('delete-session-content').waitFor({ state: 'visible' });
+    const modalBounds = await page.locator('resonanz-delete-dialog').boundingBox();
+    assert.equal(modalBounds.x, 0, 'Session modal covers navigation as well as the workspace');
+    assert.equal(modalBounds.width, compact.width, 'Session modal covers the native window width');
+    await assertInside('resonanz-delete-dialog footer > *', 'long-title deletion dialog actions');
+    await scrollBody('[test-id="delete-session-content"]', 'resonanz-delete-dialog footer', false);
+    await captureDiagnosticImage('layout-delete-dialog.png');
+    await page.keyboard.press('Escape');
+    await control('delete-session-content').waitFor({ state: 'hidden' });
+    await navigate('#/settings', 'settings-view', compact);
+    await control('clear-library').click();
+    await control('confirmation-content').waitFor({ state: 'visible' });
+    await assertInside('resonanz-confirmation-dialog footer > *', 'confirmation dialog actions');
+    await scrollBody(
+      '[test-id="confirmation-content"]',
+      'resonanz-confirmation-dialog footer',
+      false,
+    );
+    await captureDiagnosticImage('layout-confirmation-dialog.png');
+    await control('cancel-confirmation').click();
+    await control('confirmation-content').waitFor({ state: 'hidden' });
+    await writeFile(
+      join(artifacts, 'layout-evidence.json'),
+      `${JSON.stringify(evidence, null, 2)}\n`,
+    );
+    passed(
+      'native desktop layout: 1440x900/960x640, English/German, light/dark, fixed chrome/actions, isolated content scrolling, six keyboard/pointer splitters with remount/reload persistence, setup steps and dialogs',
+    );
+  } catch (error) {
+    await captureDiagnosticImage('layout-failure.png').catch(() => undefined);
+    await writeFile(join(artifacts, 'layout-evidence.json'), JSON.stringify(evidence, null, 2));
+    throw error;
+  } finally {
+    try {
+      await request('settings.save', {
+        uiLanguage: before.settings.uiLanguage ?? 'en',
+        appearance: before.settings.appearance ?? 'system',
+      });
+      if (fixtureId) await request('sessions.delete', { sessionId: fixtureId });
+      for (const collectionId of collectionIds)
+        await request('collections.delete', { collectionId });
+      await page.evaluate((saved) => {
+        for (const key of Object.keys(localStorage))
+          if (key.startsWith('resonanz.layout.')) localStorage.removeItem(key);
+        for (const [key, value] of Object.entries(saved)) localStorage.setItem(key, value);
+      }, originalLayout);
+      await navigate(
+        `#/session/${recordedId}?tab=analysis`,
+        'session-analysis-split',
+        originalSize,
+      );
+      await page.reload();
+      await control('session-analysis-split').waitFor({ state: 'visible' });
+      await resize(originalSize);
+    } finally {
+      try {
+        await nativeWindow.evaluate((window, previous) => {
+          window.webContents.setBackgroundThrottling(previous);
+        }, backgroundThrottling);
+      } finally {
+        await nativeWindow.dispose();
+      }
+    }
+  }
+}
+
 async function selectFile(path) {
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
@@ -344,13 +973,21 @@ async function selectFile(path) {
   return request('sessions.get', { sessionId: imported.id });
 }
 
-async function exportFile(format, path, button) {
+async function exportFile(format, path, button, expectedBytes) {
   if (!(await button.isVisible())) await page.locator('.session-menu > summary').click();
   await application.evaluate(({ dialog }, filePath) => {
     dialog.showSaveDialog = async () => ({ canceled: false, filePath });
   }, path);
   await button.click();
-  await waitFor(async () => (await stat(path).catch(() => null))?.size > 0, `${format} export`);
+  // The UI click does not await the native export promise. copyFile can expose a nonempty
+  // destination before the final chunk, so audio checks must wait for its complete size.
+  await waitFor(
+    async () => {
+      const bytes = (await stat(path).catch(() => null))?.size;
+      return expectedBytes === undefined ? bytes > 0 : bytes === expectedBytes;
+    },
+    `${format} export${expectedBytes === undefined ? '' : ` (${expectedBytes} bytes)`}`,
+  );
 }
 
 try {
@@ -539,6 +1176,7 @@ try {
   );
   assert.equal((await session()).transcript[0].endMs, recording.durationMs);
   await verifyProcessingStatus();
+  await verifyDesktopLayout();
   await captureDiagnosticImage('session.png');
   const jsonPath = join(artifacts, 'session.json');
   const markdownPath = join(artifacts, 'session.md');
@@ -553,6 +1191,7 @@ try {
     'audio',
     audioPath,
     page.getByRole('button', { name: 'Audio exportieren', exact: true }),
+    recording.audioBytes,
   );
   assert.equal((await stat(audioPath)).size, recording.audioBytes);
   assert.equal((await readFile(audioPath)).subarray(0, 4).toString('hex'), '1a45dfa3');
@@ -619,6 +1258,7 @@ try {
   );
   const conversationInstructions =
     'Sprich auf Deutsch, kurz und klar. Dies ist ein Einrichtungstest.';
+  process.stdout.write('CHECK native preferences: conversation instructions\n');
   const speechAdvanced = page.locator('.speech-advanced');
   if ((await speechAdvanced.getAttribute('open')) === null)
     await speechAdvanced.locator('summary').click();
@@ -626,6 +1266,7 @@ try {
   const connectionAdvanced = page.locator('.advanced:not(.speech-advanced)');
   if ((await connectionAdvanced.getAttribute('open')) === null)
     await connectionAdvanced.locator(':scope > summary').click();
+  process.stdout.write('CHECK native preferences: save settings\n');
   await control('save-settings').click();
   await waitFor(
     async () =>
@@ -635,6 +1276,7 @@ try {
   );
   assert.equal(await control('api-key').count(), 0);
   assert.equal((await request('bootstrap.get')).settings.autoTranscribe, false);
+  process.stdout.write('CHECK native preferences: silence and pause annotations\n');
   await control('silence-reminder').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.silenceReminder === true,
@@ -645,6 +1287,7 @@ try {
     async () => (await request('bootstrap.get')).settings.markPausesInTranscript === true,
     'recording pause annotation preference',
   );
+  process.stdout.write('CHECK native preferences: speech rate and retention\n');
   const rate = control('speech-rate').getByRole('slider');
   await rate.press('End');
   await waitFor(
@@ -764,6 +1407,7 @@ try {
   await writeFile(join(artifacts, 'evidence.json'), `${JSON.stringify(evidence, null, 2)}\n`);
   process.stdout.write(`Desktop verification passed. Artifacts: ${artifacts}\n`);
 } catch (error) {
+  process.stderr.write(`${error?.stack ?? String(error)}\n`);
   const ui =
     page && !page.isClosed()
       ? await page

@@ -880,5 +880,11 @@
   "loc.resonanz.voice.title": "Sprich mit Resonanz",
   "loc.resonanz.voice.type": "Tippen statt sprechen",
   "loc.resonanz.voice.what": "Was möchtest du wissen?",
-  "loc.resonanz.voice.withoutLooking": "ohne hinzusehen"
+  "loc.resonanz.voice.withoutLooking": "ohne hinzusehen",
+  "loc.resonanz.layout.resizeNavigation": "Navigation und Arbeitsbereich vergrößern oder verkleinern",
+  "loc.resonanz.layout.resizeLibrary": "Sitzungsliste und Vorschau vergrößern oder verkleinern",
+  "loc.resonanz.layout.resizeRing": "Sitzungsübersicht und Kapitel vergrößern oder verkleinern",
+  "loc.resonanz.layout.resizeAnalysis": "Analyse und Transkript vergrößern oder verkleinern",
+  "loc.resonanz.layout.resizeQuestions": "Fragen und Belege vergrößern oder verkleinern",
+  "loc.resonanz.layout.resizeRecovery": "Verarbeitungsdetails und Transkript vergrößern oder verkleinern"
 }

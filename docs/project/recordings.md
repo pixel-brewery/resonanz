@@ -37,6 +37,12 @@ views share the same session, audio player and evidence selection. Actual decode
 audio peaks form the waveform; missing audio does not receive invented peaks.
 Select a chapter or marker to inspect context and play the original passage.
 
+Drag the dividers beside the navigation, library preview and session side panes to
+adjust their widths. A focused divider also supports arrow keys, Shift+arrow keys
+and Home/End. Resonanz remembers the widths on this device and keeps both panes
+usable when the window gets smaller. Toolbars, playback, question controls and
+dialog actions stay visible while the corresponding content scrolls.
+
 Transcribe a completed recording using installed system recognition. On Windows,
 file transcription accepts WAV input up to 64 MiB, roughly 35 minutes at 16 kHz
 mono. The required recognition language must be installed. A failed transcript

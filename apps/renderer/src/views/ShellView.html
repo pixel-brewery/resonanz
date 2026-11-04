@@ -1,6 +1,17 @@
 <div class="app-shell" [class.focus-mode]="presenter.focusMode()">
-  <div class="app-body">
-    <aside class="sidebar" [attr.aria-label]="'loc.resonanz.nav.main' | translate">
+  <mosaik-split
+    class="app-body"
+    test-id="workspace-split"
+    resonanzSplitLayout="workspace-navigation"
+    splitInitialPosition="236px"
+    [splitLayoutActive]="!presenter.focusMode()"
+    [intl]="{ resizeLabel: ('loc.resonanz.layout.resizeNavigation' | translate) }"
+    lock="start"
+    min="200px"
+    max="27%"
+    fit="both"
+  >
+    <aside slot="start" class="sidebar" [attr.aria-label]="'loc.resonanz.nav.main' | translate">
       <div class="window-drag-region" part="window-drag-region" aria-hidden="true"></div>
       <a class="brand" routerLink="/"><resonanz-glyph [tile]="true" /><span>Resonanz</span></a>
       <button class="new-session" test-id="new-recording" (click)="presenter.openCapture()">
@@ -49,68 +60,69 @@
           horizontalContentAlignment="left"
         />
       </nav>
-      <details class="organization" open>
-        <summary>{{ 'loc.resonanz.nav.organize' | translate }}</summary>
-        <mosaik-button
-          routerLink="/"
-          [queryParams]="{ scope: 'favorites' }"
-          test-id="nav-favorites"
-          [label]="'loc.resonanz.nav.favorites' | translate"
-          icon="star"
-          appearance="plain"
-          fit="width"
-          horizontalContentAlignment="left"
-        />
-        <mosaik-button
-          routerLink="/"
-          [queryParams]="{ scope: 'conversations' }"
-          [label]="'loc.resonanz.nav.conversations' | translate"
-          icon="live"
-          appearance="plain"
-          fit="width"
-          horizontalContentAlignment="left"
-        />
-        <div class="collection-heading">
-          <span>{{ 'loc.resonanz.nav.collections' | translate }}</span
-          ><mosaik-button
-            test-id="add-collection"
-            icon="add"
-            size="small"
-            appearance="plain"
-            [attr.aria-label]="'loc.resonanz.nav.addCollection' | translate"
-            (click)="presenter.creatingCollection.set(!presenter.creatingCollection())"
-          />
-        </div>
-        @if (presenter.creatingCollection()) {
-          <div class="collection-editor" test-id="collection-form">
-            <mosaik-textbox
-              test-id="collection-name"
-              [label]="'loc.resonanz.nav.collectionName' | translate"
-              [formField]="presenter.collectionForm.name"
-              (keydown.enter)="presenter.createCollection()"
-            /><mosaik-button
-              test-id="save-collection"
-              [label]="'loc.resonanz.nav.create' | translate"
-              appearance="soft"
-              [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
-              (click)="presenter.createCollection()"
-            />
-          </div>
-        }
-        @for (collection of presenter.library.collections(); track collection.id) {
+      <div class="sidebar-scroll" test-id="sidebar-collections">
+        <details class="organization" open>
+          <summary>{{ 'loc.resonanz.nav.organize' | translate }}</summary>
           <mosaik-button
             routerLink="/"
-            [queryParams]="{ collection: collection.id }"
-            [attr.test-id]="'collection-' + collection.id"
-            [label]="collection.name"
-            icon="folder"
+            [queryParams]="{ scope: 'favorites' }"
+            test-id="nav-favorites"
+            [label]="'loc.resonanz.nav.favorites' | translate"
+            icon="star"
             appearance="plain"
             fit="width"
             horizontalContentAlignment="left"
           />
-        }
-      </details>
-      <div class="sidebar-spacer"></div>
+          <mosaik-button
+            routerLink="/"
+            [queryParams]="{ scope: 'conversations' }"
+            [label]="'loc.resonanz.nav.conversations' | translate"
+            icon="live"
+            appearance="plain"
+            fit="width"
+            horizontalContentAlignment="left"
+          />
+          <div class="collection-heading">
+            <span>{{ 'loc.resonanz.nav.collections' | translate }}</span
+            ><mosaik-button
+              test-id="add-collection"
+              icon="add"
+              size="small"
+              appearance="plain"
+              [attr.aria-label]="'loc.resonanz.nav.addCollection' | translate"
+              (click)="presenter.creatingCollection.set(!presenter.creatingCollection())"
+            />
+          </div>
+          @if (presenter.creatingCollection()) {
+            <div class="collection-editor" test-id="collection-form">
+              <mosaik-textbox
+                test-id="collection-name"
+                [label]="'loc.resonanz.nav.collectionName' | translate"
+                [formField]="presenter.collectionForm.name"
+                (keydown.enter)="presenter.createCollection()"
+              /><mosaik-button
+                test-id="save-collection"
+                [label]="'loc.resonanz.nav.create' | translate"
+                appearance="soft"
+                [disabled]="presenter.collectionForm().invalid() || presenter.savingCollection()"
+                (click)="presenter.createCollection()"
+              />
+            </div>
+          }
+          @for (collection of presenter.library.collections(); track collection.id) {
+            <mosaik-button
+              routerLink="/"
+              [queryParams]="{ collection: collection.id }"
+              [attr.test-id]="'collection-' + collection.id"
+              [label]="collection.name"
+              icon="folder"
+              appearance="plain"
+              fit="width"
+              horizontalContentAlignment="left"
+            />
+          }
+        </details>
+      </div>
       <div class="assistant-card">
         <span class="caption">{{
           presenter.library.capabilities()?.platform === 'darwin'
@@ -143,7 +155,7 @@
         }
       </div>
     </aside>
-    <div class="workspace">
+    <div slot="end" class="workspace">
       @if (!presenter.focusMode()) {
         <!-- The unified toolbar is the window's title bar (Symphony's window chrome): back and
              forward, the screen's title and subtitle and the screen's contextual actions. Every
@@ -201,7 +213,7 @@
         />
       }
     </div>
-  </div>
+  </mosaik-split>
   @if (presenter.statusBarVisible()) {
     <resonanz-status-bar />
   }

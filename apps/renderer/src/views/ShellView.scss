@@ -10,24 +10,25 @@
   overflow: hidden;
 }
 .app-body {
-  display: flex;
   flex: 1;
   min-height: 0;
   min-width: 0;
 }
 .sidebar {
-  flex: 0 0 236px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 0 12px 14px;
-  border-right: 1px solid var(--mosaik-scheme-highlight);
   background: color-mix(
     in oklab,
     var(--mosaik-scheme-highlight) 40%,
     var(--mosaik-scheme-background)
   );
-  overflow-y: auto;
+  overflow: hidden;
 }
 .window-drag-region {
   // Spans the sidebar's padding so its whole top edge moves the window.
@@ -75,9 +76,15 @@
   background: transparent;
   border-radius: 8px;
 }
-.sidebar-spacer {
+.sidebar-scroll {
   flex: 1;
-  min-height: 12px;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.sidebar > :not(.sidebar-scroll) {
+  flex-shrink: 0;
 }
 .assistant-card {
   display: flex;
@@ -97,7 +104,10 @@
 }
 .assistant-row > span:nth-child(2) {
   flex: 1;
+  min-width: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .assistant-row .caption {
   font-size: 10px;
@@ -106,15 +116,19 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 .window-toolbar {
+  container-type: inline-size;
+  container-name: window-toolbar;
   display: flex;
   flex: 0 0 52px;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   height: 52px;
   padding: 0 16px 0 8px;
   border-bottom: 1px solid var(--mosaik-scheme-highlight);
@@ -146,7 +160,8 @@
 }
 .window-toolbar-actions {
   display: flex;
-  flex: none;
+  min-width: 0;
+  flex: 0 1 auto;
   align-items: center;
   gap: 10px;
 }
@@ -194,9 +209,21 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+.focus-mode .app-body {
+  --split-divider-width: 0px;
+}
+.focus-mode .app-body::part(divider) {
+  visibility: hidden;
+}
 .focus-mode .sidebar {
   display: none;
 }
 :host.tray-mode .app-shell {
   display: none;
+}
+@container window-toolbar (max-width: 860px) {
+  .window-toolbar-actions {
+    --resonanz-tab-padding: 10px;
+    gap: 6px;
+  }
 }

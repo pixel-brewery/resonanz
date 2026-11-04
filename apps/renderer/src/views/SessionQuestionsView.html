@@ -1,6 +1,16 @@
 @if (presenter.session(); as session) {
-  <div class="question-layout" test-id="session-questions">
-    <section class="question-pane">
+  <mosaik-split
+    class="question-layout"
+    test-id="session-questions"
+    resonanzSplitLayout="session-questions"
+    splitInitialPosition="320px"
+    min="260px"
+    max="45%"
+    lock="end"
+    fit="both"
+    [intl]="{ resizeLabel: ('loc.resonanz.layout.resizeQuestions' | translate) }"
+  >
+    <section slot="start" class="question-pane">
       <div class="context-bar">
         <span class="context-icon" aria-hidden="true">◎</span>
         <p>
@@ -227,30 +237,32 @@
         }
       </div>
     </section>
-    <aside class="evidence-sidebar">
+    <aside slot="end" class="evidence-sidebar">
       <h2>{{ 'loc.resonanz.question.evidence' | translate }}</h2>
       <p class="caption">{{ 'loc.resonanz.question.quoteContext' | translate }}</p>
-      @if (presenter.selectedEvidence(); as evidence) {
-        <resonanz-evidence-panel
-          [quote]="evidence.quote"
-          [before]="presenter.transcriptContext().before"
-          [after]="presenter.transcriptContext().after"
-          [atMs]="evidence.atMs"
-          [durationMs]="session.durationMs"
-          [audioAvailable]="session.audioAvailable && !presenter.capturing()"
-          [kind]="presenter.selectedMarker()?.kind ?? 'moment'"
-          (play)="presenter.playExcerpt(evidence)"
-          (transcript)="presenter.selectTab('analysis')"
-        />
-      } @else {
-        <div class="outline-card evidence-empty">
-          <p class="caption">{{ 'loc.resonanz.question.chooseEvidence' | translate }}</p>
+      <div class="evidence-content">
+        @if (presenter.selectedEvidence(); as evidence) {
+          <resonanz-evidence-panel
+            [quote]="evidence.quote"
+            [before]="presenter.transcriptContext().before"
+            [after]="presenter.transcriptContext().after"
+            [atMs]="evidence.atMs"
+            [durationMs]="session.durationMs"
+            [audioAvailable]="session.audioAvailable && !presenter.capturing()"
+            [kind]="presenter.selectedMarker()?.kind ?? 'moment'"
+            (play)="presenter.playExcerpt(evidence)"
+            (transcript)="presenter.selectTab('analysis')"
+          />
+        } @else {
+          <div class="outline-card evidence-empty">
+            <p class="caption">{{ 'loc.resonanz.question.chooseEvidence' | translate }}</p>
+          </div>
+        }
+        <div class="outline-card explanation">
+          <h3>{{ 'loc.resonanz.question.how' | translate }}</h3>
+          <p class="caption">{{ 'loc.resonanz.analysis.evidencePolicy' | translate }}</p>
         </div>
-      }
-      <div class="outline-card explanation">
-        <h3>{{ 'loc.resonanz.question.how' | translate }}</h3>
-        <p class="caption">{{ 'loc.resonanz.analysis.evidencePolicy' | translate }}</p>
       </div>
     </aside>
-  </div>
+  </mosaik-split>
 }

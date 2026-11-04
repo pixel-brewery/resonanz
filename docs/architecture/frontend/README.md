@@ -37,6 +37,23 @@ Onboarding keep their own title bars. Every title bar carries
 `part="window-drag-region"`; one global rule makes all of it drag the window and
 exempts only controls (buttons, fields, tabs, menus, `part="window-no-drag"`).
 
+The workspace navigation, library preview and Ring, Analysis, Questions and Recovery
+side panes use the public Mosaik Split control. `SplitLayoutDirective` restores
+device-local pane preferences after the control has measured its panels; Mosaik
+owns dragging, keyboard interaction and the minimum/maximum sizes. Locked panes
+retain pixel widths. Initialization, temporary focus-mode collapse and window
+resizing do not overwrite the user's preference. A size saved in a larger window
+cannot collapse the other pane when restored in a compact window. These preferences
+are optional local UI state, outside session files and native settings.
+
+Window frames, toolbars, pane headings and main pane controls stay fixed. Session
+lists, preview content, analysis, transcript entries, question history and evidence
+each have an explicitly bounded vertical scroll body. The navigation scrolls its organization and collections; Settings pins its search and bottom actions around the navigation.
+Dialogs pin confirmation buttons around their scroll body. Voice uses one response
+scroll body instead of separate question/answer/quote scrollers. Ring and Voice
+visualizations size against their actual stage width and height. Long source text
+wraps, and evidence selection only scrolls the transcript body.
+
 `StatusBarView` spans the bottom of the window on every surface except setup:
 
 - the running capture (recording dot, elapsed time, live-conversation stage, pause,

@@ -25,10 +25,8 @@
         (valueChange)="presenter.selectTab($event)"
       /><mosaik-button
         [routerLink]="['/voice', session.id]"
-        [label]="
-          (presenter.tab() === 'ring' ? 'loc.resonanz.session.talk' : 'loc.resonanz.nav.voice')
-            | translate
-        "
+        [label]="'loc.resonanz.nav.voice' | translate"
+        [attr.aria-label]="'loc.resonanz.session.talk' | translate"
         icon="mic"
         [appearance]="presenter.tab() === 'ring' ? 'solid' : 'outline'"
       />

@@ -71,30 +71,38 @@
           ></span
           >{{ presenter.statusLabel() }}</span
         >
-        @if (presenter.question()) {
-          <p class="spoken-question">„{{ presenter.question() }}“</p>
-        }
-        @if (
-          presenter.state() === 'answer' ||
-          presenter.state() === 'gap' ||
-          presenter.state() === 'playing'
-        ) {
-          <h2 class="spoken-answer">{{ presenter.answer() }}</h2>
-          @if (presenter.state() === 'playing' && presenter.activeEvidence(); as evidence) {
-            <p class="original-quote">
-              {{
-                intl.t('loc.resonanz.voice.originalQuote', evidence.atMs | duration, evidence.quote)
-              }}
-            </p>
+        <div class="voice-copy" test-id="voice-response-content">
+          @if (presenter.question()) {
+            <p class="spoken-question">„{{ presenter.question() }}“</p>
           }
-        } @else if (presenter.state() === 'idle') {
-          <h2 class="spoken-answer">
-            {{
-              (presenter.session.session() ? 'loc.resonanz.voice.hint' : 'loc.resonanz.voice.start')
-                | translate
-            }}
-          </h2>
-        }
+          @if (
+            presenter.state() === 'answer' ||
+            presenter.state() === 'gap' ||
+            presenter.state() === 'playing'
+          ) {
+            <h2 class="spoken-answer">{{ presenter.answer() }}</h2>
+            @if (presenter.state() === 'playing' && presenter.activeEvidence(); as evidence) {
+              <p class="original-quote">
+                {{
+                  intl.t(
+                    'loc.resonanz.voice.originalQuote',
+                    evidence.atMs | duration,
+                    evidence.quote
+                  )
+                }}
+              </p>
+            }
+          } @else if (presenter.state() === 'idle') {
+            <h2 class="spoken-answer">
+              {{
+                (presenter.session.session()
+                  ? 'loc.resonanz.voice.hint'
+                  : 'loc.resonanz.voice.start'
+                ) | translate
+              }}
+            </h2>
+          }
+        </div>
       </div>
     </resonanz-radial-timeline>
   </div>
