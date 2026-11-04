@@ -5,6 +5,34 @@ and the provenance-verified upstream audio core. An additional API key or cloud 
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
 
+## Native desktop layout: 2026-11-04
+
+The built Electron app on macOS ARM64 passed the controlled desktop suite with
+isolated synthetic recordings and an unauthenticated test profile. Its layout group
+exercises nine views, including both library presentations, at 1440×900 and 960×640
+in English/German and light/dark mode: **72 view/size/language/theme combinations**.
+Long imported transcripts, summaries, chapter titles and question history plus
+twenty temporary collections provide actual overflow. Geometry assertions verify
+fixed window frames/actions, usable content height, vertical content scrolling and
+no horizontal overflow. The six Mosaik splitters were resized by keyboard and
+pointer, restored after navigation/reload and checked again in a compact window.
+An oversized 5,000-pixel stored pane preference also restores without collapsing
+either pane; modal bounds cover the full native window, including navigation.
+Setup steps and confirmation/deletion dialogs retain their action controls.
+
+Native screenshots were visually reviewed, including the compact German dark
+session and weekly views. The weekly layout no longer forces a 680-pixel content
+minimum; compact toolbars reserve room for their title and date. The Voice check
+covers its idle ring within the actual stage. Long spoken responses, real speech
+recognition and provider inference were not exercised by this layout group.
+Fixture sessions/collections and preference changes are cleaned up by the runner;
+the task-owned Electron instance exits. This is source-app layout evidence, not a
+new packaged-app or Windows result.
+
+The final successful layout run is recorded under
+`.codex-work/desktop-smoke-bafBuG/`, including `layout-evidence.json` and native PNGs.
+Earlier real media/account evidence below remains separate.
+
 ## Long macOS recording recovery: 2026-11-04
 
 The earlier 0.1.6 single-request file path failed on an owner-authorized 38-minute

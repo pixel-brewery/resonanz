@@ -10,7 +10,7 @@ div {
   background: var(--mosaik-scheme-highlight);
 }
 button {
-  padding: 5px 14px;
+  padding: 5px var(--resonanz-tab-padding, 14px);
   border: 0;
   border-radius: 7px;
   background: transparent;

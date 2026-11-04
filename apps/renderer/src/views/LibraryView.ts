@@ -20,6 +20,8 @@ import { SegmentedTabsComponent } from '../components/segmented-tabs/SegmentedTa
 import { WeekLandscapeComponent } from '../components/week-landscape/WeekLandscapeComponent';
 import { DeleteDialogComponent } from '../components/delete-dialog/DeleteDialogComponent';
 import { TopicThreadsComponent } from '../components/topic-threads/TopicThreadsComponent';
+import { SplitComponent } from '@pixel-brewery/mosaik-elements-angular/components/split';
+import { SplitLayoutDirective } from '../components/split-layout/SplitLayoutDirective';
 import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolbarDirective';
 // #endregion
 
@@ -48,6 +50,8 @@ import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolb
     TextBoxComponent,
     DurationPipe,
     WindowToolbarDirective,
+    SplitComponent,
+    SplitLayoutDirective,
   ],
   templateUrl: './LibraryView.html',
   styleUrl: './LibraryView.scss',

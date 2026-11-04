@@ -1,3 +1,5 @@
+import { SplitComponent } from '@pixel-brewery/mosaik-elements-angular/components/split';
+import { SplitLayoutDirective } from '../components/split-layout/SplitLayoutDirective';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -23,6 +25,8 @@ import { isTranslationKey } from '@resonanz/intl';
   selector: 'resonanz-session-recovery',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    SplitComponent,
+    SplitLayoutDirective,
     RouterLink,
     ButtonComponent,
     IconComponent,

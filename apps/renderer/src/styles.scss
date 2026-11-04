@@ -31,6 +31,12 @@ body {
 * {
   box-sizing: border-box;
 }
+mosaik-split {
+  --split-divider-width: 1px;
+  --split-divider-hit-area: 12px;
+  min-width: 0;
+  min-height: 0;
+}
 button,
 input,
 textarea {

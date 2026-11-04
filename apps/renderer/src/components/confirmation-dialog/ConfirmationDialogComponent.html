@@ -8,22 +8,24 @@
   (modalDismiss)="cancel()"
   [attr.aria-busy]="busy()"
 >
-  <span class="warning-icon" aria-hidden="true">!</span>
-  <h2 [id]="titleId">{{ title() | message }}</h2>
-  <p [id]="descriptionId">{{ description() | message }}</p>
-  @if (details().length) {
-    <ul>
-      @for (detail of details(); track $index) {
-        <li>{{ detail | message }}</li>
-      }
-    </ul>
-  }
-  @if (warning()) {
-    <p class="caption">{{ warning() | message }}</p>
-  }
-  @if (blockedReason()) {
-    <p class="blocked" role="status">{{ blockedReason() | message }}</p>
-  }
+  <div class="dialog-content" test-id="confirmation-content">
+    <span class="warning-icon" aria-hidden="true">!</span>
+    <h2 [id]="titleId">{{ title() | message }}</h2>
+    <p [id]="descriptionId">{{ description() | message }}</p>
+    @if (details().length) {
+      <ul>
+        @for (detail of details(); track $index) {
+          <li>{{ detail | message }}</li>
+        }
+      </ul>
+    }
+    @if (warning()) {
+      <p class="caption">{{ warning() | message }}</p>
+    }
+    @if (blockedReason()) {
+      <p class="blocked" role="status">{{ blockedReason() | message }}</p>
+    }
+  </div>
   <footer>
     <mosaik-button
       test-id="cancel-confirmation"

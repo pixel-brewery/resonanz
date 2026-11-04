@@ -14,14 +14,24 @@
 }
 section {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: min(560px, calc(100% - 48px));
   max-height: calc(100% - 48px);
-  overflow: auto;
-  padding: 28px;
+  min-height: 0;
+  overflow: hidden;
   border: 1px solid var(--mosaik-scheme-highlight);
   border-radius: 14px;
   background: var(--mosaik-scheme-surface);
   box-shadow: var(--mosaik-elevation-bold);
+}
+.dialog-content {
+  min-height: 0;
+  padding: 28px 28px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
 }
 .warning-icon {
   display: flex;
@@ -66,8 +76,9 @@ li + li {
 }
 footer {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   justify-content: end;
   gap: 8px;
-  margin-top: 22px;
+  padding: 22px 28px 28px;
 }

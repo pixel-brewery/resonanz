@@ -10,6 +10,8 @@
   width: 100%;
   height: 100%;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 .setup-titlebar {
   display: flex;
@@ -32,11 +34,16 @@
   display: flex;
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 aside {
   display: flex;
   flex-direction: column;
   flex: 0 0 248px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   padding: 28px 20px 20px;
   background: color-mix(
     in oklab,
@@ -45,7 +52,15 @@ aside {
   );
   border-right: 1px solid var(--mosaik-scheme-highlight);
 }
+resonanz-setup-steps {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .setup-later {
+  flex: 0 0 auto;
   margin-top: auto;
   padding-top: 20px;
 }
@@ -62,6 +77,7 @@ aside {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 .setup-content {
   display: flex;
@@ -69,8 +85,15 @@ aside {
   gap: 18px;
   flex: 1;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 28px 36px;
+}
+.setup-content > * {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .step-intro {
   display: flex;
@@ -298,6 +321,7 @@ mosaik-segment {
 }
 footer {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 10px;

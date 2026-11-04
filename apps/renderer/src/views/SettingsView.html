@@ -7,7 +7,7 @@
       [attr.aria-label]="'loc.resonanz.settings.search' | translate"
       [formField]="searchForm.text"
     />
-    <nav>
+    <nav test-id="settings-navigation">
       @for (section of sections; track section.id) {
         <mosaik-button
           [icon]="section.icon"
@@ -54,7 +54,7 @@
             : ('loc.resonanz.settings.immediate' | translate)
       }}</span>
     </header>
-    <div class="settings-scroll">
+    <div class="settings-scroll" test-id="settings-content">
       <div class="settings-grid">
         <section id="settings-recording" [hidden]="!visibility()['recording']">
           <h2>{{ 'loc.resonanz.capture.recording' | translate }}</h2>

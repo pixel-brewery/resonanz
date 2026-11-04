@@ -5,31 +5,42 @@
   min-height: 0;
 }
 .ring-layout {
-  display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
 }
 .ring-stage {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex: 1;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
   min-width: 0;
-  position: relative;
-  padding: 16px 10px;
+  min-height: 0;
+  padding: 16px 20px;
+  overflow: hidden;
 }
-.ring-stage > resonanz-radial-timeline {
-  max-height: 100%;
-  width: min(100%, 710px);
+.ring-visual {
+  display: grid;
+  place-items: center;
+  container-type: size;
+  container-name: session-ring;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.ring-visual > resonanz-radial-timeline {
+  width: min(100cqw, 100cqh, 710px);
+  height: min(100cqw, 100cqh, 710px);
 }
 .ring-stage > resonanz-marker-legend {
-  position: absolute;
-  left: 24px;
-  bottom: 20px;
-  right: 12px;
+  flex: none;
+  align-self: stretch;
 }
 .ring-duration {
-  font: 600 52px/1 var(--mosaik-font-family, Georgia, serif);
+  font: 600 clamp(30px, min(8cqw, 8cqh), 52px)/1 var(--mosaik-font-family, Georgia, serif);
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   border: none;
@@ -66,36 +77,57 @@
 }
 .marker-title {
   margin: 0;
-  font: 600 20px/1.35 var(--mosaik-font-family, Georgia, serif);
+  font: 600 clamp(14px, min(4cqw, 4cqh), 20px)/1.35 var(--mosaik-font-family, Georgia, serif);
   text-wrap: balance;
 }
 .chapter-title {
   margin: 0;
-  font: 600 24px/1.2 var(--mosaik-font-family, Georgia, serif);
+  font: 600 clamp(16px, min(4.5cqw, 4.5cqh), 24px)/1.2 var(--mosaik-font-family, Georgia, serif);
   letter-spacing: -0.01em;
   text-wrap: balance;
 }
 .ring-quote {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
   font: 400 14px/1.5 var(--mosaik-font-family, Georgia, serif);
   text-wrap: balance;
   color: var(--mosaik-scheme-lowlight);
   margin: 0;
-  max-height: 112px;
-  overflow-y: auto;
 }
 .ring-sidebar {
-  flex: 0 0 400px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   padding: 18px 20px;
-  border-left: 1px solid var(--mosaik-scheme-highlight);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow-y: auto;
+  overflow: hidden;
   background: color-mix(
     in oklab,
     var(--mosaik-scheme-highlight) 18%,
     var(--mosaik-scheme-background)
   );
+}
+.ring-details {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+}
+.selected-quote {
+  margin: 14px 0;
+  line-height: 1.55;
+}
+.digest-card,
+.section-heading,
+.ring-tools {
+  flex: none;
 }
 .digest-card {
   padding: 14px;
@@ -228,7 +260,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: auto;
 }
 .ring-context-actions {
   display: flex;
@@ -241,37 +272,65 @@ summary:focus-visible {
   outline: 2px solid var(--mosaik-color-info-500);
   outline-offset: 2px;
 }
-@media (max-width: 1300px) {
-  .ring-sidebar {
-    flex-basis: 340px;
-    padding: 16px;
-  }
-  .ring-duration {
-    font-size: 42px;
-  }
-  .ring-counts {
-    font-size: 12px;
-  }
-}
-@media (max-width: 1050px) {
-  .ring-sidebar {
-    flex-basis: 300px;
-  }
+@media (max-height: 720px) {
   .ring-stage {
-    padding: 10px 0 80px;
+    padding: 10px 16px;
+    gap: 8px;
   }
-  .ring-duration {
-    font-size: 36px;
+  .ring-sidebar {
+    padding: 12px 16px;
+    gap: 10px;
   }
-  .marker-title {
-    font-size: 16px;
-  }
-  .ring-quote {
-    max-height: 70px;
-    font-size: 11px;
+  .digest-card {
+    padding: 10px;
+    gap: 6px;
   }
 }
 
 .ring-stage p.caption {
   margin: 0;
+}
+
+.ring-eyebrow,
+.chapter-title,
+.marker-title,
+.chapter-summary,
+.ring-counts,
+.digest-card {
+  overflow-wrap: anywhere;
+}
+.chapter-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-size: clamp(11px, min(2.4cqw, 2.4cqh), 14px);
+}
+.chapter-title,
+.marker-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.chapter-heading {
+  flex-wrap: wrap;
+}
+
+@container session-ring (max-width: 400px) or (max-height: 400px) {
+  .chapter-summary,
+  .ring-stage p.caption {
+    display: none;
+  }
+  .ring-counts,
+  .chapter-counts {
+    font-size: 11px;
+  }
+  .ring-quote {
+    font-size: 11px;
+    -webkit-line-clamp: 2;
+  }
+  .ring-eyebrow {
+    font-size: 10px;
+  }
 }

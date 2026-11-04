@@ -1,3 +1,5 @@
+import { SplitComponent } from '@pixel-brewery/mosaik-elements-angular/components/split';
+import { SplitLayoutDirective } from '../components/split-layout/SplitLayoutDirective';
 import { MessagePipe } from '../pipes/MessagePipe';
 import { TranslateFacade } from '../services/TranslateFacade';
 import { TranslatePipe } from '../pipes/TranslatePipe';
@@ -13,6 +15,8 @@ import { chapterColors, markerLabels } from '../components/visualization/Visuali
   selector: 'resonanz-session-ring',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    SplitComponent,
+    SplitLayoutDirective,
     MessagePipe,
     TranslatePipe,
     ButtonComponent,
