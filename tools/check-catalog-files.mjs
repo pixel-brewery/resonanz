@@ -148,6 +148,11 @@ function inspectCatalog(path, label, errors) {
         );
       else strings += 1;
     }
+    if (strings === 0 && object !== tree) {
+      errors.push(
+        `${label}: namespace ${JSON.stringify(prefix)} must contain at least one translation string.`,
+      );
+    }
     return strings;
   }
   if (inspectObject(tree) === 0)

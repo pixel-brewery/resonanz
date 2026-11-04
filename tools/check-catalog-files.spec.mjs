@@ -92,8 +92,39 @@ test('rejects nonstring and empty translation values without comparing their sem
   const root = fixture();
   catalogs(root);
   for (const value of [null, 3, {}, [], '', '   ']) {
-    write(root, 'apps/web/src/assets/i18n/lang.de.json', { 'loc.greeting': value });
+    write(root, 'apps/web/src/assets/i18n/lang.de.json', {
+      'loc.valid': 'Gültig',
+      'loc.greeting': value,
+    });
     assert.ok(checkCatalogFiles(root).errors.some((error) => error.includes('translation string')));
+  }
+});
+
+test('rejects empty namespaces beside valid strings at every nesting depth', () => {
+  const root = fixture();
+  catalogs(root);
+  const cases = [
+    { catalog: { 'loc.good': 'Good', 'loc.required': {} }, path: 'loc.required' },
+    { catalog: { loc: { good: 'Good', required: {} } }, path: 'loc.required' },
+    { catalog: { loc: { good: 'Good', required: { nested: {} } } }, path: 'loc.required.nested' },
+    { catalog: { 'loc.good': 'Good', '': {} }, path: '' },
+  ];
+  for (const { catalog, path } of cases) {
+    for (const locale of ['de', 'en']) {
+      write(root, `apps/web/src/assets/i18n/lang.${locale}.json`, catalog);
+    }
+    const errors = checkCatalogFiles(root).errors;
+    for (const locale of ['de', 'en']) {
+      assert.ok(
+        errors.some(
+          (error) =>
+            error.includes(`lang.${locale}.json`) &&
+            error.includes(
+              `namespace ${JSON.stringify(path)} must contain at least one translation string`,
+            ),
+        ),
+      );
+    }
   }
 });
 
