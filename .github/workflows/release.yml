@@ -191,6 +191,8 @@ jobs:
       - run: yarn install --immutable
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Prepare the pinned Electron runtime
+        run: yarn exec install-electron --no
       - run: yarn format:check
       - run: yarn verify
       - name: Exercise the Windows speech runtime

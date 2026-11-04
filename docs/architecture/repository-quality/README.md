@@ -26,12 +26,18 @@ and a matrix result of `success` pass. The gate
 has no repository token permissions and does not check out source. Pull requests,
 pushes to `main`, merge queues and manual runs use the same workflow.
 
-For code or mixed changes, each platform installs the locked dependencies, checks formatting, verifies skill
+For code or mixed changes, each platform installs the locked dependencies, explicitly prepares the pinned
+Electron binary through `yarn exec install-electron --no`, checks formatting, verifies skill
 and vendor/source provenance, checks public content, checks types, runs behavior
 tests, builds the application, exercises the built desktop app, packages it,
 verifies the package and exercises the actual packaged executable. Windows also
 checks its native speech integration. Controlled fixtures do not establish real
 microphone, personal assistant-account or release readiness.
+
+The release platform build uses the same explicit runtime preparation. Electron's installed package has no
+postinstall binary hook; its documented `install-electron` bin performs that setup before native checks.
+Running it directly preserves installer diagnostics and avoids relying on the first desktop launch to prepare
+its executable. Package versions, artifact checksums and required checks remain unchanged.
 
 ## Documentation changes in this source revision
 

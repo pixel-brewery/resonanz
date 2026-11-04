@@ -80,6 +80,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: yarn install --immutable
 
+      - name: Prepare the pinned Electron runtime
+        if: needs.changes.outputs.documentation_only == 'false'
+        run: yarn exec install-electron --no
+
       - name: Check formatting
         if: needs.changes.outputs.documentation_only == 'false'
         run: yarn format:check
