@@ -13,3 +13,6 @@ resources/icons/png
 
 # Imported skill content is protected by skills-lock.json.
 .agents/skills/architecture/
+
+# Wortlaut pins the original shipped rule-pack bytes.
+.wortlaut/rule-packs/**
