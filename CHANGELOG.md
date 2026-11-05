@@ -1,3 +1,14 @@
+## 0.1.11 (2026-11-05)
+
+### 🩹 Fixes
+
+- **desktop:** refresh app artwork and session interactions ([ed71eed](https://github.com/pixel-brewery/resonanz/commit/ed71eed))
+- **favorites:** restore toggle state after rejected saves ([42a3831](https://github.com/pixel-brewery/resonanz/commit/42a3831))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.10 (2026-11-04)
 
 ### 🩹 Fixes
