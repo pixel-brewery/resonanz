@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormFieldDirective, TypographyDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
+import { ToggleButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/toggle-button';
 import { SearchBoxComponent } from '@pixel-brewery/mosaik-elements-angular/components/search-box';
 import { TextBoxComponent } from '@pixel-brewery/mosaik-elements-angular/components/text-box';
 import { MessageComponent } from '@pixel-brewery/mosaik-elements-angular/components/message';
@@ -46,6 +47,7 @@ import { WindowToolbarDirective } from '../components/window-toolbar/WindowToolb
     RouterLink,
     FormFieldDirective,
     ButtonComponent,
+    ToggleButtonComponent,
     SearchBoxComponent,
     TextBoxComponent,
     DurationPipe,

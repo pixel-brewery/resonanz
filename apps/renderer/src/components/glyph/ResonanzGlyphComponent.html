@@ -1,5 +1,7 @@
-<span [class.tile]="tile()"
-  ><svg
+@if (tile()) {
+  <img class="tile" ngSrc="assets/resonanz.svg" width="32" height="32" alt="" />
+} @else {
+  <svg
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -9,5 +11,6 @@
     <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
     <path
       d="M8 8a5.7 5.7 0 0 0 0 8M16 8a5.7 5.7 0 0 1 0 8M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4"
-    /></svg
-></span>
+    />
+  </svg>
+}

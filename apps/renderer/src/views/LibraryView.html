@@ -199,71 +199,80 @@
                     <article
                       class="session-row"
                       [class.selected]="presenter.selectedId() === session.id"
-                      [attr.test-id]="'session-row-' + session.id"
-                      (click)="presenter.select(session.id)"
-                      (keydown.enter)="presenter.select(session.id)"
-                      tabindex="0"
-                      role="button"
-                      [attr.aria-pressed]="presenter.selectedId() === session.id"
-                      (keydown.space)="$event.preventDefault(); presenter.select(session.id)"
-                      [attr.aria-label]="
-                        session.title + ('loc.resonanz.library.previewSuffix' | translate)
-                      "
                     >
-                      <resonanz-waveform
-                        class="fingerprint"
-                        [values]="presenter.waveform(session.id)"
-                        [markers]="presenter.rowMarkers(session.id)"
-                        [durationMs]="session.durationMs"
-                        [count]="36"
-                      />
-                      <div class="row-text">
-                        <strong>{{ session.title }}</strong
-                        ><span class="caption"
-                          >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
-                          {{
-                            session.kind === 'conversation'
-                              ? ('loc.resonanz.capture.live' | translate)
-                              : ('loc.resonanz.capture.microphone' | translate)
-                          }}
-                          @if (session.insightCounts?.decisions) {
-                            ·
-                            {{
-                              intl.t(
-                                'loc.resonanz.marker.decisionCount',
-                                session.insightCounts.decisions
-                              )
-                            }}
-                          }
+                      <mosaik-button
+                        class="session-open"
+                        [attr.test-id]="'session-row-' + session.id"
+                        [attr.aria-label]="
+                          intl.t('loc.resonanz.library.openSession', session.title)
+                        "
+                        appearance="plain"
+                        variant="neutral"
+                        fit="width"
+                        (focusin)="presenter.select(session.id)"
+                        (click)="presenter.open(session.id)"
+                      >
+                        <span slot="label" class="session-row-content">
+                          <resonanz-waveform
+                            class="fingerprint"
+                            [values]="presenter.waveform(session.id)"
+                            [markers]="presenter.rowMarkers(session.id)"
+                            [durationMs]="session.durationMs"
+                            [count]="36"
+                          />
+                          <span class="row-text">
+                            <strong>{{ session.title }}</strong
+                            ><span class="caption"
+                              >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
+                              {{
+                                session.kind === 'conversation'
+                                  ? ('loc.resonanz.capture.live' | translate)
+                                  : ('loc.resonanz.capture.microphone' | translate)
+                              }}
+                              @if (session.insightCounts?.decisions) {
+                                ·
+                                {{
+                                  intl.t(
+                                    'loc.resonanz.marker.decisionCount',
+                                    session.insightCounts.decisions
+                                  )
+                                }}
+                              }
+                            </span>
+                          </span>
+                          <span
+                            class="row-status"
+                            [class.failed]="presenter.displayState(session) === 'error'"
+                            [class.processing]="
+                              presenter.displayState(session) === 'transcribing' ||
+                              presenter.displayState(session) === 'analyzing'
+                            "
+                            [class.attention]="
+                              presenter.displayState(session) === 'error' ||
+                              presenter.displayState(session) === 'interrupted' ||
+                              presenter.displayState(session) === 'analysisWaiting'
+                            "
+                            ><span
+                              class="status-dot"
+                              [class.success]="
+                                presenter.displayState(session) === 'ready' ||
+                                presenter.displayState(session) === 'saved'
+                              "
+                              [class.recording]="session.status === 'recording'"
+                            ></span
+                            >{{ presenter.status(session) | message }}</span
+                          ><span class="row-duration">{{ session.durationMs | duration }}</span>
                         </span>
-                      </div>
-                      <span
-                        class="row-status"
-                        [class.failed]="presenter.displayState(session) === 'error'"
-                        [class.processing]="
-                          presenter.displayState(session) === 'transcribing' ||
-                          presenter.displayState(session) === 'analyzing'
-                        "
-                        [class.attention]="
-                          presenter.displayState(session) === 'error' ||
-                          presenter.displayState(session) === 'interrupted' ||
-                          presenter.displayState(session) === 'analysisWaiting'
-                        "
-                        ><span
-                          class="status-dot"
-                          [class.success]="
-                            presenter.displayState(session) === 'ready' ||
-                            presenter.displayState(session) === 'saved'
-                          "
-                          [class.recording]="session.status === 'recording'"
-                        ></span
-                        >{{ presenter.status(session) | message }}</span
-                      ><span class="row-duration">{{ session.durationMs | duration }}</span
-                      ><mosaik-button
+                      </mosaik-button>
+                      <mosaik-toggle-button
                         class="row-star"
+                        [class.is-favorite]="session.starred"
                         [attr.test-id]="'star-' + session.id"
-                        icon="star"
-                        [appearance]="session.starred ? 'soft' : 'plain'"
+                        [icon]="session.starred ? 'starFilled' : 'star'"
+                        [isChecked]="session.starred"
+                        [attr.inert]="presenter.mutating() ? '' : null"
+                        appearance="plain"
+                        variant="neutral"
                         size="small"
                         [attr.aria-label]="
                           session.starred
@@ -284,6 +293,7 @@
         @if (presenter.selected(); as selected) {
           <aside
             class="session-preview"
+            [attr.test-id]="'session-preview-' + selected.id"
             [attr.aria-label]="'loc.resonanz.library.preview' | translate"
           >
             <h2>{{ selected.title }}</h2>

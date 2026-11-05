@@ -131,8 +131,106 @@ async function menuAction(id) {
 async function openSession(id) {
   await openLibrary();
   await control(`session-row-${id}`).click();
-  await control('preview-open').click();
+  await page.waitForURL((url) => url.hash.startsWith(`#/session/${id}?`));
   await control('session-title').waitFor({ state: 'visible' });
+}
+
+async function selectPreview(id) {
+  await control(`session-row-${id}`).getByRole('button').focus();
+  await control(`session-preview-${id}`).waitFor({ state: 'visible' });
+}
+
+async function verifyLibraryActions(id) {
+  const { appearance } = (await request('bootstrap.get')).settings;
+  const favoritePaint = [];
+  const expectFavorite = async (expected) => {
+    const toggle = control(`star-${id}`);
+    await waitFor(
+      async () =>
+        (await request('sessions.get', { sessionId: id })).starred === expected &&
+        (await toggle.evaluate(
+          (element, checked) => element.isChecked === checked && !element.inert,
+          expected,
+        )),
+      `favorite ${expected}: durable state and rendered toggle agree`,
+    );
+    await waitFor(
+      () =>
+        toggle
+          .locator('mosaik-icon svg')
+          .evaluate((svg) => {
+            // The outline icon is an even-odd hollow path, so both variants have a fill.
+            // Check the actual center geometry rather than assuming an outline uses strokes.
+            const box = svg.viewBox.baseVal;
+            const center = new DOMPoint(box.x + box.width / 2, box.y + box.height / 2);
+            return [...svg.querySelectorAll('path, polygon')].some((shape) =>
+              shape.isPointInFill(center),
+            );
+          })
+          .then((filled) => filled === expected),
+      `favorite ${expected}: outlined or filled star is rendered`,
+    );
+    assert(await control('library-view').isVisible(), 'Favorite activation stays in the library');
+    return toggle;
+  };
+
+  try {
+    for (const mode of ['light', 'dark']) {
+      await request('settings.save', { appearance: mode });
+      await openLibrary();
+      await control('tab-list').click();
+      const toggle = await expectFavorite(true);
+      const selectedName = await toggle.getByRole('button').getAttribute('aria-label');
+
+      await toggle.click();
+      await expectFavorite(false);
+      assert.notEqual(
+        await toggle.getByRole('button').getAttribute('aria-label'),
+        selectedName,
+        'Favorite action exposes its changed purpose to keyboard and assistive users',
+      );
+      await toggle.getByRole('button').focus();
+      await page.keyboard.press('Enter');
+      await expectFavorite(true);
+      await page.reload();
+      await control('library-view').waitFor({ state: 'visible' });
+      await expectFavorite(true);
+      await toggle.getByRole('button').focus();
+      await page.keyboard.press('Space');
+      await expectFavorite(false);
+      await toggle.click();
+      await expectFavorite(true);
+      favoritePaint.push({
+        mode,
+        ...(await toggle.locator('mosaik-icon svg').evaluate((svg) => ({
+          foreground: getComputedStyle(svg).color,
+          selectedAccent: getComputedStyle(svg).getPropertyValue('--resonanz-favorite-color'),
+        }))),
+      });
+      await captureDiagnosticImage(`library-favorite-${mode}.png`);
+
+      for (const activation of ['pointer', 'Enter', 'Space']) {
+        if (activation === 'pointer') await control(`session-row-${id}`).click();
+        else {
+          await control(`session-row-${id}`).getByRole('button').focus();
+          await page.keyboard.press(activation);
+        }
+        await page.waitForURL((url) => url.hash.startsWith(`#/session/${id}?`));
+        await control('session-title').waitFor({ state: 'visible' });
+        await openLibrary();
+        await expectFavorite(true);
+      }
+    }
+    await writeFile(
+      join(artifacts, 'favorite-appearance.json'),
+      `${JSON.stringify(favoritePaint, null, 2)}\n`,
+    );
+    passed(
+      'direct session opening and independent favorite toggles: click, Enter, Space, persisted reload and outlined/filled state in light/dark',
+    );
+  } finally {
+    await request('settings.save', { appearance });
+  }
 }
 
 // The native capturer can render the hidden Electron test window without showing or focusing it.
@@ -736,7 +834,7 @@ async function verifyDesktopLayout() {
             await navigate(route.route, route.marker, size);
             if (route.name === 'library') {
               await control('tab-list').click();
-              await control(`session-row-${fixtureId}`).click();
+              await selectPreview(fixtureId);
               await control('preview-open').waitFor({ state: 'visible' });
             }
             if (route.name === 'landscape') {
@@ -807,7 +905,7 @@ async function verifyDesktopLayout() {
     }
 
     await navigate('#/', 'library-view', large);
-    await control(`session-row-${fixtureId}`).click();
+    await selectPreview(fixtureId);
     await adjustSplit('workspace-navigation');
     await adjustSplit('library-preview');
     // Wide windows can still have narrow lists after dragging both adjacent panes.
@@ -823,13 +921,13 @@ async function verifyDesktopLayout() {
     const boundedPreview = await paneWidths('library-preview');
     await navigate(`#/session/${fixtureId}?tab=ring`, 'session-ring-split', large);
     await navigate('#/', 'library-view', large);
-    await control(`session-row-${fixtureId}`).click();
+    await selectPreview(fixtureId);
     await assertRestoredSplit('workspace-navigation', boundedNavigation);
     await assertRestoredSplit('library-preview', boundedPreview);
     await page.reload();
     await control('library-view').waitFor({ state: 'visible' });
     await resize(large);
-    await control(`session-row-${fixtureId}`).click();
+    await selectPreview(fixtureId);
     await assertRestoredSplit('workspace-navigation', boundedNavigation);
     await assertRestoredSplit('library-preview', boundedPreview);
     for (const [tab, key, marker] of [
@@ -1136,6 +1234,11 @@ try {
   await waitFor(async () => (await session()).collectionId === collection.id, 'metadata save');
   await menuAction('toggle-favorite');
   await waitFor(async () => (await session()).starred, 'favourite');
+  await waitFor(
+    () => control('toggle-favorite').evaluate((element) => element.isChecked && !element.inert),
+    'session favorite action follows its completed save',
+  );
+  await verifyLibraryActions(recordedId);
   await control('nav-favorites').click();
   await page.waitForURL((url) => url.hash === '#/?scope=favorites');
   await control(`session-row-${recordedId}`).waitFor({ state: 'visible' });

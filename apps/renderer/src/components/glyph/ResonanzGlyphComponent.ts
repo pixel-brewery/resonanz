@@ -1,9 +1,11 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** The supplied Resonanz mark, in the handoff's 24-unit coordinate system. */
+/** Shares the native application artwork while retaining the standalone mark. */
 @Component({
   selector: 'resonanz-glyph',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgOptimizedImage],
   templateUrl: './ResonanzGlyphComponent.html',
   styleUrl: './ResonanzGlyphComponent.scss',
   host: { 'aria-hidden': 'true' },

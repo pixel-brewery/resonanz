@@ -74,3 +74,14 @@ summary:focus-visible {
   outline: 2px solid var(--mosaik-color-info-500);
   outline-offset: 2px;
 }
+
+.favorite-toggle {
+  --toggle-button-background-color: transparent;
+  --toggle-button-border-color: transparent;
+}
+.favorite-toggle.is-favorite {
+  --toggle-button-foreground-color: var(--resonanz-favorite-color);
+}
+.favorite-toggle::part(label) {
+  color: var(--mosaik-scheme-foreground);
+}

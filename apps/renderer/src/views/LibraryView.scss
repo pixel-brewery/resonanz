@@ -97,12 +97,41 @@
   background: var(--mosaik-scheme-surface);
 }
 .session-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 62px;
+}
+.session-open {
+  flex: 1;
+  min-width: 0;
+  --button-font-text-transform: none;
+  --button-font-weight: normal;
+  --button-foreground-color: var(--mosaik-scheme-foreground);
+  --button-height: auto;
+  --button-min-width: 0;
+  --button-min-height: 62px;
+  --button-border-radius: 0;
+  --button-padding-top: 12px;
+  --button-padding-right: 56px;
+  --button-padding-bottom: 12px;
+  --button-padding-left: 16px;
+}
+.session-open::part(button) {
+  min-width: 0;
+  text-align: left;
+}
+.session-open::part(innerStack) {
+  width: 100%;
+  min-width: 0;
+}
+.session-row-content {
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 12px 16px;
-  min-height: 62px;
-  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
 }
 .session-row + .session-row {
   border-top: 1px solid var(--mosaik-scheme-highlight);
@@ -158,12 +187,16 @@
   font-variant-numeric: tabular-nums;
 }
 .row-star {
-  flex: none;
-  visibility: hidden;
+  position: absolute;
+  inset-inline-end: 8px;
+  top: 50%;
+  translate: 0 -50%;
+  --toggle-button-background-color: transparent;
+  --toggle-button-border-color: transparent;
+  --toggle-button-foreground-color: var(--mosaik-scheme-lowlight);
 }
-.session-row:hover .row-star,
-.session-row:focus-within .row-star {
-  visibility: visible;
+.row-star.is-favorite {
+  --toggle-button-foreground-color: var(--resonanz-favorite-color);
 }
 .session-preview {
   width: 100%;
@@ -315,7 +348,7 @@ button:focus-visible {
     width: 64px;
     flex-basis: 64px;
   }
-  .session-row {
+  .session-row-content {
     gap: 12px;
   }
   .row-status {
@@ -329,9 +362,15 @@ button:focus-visible {
   .fingerprint {
     display: none;
   }
-  .session-row {
+  .session-row-content {
     gap: 10px;
-    padding-inline: 12px;
+  }
+  .session-open {
+    --button-padding-left: 12px;
+    --button-padding-right: 48px;
+  }
+  .row-star {
+    inset-inline-end: 4px;
   }
 }
 @container window-toolbar (max-width: 860px) {

@@ -119,6 +119,7 @@ for (const path of [
   'index.html',
   'audio/pcm-audio.worklet.js',
   'assets/resonanz-mark.svg',
+  'assets/resonanz.svg',
   'favicon.ico',
   'resonanz.ico',
 ])
@@ -238,6 +239,11 @@ if (process.platform === 'darwin') {
     throw new Error('The packaged macOS bundle identifier differs from Resonanz.');
   if (plistValue('CFBundleExecutable') !== 'Resonanz')
     throw new Error('The packaged macOS executable differs from Resonanz.');
+  const iconFile = plistValue('CFBundleIconFile');
+  compareResource(
+    join(resourceRoot, iconFile.endsWith('.icns') ? iconFile : `${iconFile}.icns`),
+    join(root, 'resources/icons/resonanz.icns'),
+  );
   for (const key of ['NSMicrophoneUsageDescription', 'NSSpeechRecognitionUsageDescription'])
     if (!plistValue(key)) throw new Error(`The packaged macOS application is missing ${key}.`);
   execFileSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', appRoot], {

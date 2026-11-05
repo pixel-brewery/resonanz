@@ -6,6 +6,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormFieldDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
+import { ToggleButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/toggle-button';
 import {
   SelectComponent,
   SelectItemComponent,
@@ -32,6 +33,7 @@ import { ProcessingStatusComponent } from '../components/processing-status/Proce
     RouterLink,
     FormFieldDirective,
     ButtonComponent,
+    ToggleButtonComponent,
     SelectComponent,
     SelectItemComponent,
     TextBoxComponent,
