@@ -1,3 +1,13 @@
+## 0.1.12 (2026-11-05)
+
+### 🩹 Fixes
+
+- **renderer:** redesign ring chapter controls ([9ce1fc5](https://github.com/pixel-brewery/resonanz/commit/9ce1fc5))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.11 (2026-11-05)
 
 ### 🩹 Fixes
