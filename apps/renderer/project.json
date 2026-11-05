@@ -12,6 +12,7 @@
         "production",
         "^production",
         "{workspaceRoot}/resources/icons/resonanz-mark.svg",
+        "{workspaceRoot}/resources/icons/resonanz.svg",
         "{workspaceRoot}/resources/icons/resonanz.ico"
       ],
       "outputs": ["{options.outputPath}"],
@@ -28,6 +29,11 @@
           },
           {
             "glob": "resonanz-mark.svg",
+            "input": "resources/icons",
+            "output": "assets"
+          },
+          {
+            "glob": "resonanz.svg",
             "input": "resources/icons",
             "output": "assets"
           },

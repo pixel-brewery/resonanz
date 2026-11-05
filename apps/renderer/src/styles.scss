@@ -11,6 +11,8 @@
   }
 }
 :root {
+  // Selected favorites keep the owner's yellow accent independent of semantic warnings.
+  --resonanz-favorite-color: #eab308;
   color-scheme: light;
   font-family: var(--mosaik-font-family, Georgia, serif);
   color: var(--mosaik-scheme-foreground);
@@ -100,6 +102,7 @@ mosaik-toast {
   mosaik-textbox,
   mosaik-checkbox,
   mosaik-toggle-switch,
+  mosaik-toggle-button,
   mosaik-dropdown-button,
   resonanz-segmented-tabs,
   [part~='window-no-drag'] {

@@ -379,7 +379,7 @@
   "loc.resonanz.library.notAnalyzed": "noch nicht analysiert",
   "loc.resonanz.library.open": "Session öffnen",
   "loc.resonanz.library.preview": "Session-Vorschau",
-  "loc.resonanz.library.previewSuffix": ", Vorschau anzeigen",
+  "loc.resonanz.library.openSession": "Sitzung {0} öffnen",
   "loc.resonanz.library.processing": "Dein Assistent arbeitet an dieser Session. Aufnahme und vorhandenes Transkript sind bereits gesichert.",
   "loc.resonanz.library.processingSaved": "Die Aufnahme bleibt lokal gesichert.",
   "loc.resonanz.library.readTranscript": "Transkript lesen",

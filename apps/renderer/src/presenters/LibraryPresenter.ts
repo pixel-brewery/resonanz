@@ -309,12 +309,14 @@ export class LibraryPresenter {
     this.planDetails(this.library.sessions(), this._detailTargets());
   }
   public async open(id: string, tab = 'ring', edit = false): Promise<void> {
+    const session =
+      this._details().get(id) ?? this.library.sessions().find((item) => item.id === id);
     await this._router.navigate(['/session', id], {
       queryParams: {
         tab:
           tab === 'ring' &&
-          (this._details().get(id)?.pipeline?.analysis?.state === 'failed' ||
-            this._details().get(id)?.pipeline?.transcription?.state === 'failed')
+          (session?.pipeline?.analysis?.state === 'failed' ||
+            session?.pipeline?.transcription?.state === 'failed')
             ? 'processing'
             : tab,
         ...(edit ? { edit: 'true' } : {}),

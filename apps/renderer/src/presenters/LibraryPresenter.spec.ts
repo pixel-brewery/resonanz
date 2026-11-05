@@ -240,6 +240,27 @@ function scope(
 }
 
 describe('library detail projection', () => {
+  it.each(['transcription', 'analysis'] as const)(
+    'opens recovery for a failed %s session before its details have loaded',
+    async (stage) => {
+      const newer = Array.from({ length: 35 }, (_, i) => recording(i + 1, 30, i));
+      const failed: ISession = {
+        ...recording(100, 13),
+        status: 'error',
+        pipeline: { [stage]: { state: 'failed', error: 'Controlled failure' } },
+      };
+      const test = scope([...newer, failed]);
+      expect(test.reads.some((read) => read.id === failed.id)).toBe(false);
+
+      await test.presenter.open(failed.id);
+
+      expect(TestBed.inject(Router).navigate).toHaveBeenCalledExactlyOnceWith(
+        ['/session', failed.id],
+        { queryParams: { tab: 'processing' } },
+      );
+    },
+  );
+
   it('loads every session in an older visible week beyond the catalog prefix, with real markers and topic evidence', async () => {
     const newer = Array.from({ length: 45 }, (_, i) => recording(i + 1, 30, i));
     const older = Array.from({ length: 45 }, (_, i) => recording(i + 100, 19 + (i % 5), i));

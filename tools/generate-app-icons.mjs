@@ -1,20 +1,77 @@
 // #region Imports
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { resonanzTheme } from '../resources/themes/resonanz-soho.ts';
 
 // #endregion
 
-const root = resolve('resources/icons');
+const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const root = resolve(workspaceRoot, 'resources/icons');
 const trayOnly = process.argv.slice(2).includes('--tray-only');
 const source = await readFile(resolve(root, 'resonanz-mark.svg'), 'utf8');
 const mark = source.match(/<g\s+id="resonanz-mark"[\s\S]*?<\/g>/u)?.[0];
 if (!mark) throw new Error('The canonical Resonanz mark is missing.');
 
-const appSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="color:#ffffff">
-  <rect x="48" y="48" width="928" height="928" rx="224" fill="#171717"/>
-  <g transform="translate(128 128) scale(24)">${mark}</g>
+// App artwork takes the approved warm wine ramp directly from the product theme.
+// The native tray keeps its independent monochrome/state contract below.
+const wine = resonanzTheme.palette.light.primary;
+const squircle =
+  'M304 80H720C862 80 944 162 944 304V720C944 862 862 944 720 944H304C162 944 80 862 80 720V304C80 162 162 80 304 80Z';
+const appMark = mark.replaceAll('currentColor', 'url(#glyph-ink)');
+const appSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Resonanz">
+  <defs>
+    <linearGradient id="wine-body" x1="190" y1="80" x2="800" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="${wine['300']}"/>
+      <stop offset=".30" stop-color="${wine['500']}"/>
+      <stop offset=".72" stop-color="${wine['600']}"/>
+      <stop offset="1" stop-color="${wine['800']}"/>
+    </linearGradient>
+    <radialGradient id="surface-light" cx=".25" cy=".02" r="1.04">
+      <stop stop-color="${wine['100']}" stop-opacity=".38"/>
+      <stop offset=".55" stop-color="${wine['100']}" stop-opacity=".05"/>
+      <stop offset="1" stop-color="${wine['100']}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="edge-light" x1="180" y1="80" x2="830" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity=".66"/>
+      <stop offset=".4" stop-color="#ffffff" stop-opacity=".12"/>
+      <stop offset="1" stop-color="${wine['900']}" stop-opacity=".68"/>
+    </linearGradient>
+    <linearGradient id="inset-light" x1="512" y1="80" x2="512" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity=".21"/>
+      <stop offset=".65" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glyph-ink" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="${resonanzTheme.scheme.light.background}"/>
+    </linearGradient>
+    <filter id="tile-shadow" x="-20%" y="-15%" width="140%" height="145%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="${wine['900']}" flood-opacity=".25"/>
+    </filter>
+    <filter id="glyph-depth" x="-20%" y="-20%" width="140%" height="145%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="4" flood-color="${wine['900']}" flood-opacity=".38"/>
+    </filter>
+    <filter id="surface-grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="11" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <clipPath id="face"><path d="${squircle}"/></clipPath>
+  </defs>
+  <g filter="url(#tile-shadow)">
+    <path d="${squircle}" transform="translate(0 9)" fill="${wine['900']}"/>
+    <path d="${squircle}" fill="url(#wine-body)"/>
+  </g>
+  <g clip-path="url(#face)">
+    <path d="${squircle}" fill="url(#surface-light)"/>
+    <path d="${squircle}" filter="url(#surface-grain)" opacity=".025"/>
+    <path d="${squircle}" fill="none" stroke="url(#edge-light)" stroke-width="4"/>
+    <path d="${squircle}" transform="translate(512 512) scale(.978) translate(-512 -512)" fill="none" stroke="url(#inset-light)" stroke-width="2"/>
+    <g filter="url(#glyph-depth)">
+      <g transform="translate(160 160) scale(22)">${appMark}</g>
+    </g>
+  </g>
 </svg>\n`;
 const appDirectory = resolve(root, 'png/app');
 const trayDirectory = resolve(root, 'png/tray');
@@ -84,7 +141,9 @@ if (!trayOnly) {
       data: await readFile(resolve(appDirectory, `resonanz-${size}.png`)),
     })),
   );
-  await writeFile(resolve(root, 'resonanz.ico'), createIco(icoImages));
+  const ico = createIco(icoImages);
+  await writeFile(resolve(root, 'resonanz.ico'), ico);
+  await writeFile(resolve(workspaceRoot, 'apps/renderer/public/favicon.ico'), ico);
   const icnsImages = await Promise.all(
     [
       ['icp4', 16],

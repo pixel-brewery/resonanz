@@ -31,6 +31,7 @@ import {
   reiconEdit,
   reiconUser,
 } from '@pixel-brewery/mosaik-icons/reicon';
+import { reiconStarFill } from '@pixel-brewery/mosaik-icons/reicon/fill';
 import { lobeClaude, lobeOpenai } from '@pixel-brewery/mosaik-icons/lobe-icons';
 // #endregion
 
@@ -54,6 +55,7 @@ export const icons = {
   settings: reiconSettings,
   sparkle: reiconSparkle,
   star: reiconStar,
+  starFilled: reiconStarFill,
   stop: reiconStop,
   trash: reiconTrash,
   import: reiconUpload,

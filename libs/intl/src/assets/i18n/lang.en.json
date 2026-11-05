@@ -379,7 +379,7 @@
   "loc.resonanz.library.notAnalyzed": "Not analyzed yet",
   "loc.resonanz.library.open": "Open session",
   "loc.resonanz.library.preview": "Session preview",
-  "loc.resonanz.library.previewSuffix": ", show preview",
+  "loc.resonanz.library.openSession": "Open session {0}",
   "loc.resonanz.library.processing": "Your assistant is working on this session. Its recording and existing transcript are already saved.",
   "loc.resonanz.library.processingSaved": "The recording remains saved locally.",
   "loc.resonanz.library.readTranscript": "Read transcript",

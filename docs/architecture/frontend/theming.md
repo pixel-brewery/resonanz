@@ -22,6 +22,13 @@ content. A scheme surface is an elevated neutral background and becomes brown in
 dark mode; it must not substitute for the on-color of a rose primary fill. The
 digest's inverse play control and progress marks use the same primary on-color.
 
+The native app icon and renderer brand tile share the generated wine-red squircle
+artwork. `yarn icons` reads the primary palette from the theme export and generates
+SVG, PNG, ICNS, ICO and the favicon. The renderer copies the SVG as a declared Nx
+build input; package verification compares the actual macOS bundle icon with the
+canonical ICNS. Favorite toggles use the owner's separate yellow accent token,
+`--resonanz-favorite-color`, through Mosaik's public foreground styling API.
+
 The public Mosaik MCP supplied its schema, examples and generation guide. Its
 legacy Style Dictionary validator disagrees with the current Theme Editor's
 contrast-aware step-zero colors and generated dark palettes. The actual export

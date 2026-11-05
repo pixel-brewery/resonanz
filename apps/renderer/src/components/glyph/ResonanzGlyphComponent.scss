@@ -1,5 +1,4 @@
-:host,
-span {
+:host {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9,13 +8,6 @@ svg {
   height: 24px;
 }
 .tile {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--mosaik-color-primary-500);
-  color: var(--mosaik-color-primary-0);
-}
-.tile svg {
-  width: 18px;
-  height: 18px;
+  width: calc(var(--mosaik-layout-space) * 4);
+  height: calc(var(--mosaik-layout-space) * 4);
 }

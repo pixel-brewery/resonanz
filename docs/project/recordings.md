@@ -32,7 +32,11 @@ separate preference and follows successful native file transcription.
 
 ## Transcript and analysis
 
-Open a session from the library preview. The **Ring**, **Analysis** and **Questions**
+Click a session row to open it directly, or focus it and press Enter or Space.
+Keyboard focus also selects its library preview. The separate star toggles a
+favorite without opening the session; selected favorites show a filled yellow star
+and remain selected after restarting the app.
+The **Ring**, **Analysis** and **Questions**
 views share the same session, audio player and evidence selection. Actual decoded
 audio peaks form the waveform; missing audio does not receive invented peaks.
 Select a chapter or marker to inspect context and play the original passage.
