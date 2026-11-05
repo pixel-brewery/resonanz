@@ -5,6 +5,50 @@ and the provenance-verified upstream audio core. An additional API key or cloud 
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
 
+## Ring chapter controls: 2026-11-05
+
+RadialTimeline uses bounded public Mosaik chapter buttons and full-title tooltips.
+The large invisible SVG label rectangles and their native group focus outlines
+are removed. Collision checks keep title controls away from the central context
+and actual marker hit circles. Numbered controls and a complete chapter picker
+provide progressively denser layouts; the picker has a separate header strip.
+
+Thirty-eight focused geometry cases cover stage bounds, center clearance,
+neighbor separation, marker-circle boundaries, scaling, dense fallback and stable
+source identities. Full Node 24 verification passed 528 behavior tests in 61
+files, 105 tooling tests, fifteen catalog cases, provenance/content checks,
+native/Angular type checks and both builds. The designer framework checker found
+zero errors, warnings or exceptions; manual counting finds five Mosaik tags.
+The independent architect source review found no unresolved blockers.
+
+An actual Electron regression reproduced a chapter label intercepting the east
+marker's pointer events. Native checks after the correction can select east and
+west markers by pointer and east by keyboard; a visible compact picker leaves
+the north marker usable. Another regression reproduced Select consuming Escape
+before a hover Tooltip's anchor listener. The component now dismisses its own
+controlled tooltip state in the capture phase without consuming the key or
+changing selection. No Mosaik vendor source was modified.
+The installed Select also clears its internal value on closed Escape. Its native
+change event restores a rejected null from the existing chapter owner; valid new
+chapter selections keep their ordinary selection event path.
+
+The final built macOS ARM64 app passed all fifteen controlled E2E groups,
+including the existing 72 view/size/language/theme combinations. Six long chapter
+titles exercise bounded title and number controls, full hover titles, Enter/Space,
+Tab order and Escape. A 32-chapter fixture exercises the complete picker, retained
+selection after Escape, focus transfer across resizing and preserved external
+focus. Native marker clicks use actual pointer hit testing rather than forced
+events. Evidence is under `.codex-work/desktop-smoke-gbYfZ5/`.
+
+A fresh macOS ARM64 bundle passed package verification of 191 compared files and
+its local signature. Its actual executable passed the same fifteen E2E groups;
+evidence is under `.codex-work/packaged-smoke-sqQDdh/`, with the bundle under
+`.codex-work/ring-redesign/out/`. Native screenshots were visually reviewed in
+light/dark mode, including compact numbered controls, full-title tooltips and
+the complete dense picker. Task-owned app instances exited. These controlled
+checks establish no new physical microphone, native speech, assistant-account
+inference or local Windows acceptance.
+
 ## Native artwork and library actions: 2026-11-05
 
 The application icon now uses the exported wine-red palette in a macOS-style

@@ -71,6 +71,12 @@ restoring the native window rejects late measurements.
 
 RadialTimeline accepts optional evidence focus and an original-audio range. Dimming,
 beams and the bounded progress arc are presentation inputs, not recognition/inference.
+Its measured square feeds the pure `chapterLabelLayout` helper. Bounded title
+buttons avoid the central context and actual marker hit areas; collision fallback
+uses numbered buttons, then a complete Mosaik Select in a reserved header strip.
+Chapter arcs remain pointer targets, while native Mosaik buttons own chapter
+keyboard activation, local focus and full-title tooltips. Resize handoff retains
+the active chapter control without taking focus from outside the component.
 The public PromptBox's actual submit/clear lifecycle preserves rejected drafts and
 newer typing. Explicitly saved gap questions are user notes, never source speech.
 

@@ -440,6 +440,7 @@ async function verifyDesktopLayout() {
     ),
   );
   const collectionIds = [];
+  const extraFixtureIds = [];
   const evidence = [];
   let fixtureId;
   const settle = async () => {
@@ -749,6 +750,130 @@ async function verifyDesktopLayout() {
     }
     const large = { width: 1440, height: 900 };
     const compact = { width: 960, height: 640 };
+    const verifyRingLabels = async (tooltipImage) => {
+      const stage = page.locator('.ring-stage');
+      const chapters = fixture.analysis.chapters;
+      await control(`ring-chapter-${chapters[0].id}`).waitFor({ state: 'visible' });
+      const boxes = await page
+        .locator('mosaik-button[test-id^="ring-chapter-"]')
+        .getByRole('button')
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const rect = element.getBoundingClientRect();
+            return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+          }),
+        );
+      const bounds = await stage.boundingBox();
+      assert.equal(boxes.length, chapters.length, 'Every ordinary chapter has its own control');
+      for (const box of boxes)
+        assert(
+          box.right > box.left &&
+            box.bottom > box.top &&
+            box.left >= bounds.x &&
+            box.right <= bounds.x + bounds.width &&
+            box.top >= bounds.y &&
+            box.bottom <= bounds.y + bounds.height,
+          `Chapter bubble stays inside its stage: ${JSON.stringify(box)}`,
+        );
+      for (let index = 0; index < boxes.length; index++)
+        for (const other of boxes.slice(index + 1)) {
+          const box = boxes[index];
+          assert(
+            box.right <= other.left ||
+              other.right <= box.left ||
+              box.bottom <= other.top ||
+              other.bottom <= box.top,
+            'Chapter controls have separate, non-overlapping pointer targets',
+          );
+        }
+      assert.equal(
+        await page.locator('.radial svg .chapter[tabindex]').count(),
+        0,
+        'SVG chapter groups do not create a second oversized focus target',
+      );
+      const title = page.locator('.ring-stage .chapter-title');
+      const selectedBefore = await title.textContent();
+      const last = chapters.at(-1);
+      await control(`ring-chapter-${last.id}`).hover();
+      await control(`ring-chapter-tooltip-content-${last.id}`).waitFor({ state: 'visible' });
+      assert.equal(
+        await control(`ring-chapter-tooltip-content-${last.id}`).textContent(),
+        last.title,
+        'Hover reveals the complete saved chapter title',
+      );
+      await assertInside(
+        `[test-id="ring-chapter-tooltip-content-${last.id}"]`,
+        'Complete chapter tooltip',
+      );
+      if (tooltipImage) {
+        await control(`ring-chapter-tooltip-content-${last.id}`).evaluate(async (element) => {
+          const animations = [];
+          let current = element;
+          while (current) {
+            animations.push(
+              ...current
+                .getAnimations()
+                .filter((animation) => animation.effect?.getTiming().iterations !== Infinity),
+            );
+            if (current.animationTarget)
+              animations.push(
+                ...current.animationTarget
+                  .getAnimations({ subtree: true })
+                  .filter((animation) => animation.effect?.getTiming().iterations !== Infinity),
+              );
+            current = current.parentElement ?? current.getRootNode().host;
+          }
+          await Promise.allSettled(animations.map((animation) => animation.finished));
+        });
+        await captureDiagnosticImage(tooltipImage);
+      }
+      assert.equal(
+        await title.textContent(),
+        selectedBefore,
+        'Hover does not change chapter context',
+      );
+      await stage.hover({ position: { x: 2, y: 2 } });
+      await control(`ring-chapter-tooltip-content-${last.id}`).waitFor({ state: 'hidden' });
+      const first = control(`ring-chapter-${chapters[0].id}`).getByRole('button');
+      const second = control(`ring-chapter-${chapters[1].id}`).getByRole('button');
+      const scrollBefore = await stage.evaluate((element) => element.scrollTop);
+      await first.focus();
+      await page.keyboard.press('Tab');
+      assert(
+        await second.evaluate((element) => element.matches(':focus-visible')),
+        'Tab gives the next chapter a visible native control focus',
+      );
+      await page.keyboard.press('Enter');
+      await waitFor(
+        async () => (await title.textContent()) === chapters[1].title,
+        'Enter selects the focused chapter and its center context',
+      );
+      await waitFor(
+        async () => (await second.getAttribute('aria-pressed')) === 'true',
+        'Native chapter button exposes the selected state',
+      );
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Space');
+      await waitFor(
+        async () => (await title.textContent()) === chapters[0].title,
+        'Shift+Tab and Space select the previous chapter',
+      );
+      await waitFor(
+        async () => (await first.getAttribute('aria-pressed')) === 'true',
+        'Native previous chapter button exposes the selected state',
+      );
+      assert.equal(
+        await stage.evaluate((element) => element.scrollTop),
+        scrollBefore,
+        'Chapter keyboard navigation does not pan the stage',
+      );
+      await page.keyboard.press('Escape');
+      await control(`ring-chapter-tooltip-content-${chapters[0].id}`).waitFor({ state: 'hidden' });
+      assert(
+        await first.evaluate((element) => element.matches(':focus')),
+        'Dismissing a tooltip preserves the chapter control focus',
+      );
+    };
     const routes = [
       {
         name: 'library',
@@ -856,6 +981,12 @@ async function verifyDesktopLayout() {
             }
             if (route.name === 'ring') {
               await page.locator('.chapter-list button').first().click();
+              await verifyRingLabels(
+                (uiLanguage === 'en' && appearance === 'light' && size === large) ||
+                  (uiLanguage === 'de' && appearance === 'dark' && size === compact)
+                  ? `ring-tooltip-${uiLanguage}-${appearance}-${size.width}x${size.height}.png`
+                  : undefined,
+              );
               await scrollBody('.ring-details', '.digest-card, .section-heading, .ring-tools');
             }
             if (route.name === 'questions')
@@ -903,6 +1034,179 @@ async function verifyDesktopLayout() {
         }
       }
     }
+
+    const markerChapters = [
+      {
+        id: 'marker-chapter-east',
+        title: 'Chapter beside the east marker',
+        summary: paragraph,
+        startMs: 0,
+        endMs: fixture.durationMs / 2,
+      },
+      {
+        id: 'marker-chapter-west',
+        title: 'Chapter beside the west marker',
+        summary: paragraph,
+        startMs: fixture.durationMs / 2,
+        endMs: fixture.durationMs,
+      },
+    ];
+    const markerMoments = [
+      { id: randomUUID(), kind: 'question', atMs: 0, label: 'Controlled north marker' },
+      {
+        id: randomUUID(),
+        kind: 'decision',
+        atMs: fixture.durationMs / 4,
+        label: 'Controlled east marker',
+      },
+      {
+        id: randomUUID(),
+        kind: 'task',
+        atMs: fixture.durationMs * 0.75,
+        label: 'Controlled west marker',
+      },
+    ];
+    const markerPath = join(artifacts, 'ring-marker-fixture.json');
+    await writeFile(
+      markerPath,
+      JSON.stringify({
+        format: 'resonanz-session',
+        version: 1,
+        session: {
+          ...fixture,
+          id: randomUUID(),
+          moments: markerMoments,
+          analysis: { ...fixture.analysis, chapters: markerChapters },
+        },
+      }),
+    );
+    await navigate('#/', 'library-view', large);
+    const markerId = (await selectFile(markerPath)).id;
+    extraFixtureIds.push(markerId);
+    await navigate(`#/session/${markerId}?tab=ring`, 'session-ring-split', large);
+    await control(`ring-marker-${markerMoments[1].id}`).click();
+    await waitFor(
+      async () =>
+        (await page.locator('.ring-stage .marker-title').textContent()) === markerMoments[1].label,
+      'Chapter bubbles do not cover the east marker pointer target',
+    );
+    await control(`ring-marker-${markerMoments[2].id}`).click();
+    await waitFor(
+      async () =>
+        (await page.locator('.ring-stage .marker-title').textContent()) === markerMoments[2].label,
+      'Chapter bubbles do not cover the west marker pointer target',
+    );
+    await control(`ring-marker-${markerMoments[1].id}`).focus();
+    await page.keyboard.press('Space');
+    await waitFor(
+      async () =>
+        (await page.locator('.ring-stage .marker-title').textContent()) === markerMoments[1].label,
+      'Ring markers retain their keyboard selection and source context',
+    );
+    await captureDiagnosticImage('ring-marker-bubbles.png');
+    await resize(compact);
+    await control('ring-chapter-picker').waitFor({ state: 'visible' });
+    await control(`ring-marker-${markerMoments[0].id}`).click();
+    await waitFor(
+      async () =>
+        (await page.locator('.ring-stage .marker-title').textContent()) === markerMoments[0].label,
+      'Compact chapter picker leaves the north marker pointer target usable',
+    );
+    await captureDiagnosticImage('ring-marker-picker.png');
+    await assertFrame(
+      'Ring marker controls after chapter-density changes',
+      '.ring-stage, .ring-sidebar',
+    );
+    passed(
+      'ring marker selection remains reachable by pointer and keyboard beside chapter bubbles and the compact picker',
+    );
+
+    const denseChapters = Array.from({ length: 32 }, (_, index) => ({
+      id: `dense-ring-chapter-${index}`,
+      title:
+        `Dense chapter ${index + 1}: ${'A complete long title for the ring picker '.repeat(5)}`.slice(
+          0,
+          200,
+        ),
+      summary: paragraph,
+      startMs: index * (fixture.durationMs / 32),
+      endMs: (index + 1) * (fixture.durationMs / 32),
+    }));
+    const densePath = join(artifacts, 'dense-ring-fixture.json');
+    await writeFile(
+      densePath,
+      JSON.stringify({
+        format: 'resonanz-session',
+        version: 1,
+        session: {
+          ...fixture,
+          id: randomUUID(),
+          analysis: { ...fixture.analysis, chapters: denseChapters },
+        },
+      }),
+    );
+    await navigate('#/', 'library-view', large);
+    const denseId = (await selectFile(densePath)).id;
+    extraFixtureIds.push(denseId);
+    const denseRoute = `#/session/${denseId}?tab=ring`;
+    await navigate(denseRoute, 'session-ring-split', large);
+    const denseFirst = control(`ring-chapter-${denseChapters[0].id}`).getByRole('button');
+    await denseFirst.waitFor({ state: 'visible' });
+    await denseFirst.focus();
+    await page.keyboard.press('Tab');
+    await resize(compact);
+    const picker = control('ring-chapter-picker');
+    await picker.waitFor({ state: 'visible' });
+    await waitFor(
+      () => picker.evaluate((element) => element.matches(':focus-within')),
+      'Dense mode transfers chapter focus to its complete picker',
+    );
+    await assertInside('[test-id="ring-chapter-picker"]', 'Compact chapter picker');
+    const toggleLabel = await picker.evaluate((element) => element.intl.toggleLabel);
+    await picker.getByRole('button', { name: toggleLabel, exact: true }).click();
+    assert.equal(
+      await page.getByRole('option').count(),
+      denseChapters.length,
+      'Dense picker exposes every chapter',
+    );
+    const denseLast = denseChapters.at(-1);
+    await page
+      .getByRole('option', { name: `${denseChapters.length}. ${denseLast.title}`, exact: true })
+      .click();
+    await waitFor(
+      async () =>
+        (await page.locator('.ring-stage .chapter-title').textContent()) === denseLast.title,
+      'Dense picker selects the complete last chapter and its context',
+    );
+    assert.equal(await picker.evaluate((element) => element.value), denseLast.id);
+    await page.getByRole('option').first().waitFor({ state: 'hidden' });
+    await picker.hover();
+    const pickerTooltip = control('ring-chapter-picker-tooltip-content');
+    await pickerTooltip.waitFor({ state: 'visible' });
+    assert.equal(await pickerTooltip.textContent(), denseLast.title);
+    await page.keyboard.press('Escape');
+    await pickerTooltip.waitFor({ state: 'hidden' });
+    assert.equal(await picker.evaluate((element) => element.value), denseLast.id);
+    await picker.focus();
+    await resize(large);
+    const restoredChapter = control(`ring-chapter-${denseLast.id}`).getByRole('button');
+    await restoredChapter.waitFor({ state: 'visible' });
+    await waitFor(
+      () => restoredChapter.evaluate((element) => element.matches(':focus')),
+      'Expanded ring returns focus to the selected chapter bubble',
+    );
+    const external = page.locator('.chapter-list button').first();
+    await external.focus();
+    await resize(compact);
+    await picker.waitFor({ state: 'visible' });
+    assert(
+      await external.evaluate((element) => element.matches(':focus')),
+      'Density changes preserve a focus target outside the ring labels',
+    );
+    await captureDiagnosticImage('ring-dense-picker.png');
+    passed(
+      'ring chapter bubbles: bounded controls, full hover titles, native keyboard selection and collision fallback with focus-preserving resize',
+    );
 
     await navigate('#/', 'library-view', large);
     await selectPreview(fixtureId);
@@ -1028,6 +1332,7 @@ async function verifyDesktopLayout() {
         appearance: before.settings.appearance ?? 'system',
       });
       if (fixtureId) await request('sessions.delete', { sessionId: fixtureId });
+      for (const id of extraFixtureIds) await request('sessions.delete', { sessionId: id });
       for (const collectionId of collectionIds)
         await request('collections.delete', { collectionId });
       await page.evaluate((saved) => {
