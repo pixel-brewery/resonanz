@@ -6,6 +6,7 @@ import { TranslatePipe } from '../pipes/TranslatePipe';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import type { ISessionSummary } from '@resonanz/contracts';
 import { FormFieldDirective, TypographyDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
 import { ToggleButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/toggle-button';
@@ -72,4 +73,16 @@ export class LibraryView {
     { id: 'attention', label: 'loc.resonanz.library.attention' },
   ];
   protected readonly presenter = inject(LibraryPresenter);
+
+  /** Reconciles Mosaik's optimistic toggle when a failed write leaves the controlled input unchanged. */
+  protected async toggleFavorite(
+    control: ToggleButtonComponent,
+    session: ISessionSummary,
+  ): Promise<void> {
+    const sessionId = session.id;
+    await this.presenter.toggleStar(session);
+    const current = this.presenter.library.sessions().find((item) => item.id === sessionId);
+    const element = control.elementRef.nativeElement;
+    if (element.isConnected && current) element.isChecked = current.starred;
+  }
 }

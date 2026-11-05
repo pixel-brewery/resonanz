@@ -61,4 +61,14 @@ export class SessionView {
     { id: 'analysis', label: 'loc.resonanz.session.analysis' },
     { id: 'questions', label: 'loc.resonanz.question.questions' },
   ];
+
+  /** Reconciles Mosaik's optimistic toggle without applying a late result to another session. */
+  protected async toggleFavorite(control: ToggleButtonComponent): Promise<void> {
+    const sessionId = this.presenter.session()?.id;
+    if (!sessionId) return;
+    await this.presenter.toggleStar();
+    const current = this.presenter.session();
+    const element = control.elementRef.nativeElement;
+    if (element.isConnected && current?.id === sessionId) element.isChecked = current.starred;
+  }
 }

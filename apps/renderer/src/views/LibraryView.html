@@ -265,6 +265,7 @@
                         </span>
                       </mosaik-button>
                       <mosaik-toggle-button
+                        #favorite
                         class="row-star"
                         [class.is-favorite]="session.starred"
                         [attr.test-id]="'star-' + session.id"
@@ -279,7 +280,7 @@
                             ? ('loc.resonanz.nav.removeFavorite' | translate)
                             : ('loc.resonanz.nav.addFavorite' | translate)
                         "
-                        (click)="$event.stopPropagation(); presenter.toggleStar(session)"
+                        (click)="$event.stopPropagation(); toggleFavorite(favorite, session)"
                       />
                     </article>
                   }

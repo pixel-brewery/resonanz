@@ -20,21 +20,30 @@ actions, changed accessible action names, actual hollow/filled SVG geometry,
 durable state and reload in light/dark mode. Screenshots were visually inspected
 in both modes. A regression first reproduced a persisted/checked-state mismatch
 when a pending save disabled the Mosaik control; using inert during the save keeps
-controlled state writes active while blocking repeated input.
+controlled state writes active while blocking repeated input. A second native
+regression reproduced the rejected-write case: data stayed unchanged but the
+optimistic control retained the opposite value. Both views now reconcile the
+public checked property with their current owner after the command completes.
 
 The built macOS ARM64 app passed all thirteen controlled E2E groups, including
 the existing 72 layout combinations, scrolling, splitters and full restart with
-persisted favorites. A task-only IPC forwarder delayed the nine real favorite
-updates by 500 ms each and restored the original handler before app shutdown;
-validation and actual session persistence still ran. The helper is outside product
-and CI sources. Built evidence is under `.codex-work/desktop-smoke-IW2WMQ/`.
+persisted favorites. A task-only IPC forwarder delayed nine real favorite updates
+and two intentionally rejected saves by 500 ms each. Rejections in both the session
+menu and library row preserved the actual data and restored the native checked
+state before the normal action continued. The original handler was restored before
+app shutdown; forwarded writes still ran real validation and persistence. The
+helper is outside product and CI sources. Final built evidence is under
+`.codex-work/desktop-smoke-Y2SjAC/`.
 
 A fresh macOS ARM64 application bundle passed verification of 191 compared files,
 its local signature and the actual `CFBundleIconFile` bytes against the canonical
 ICNS. Its executable passed all thirteen normal controlled E2E groups, including
 the final session-menu state assertion. The bundle is under
 `.codex-work/icons-session-actions/out/`; packaged evidence is under
-`.codex-work/packaged-smoke-SDT2Xn/`. An initial packaged attempt stopped before
+`.codex-work/packaged-smoke-SDT2Xn/` for the initial artwork/action revision.
+Final package validation after the rejection rollback is tracked in
+[PR #25](https://github.com/pixel-brewery/resonanz/pull/25).
+An initial packaged attempt stopped before
 marker capture when the capture panel closed; the unchanged rerun completed.
 This task makes no new capture-lifecycle claim from that transient observation.
 

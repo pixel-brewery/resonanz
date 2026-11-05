@@ -34,6 +34,7 @@
         <summary [attr.aria-label]="'loc.resonanz.session.more' | translate">···</summary>
         <div part="window-no-drag" (click)="closeMenu($event)">
           <mosaik-toggle-button
+            #favorite
             class="favorite-toggle"
             [class.is-favorite]="session.starred"
             test-id="toggle-favorite"
@@ -47,7 +48,7 @@
             [attr.inert]="presenter.mutating() ? '' : null"
             appearance="plain"
             variant="neutral"
-            (click)="presenter.toggleStar()"
+            (click)="toggleFavorite(favorite)"
           /><mosaik-button
             test-id="edit-session"
             [label]="'loc.resonanz.session.organize' | translate"

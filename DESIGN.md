@@ -23,6 +23,10 @@ ignores controlled state writes while disabled, so using `disabled` for that
 temporary guard can leave the control out of sync with persisted session data.
 Inert blocks repeated pointer/keyboard actions while allowing the checked binding
 to follow the durable result.
+After each save attempt, the view also reconciles the public ToggleButton checked
+property with the current session owner. This restores a rejected change even
+when the unchanged Boolean input would not trigger another Angular binding write;
+disconnected controls and a different current session are guarded.
 
 The official Mosaik MCP supplied `toggle-button`, `button`, the Angular guide and
 Studio authoring rules. Catalog searches for `library` and `favorite` returned
