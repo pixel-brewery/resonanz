@@ -40,6 +40,10 @@ The **Ring**, **Analysis** and **Questions**
 views share the same session, audio player and evidence selection. Actual decoded
 audio peaks form the waveform; missing audio does not receive invented peaks.
 Select a chapter or marker to inspect context and play the original passage.
+Chapter titles appear in bounded bubbles around the Ring. Hover a bubble to read
+its complete title, or focus it and use Enter or Space to select the chapter.
+Narrow views use numbered bubbles; crowded rings offer a complete chapter picker
+above the visualization. Resizing preserves chapter selection and keyboard focus.
 
 Drag the dividers beside the navigation, library preview and session side panes to
 adjust their widths. A focused divider also supports arrow keys, Shift+arrow keys

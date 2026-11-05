@@ -4,6 +4,7 @@
   [class.missing]="!values().length"
   [class.evidence-focused]="focusEvidence()"
   [class.subtle]="waveformTone() === 'subtle'"
+  [class.select-labels]="chapterLabels().mode === 'select'"
 >
   <div class="beam" aria-hidden="true"></div>
   <svg viewBox="-55 -55 710 710" [attr.aria-label]="label() | message" role="group">
@@ -12,16 +13,12 @@
     }
     @for (chapter of chapterArcs(); track chapter.id) {
       <g
-        role="button"
-        tabindex="0"
         class="chapter"
         [class.selected]="chapter.selected"
         [class.highlighted]="chapter.highlighted"
         [class.faded]="chapter.faded"
-        [attr.aria-label]="chapter.title + ', ' + (chapter.startMs | duration)"
-        [attr.aria-pressed]="chapter.selected"
+        aria-hidden="true"
         (click)="chapterSelected.emit(chapter)"
-        (keydown)="selectChapter($event, chapter)"
       >
         <path
           [attr.d]="chapter.path"
@@ -29,18 +26,6 @@
           class="chapter-arc"
         />
         <path [attr.d]="chapter.path" class="chapter-hit" />
-        <foreignObject
-          [attr.x]="chapter.x - 355"
-          [attr.y]="chapter.y - 16"
-          width="710"
-          height="32"
-          class="chapter-label-box"
-          aria-hidden="true"
-        >
-          <div xmlns="http://www.w3.org/1999/xhtml" class="chapter-label-container">
-            <span class="chapter-label">{{ chapter.title }}</span>
-          </div>
-        </foreignObject>
       </g>
     }
     <g aria-hidden="true" class="audio-bars">
@@ -77,6 +62,7 @@
       <g
         role="button"
         tabindex="0"
+        [attr.test-id]="'ring-marker-' + marker.id"
         [attr.transform]="'translate(' + marker.x + ',' + marker.y + ')'"
         class="marker"
         [class]="'marker ' + marker.kind"
@@ -111,5 +97,106 @@
       </g>
     }
   </svg>
+  <div class="chapter-controls" [attr.data-label-mode]="chapterLabels().mode">
+    @if (chapterLabels().mode === 'select') {
+      <mosaik-tooltip
+        class="chapter-picker-tooltip"
+        test-id="ring-chapter-picker-tooltip"
+        [content]="focusChapter()?.title ?? intl.t('loc.resonanz.session.chapters')"
+        trigger="manual"
+        [isOpen]="pickerTooltipOpen()"
+        (closed)="pickerTooltipOpen.set(false)"
+      >
+        <mosaik-select
+          #chapterPicker
+          class="chapter-picker"
+          test-id="ring-chapter-picker"
+          size="small"
+          variant="neutral"
+          [attr.aria-label]="intl.t('loc.resonanz.session.chapters')"
+          [placeholder]="intl.t('loc.resonanz.session.chapters')"
+          [value]="focusChapter()?.id ?? null"
+          [isClearable]="false"
+          dropDownMaxHeight="320px"
+          (selectionChanged)="selectChapterFromPicker(chapterPicker.elementRef.nativeElement.value)"
+          (change)="reconcileChapterPicker(chapterPicker)"
+          (focusin)="chapterFocusIn($event, null)"
+          (focusout)="chapterFocusOut($event)"
+          (pointerenter)="pickerTooltipOpen.set(true)"
+          (pointerleave)="pickerTooltipOpen.set(false)"
+        >
+          <span slot="trigger" class="chapter-picker-label">{{
+            focusChapter()?.title ?? intl.t('loc.resonanz.session.chapters')
+          }}</span>
+          @for (chapter of chapterArcs(); track chapter.id; let index = $index) {
+            <mosaik-select-item [value]="chapter.id" [label]="index + 1 + '. ' + chapter.title" />
+          }
+        </mosaik-select>
+        <span
+          slot="content"
+          class="chapter-tooltip-text"
+          test-id="ring-chapter-picker-tooltip-content"
+          >{{ focusChapter()?.title ?? intl.t('loc.resonanz.session.chapters') }}</span
+        >
+      </mosaik-tooltip>
+    } @else {
+      @for (bubble of chapterBubbles(); track bubble.id) {
+        @let chapter = bubble.chapter;
+        <mosaik-tooltip
+          class="chapter-bubble"
+          [class.numbered]="chapterLabels().mode === 'numbers'"
+          [style.left.px]="bubble.left"
+          [style.top.px]="bubble.top"
+          [style.width.px]="bubble.width"
+          [style.height.px]="bubble.height"
+          [attr.test-id]="'ring-chapter-tooltip-' + chapter.id"
+          [content]="chapter.title"
+          trigger="manual"
+          [isOpen]="activeTooltipId() === chapter.id"
+          (closed)="dismissChapterTooltip(chapter.id)"
+        >
+          <mosaik-button
+            #chapterButton
+            class="chapter-chip"
+            [class.selected]="chapter.selected"
+            [class.highlighted]="chapter.highlighted"
+            [class.faded]="chapter.faded"
+            [attr.test-id]="'ring-chapter-' + chapter.id"
+            [attr.data-chapter-id]="chapter.id"
+            [attr.aria-label]="chapter.title + ', ' + (chapter.startMs | duration)"
+            [attr.aria-pressed]="chapter.selected"
+            appearance="outline"
+            variant="neutral"
+            size="small"
+            [ripple]="false"
+            (click)="chapterSelected.emit(chapter)"
+            (pointerenter)="hoverChapter(chapter.id)"
+            (pointerleave)="hoverChapter(null)"
+            (focusin)="chapterFocusIn($event, chapter.id)"
+            (focusout)="chapterFocusOut($event)"
+          >
+            <span slot="label" class="chapter-chip-content">
+              @if (chapterLabels().mode === 'numbers') {
+                <span class="chapter-ordinal">{{ bubble.index + 1 }}</span>
+              } @else {
+                <span
+                  class="chapter-dot"
+                  [style.background]="chapter.color"
+                  aria-hidden="true"
+                ></span>
+                <span class="chapter-label">{{ chapter.title }}</span>
+              }
+            </span>
+          </mosaik-button>
+          <span
+            slot="content"
+            class="chapter-tooltip-text"
+            [attr.test-id]="'ring-chapter-tooltip-content-' + chapter.id"
+            >{{ chapter.title }}</span
+          >
+        </mosaik-tooltip>
+      }
+    }
+  </div>
   <div class="centre"><ng-content /></div>
 </div>

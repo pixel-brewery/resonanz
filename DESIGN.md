@@ -42,3 +42,37 @@ native controls. The new row and favorite actions use the actual typed Mosaik
 Angular components; the existing menu container is retained as a scoped review
 exception rather than expanding this task into a menu migration.
 Manual source counting finds 42 Mosaik tags across the three reviewed templates.
+
+## Ring chapter controls
+
+The Ring retains the same Soho foundations, warm light/dark surfaces, Georgia
+typography and wine-red primary. Its chapter titles use bounded Mosaik Button
+pills with a chapter-color dot, a single ellipsized line and a full-title Mosaik
+Tooltip. Selection uses the theme's inverse foreground/background pair. Keyboard
+focus stays local to the button and uses the wine-red primary; an oversized
+focusable SVG group no longer includes the label's invisible layout rectangle.
+
+The measured square determines which controls fit. Titled pills leave the central
+context clear. Numbered bubbles replace titles when they collide, and a public
+Mosaik Select exposes every chapter when even numbered controls cannot fit.
+Actual marker hit areas participate in collision checks. In Select mode a separate
+header strip keeps the picker away from the ring's top markers. Focus follows an
+owned chapter control across these modes without taking focus from another pane.
+The ring continues to render the session's original chapters and audio geometry.
+
+The official Mosaik MCP supplied `tooltip`, `button` and `select` documentation.
+Timeline recipe searches returned changelog, history, order-tracking and release
+examples; none matched a circular audio visualization. The existing Ring remains
+the diagram owner, composed with public Angular controls. This framework template
+is not an IElement tree. Checker results and actual native interaction evidence
+are recorded in [verification](docs/project/verification.md).
+The framework checker reports zero errors, warnings and exceptions for the
+RadialTimeline template; manual source counting finds five Mosaik tags.
+In the installed composite Select/Tooltip, Select consumes Escape before the
+Tooltip's anchor listener receives it. Native acceptance reproduced the open
+hover tooltip. RadialTimeline controls the public Tooltip `isOpen` property and
+dismisses its own tooltip state from a lifecycle-cleaned capture listener, without
+preventing the Select's ordinary Escape action. No vendored component is changed.
+The same native check exposed Select clearing its internal value on closed Escape.
+A native `change` handler restores only a rejected null value from the current
+chapter owner, leaving new valid chapter choices and dropdown closing intact.
