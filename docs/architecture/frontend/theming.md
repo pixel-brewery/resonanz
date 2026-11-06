@@ -23,11 +23,17 @@ dark mode; it must not substitute for the on-color of a rose primary fill. The
 digest's inverse play control and progress marks use the same primary on-color.
 
 The native app icon and renderer brand tile share the generated wine-red squircle
-artwork. `yarn icons` reads the primary palette from the theme export and generates
+artwork. `yarn icons:generate` reads the primary palette from the theme export and generates
 SVG, PNG, ICNS, ICO and the favicon. The renderer copies the SVG as a declared Nx
 build input; package verification compares the actual macOS bundle icon with the
 canonical ICNS. Favorite toggles use the owner's separate yellow accent token,
 `--resonanz-favorite-color`, through Mosaik's public foreground styling API.
+
+`yarn design:md` projects the same theme export and pinned Soho model into the
+[light-mode token inventory](generated-design/DESIGN.md) and
+[component defaults](generated-design/COMPONENTS.md). `yarn design:md-check`
+compares the generated regions and validates their schema. The
+[authored component catalog](components.md) records Resonanz's actual UI usage.
 
 The public Mosaik MCP supplied its schema, examples and generation guide. Its
 legacy Style Dictionary validator disagrees with the current Theme Editor's

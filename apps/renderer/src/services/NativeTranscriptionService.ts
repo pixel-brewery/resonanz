@@ -204,7 +204,7 @@ export class NativeTranscriptionService {
     } catch (error) {
       controller.abort();
       if (error instanceof DOMException && error.name === 'AbortError')
-        throw new Error('loc.resonanz.error.fileLoadTimeout');
+        throw new Error('loc.resonanz.error.fileLoadTimeout', { cause: error });
       throw error;
     } finally {
       clearTimeout(timeout);

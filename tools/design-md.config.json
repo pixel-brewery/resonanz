@@ -1,0 +1,12 @@
+{
+  "name": "Resonanz on Mosaik Soho",
+  "description": "The effective light-mode projection of Resonanz's owner-approved Soho theme. The runtime applies the same source theme in light and dark modes.",
+  "base": "soho",
+  "overrides": {
+    "kind": "module",
+    "path": "resources/themes/resonanz-soho.ts",
+    "export": "resonanzTheme"
+  },
+  "designMd": "docs/architecture/frontend/generated-design/DESIGN.md",
+  "componentsMd": "docs/architecture/frontend/generated-design/COMPONENTS.md"
+}

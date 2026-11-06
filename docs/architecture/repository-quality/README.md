@@ -26,13 +26,20 @@ and a matrix result of `success` pass. The gate
 has no repository token permissions and does not check out source. Pull requests,
 pushes to `main`, merge queues and manual runs use the same workflow.
 
-For code or mixed changes, each platform installs the locked dependencies, explicitly prepares the pinned
-Electron binary through `yarn exec install-electron --no`, checks formatting, verifies skill
-and vendor/source provenance, checks public content, checks types, runs behavior
-tests, builds the application, exercises the built desktop app, packages it,
-verifies the package and exercises the actual packaged executable. Windows also
-checks its native speech integration. Controlled fixtures do not establish real
-microphone, personal assistant-account or release readiness.
+For code or mixed changes, each platform installs the locked dependencies,
+prepares the pinned Electron binary through `yarn exec install-electron --no` and
+runs `yarn verify:code`. That command covers full formatting, ESLint, Mosaik toggle
+contracts and theme projection drift, Wortlaut analysis and catalog lint, literal
+translation references, public content, skill and source provenance, types,
+behavior tests and production builds. The workflow then runs built-app E2E,
+packages the app and installers, checks package contents and runs packaged E2E.
+Windows also checks its native speech integration.
+
+Local `yarn verify` runs `verify:code`, `e2e`, `package:smoke` and `e2e:packaged`
+in sequence on a supported desktop host. `package:smoke` builds and checks an
+unpacked bundle. E2E creates a separate task profile for each run and exercises
+synthetic media. Physical media, personal account inference and installation
+require their own evidence.
 
 The release platform build uses the same explicit runtime preparation. Electron's installed package has no
 postinstall binary hook; its documented `install-electron` bin performs that setup before native checks.

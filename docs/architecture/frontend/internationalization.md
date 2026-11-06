@@ -37,9 +37,10 @@ matching placeholders. Date/number formatting uses the current interface locale.
 The public `@pixel-brewery/wortlaut-nx-tasks` package supplies the `resonanz:intl`
 target. The root `project.json` owns the Angular preset, English base locale,
 English/German JSON resource path and `loc.resonanz` key prefix. The default
-`analyze` configuration is read only. `yarn check:intl` rejects duplicate keys,
-empty values and different key sets with explicit error severities; `yarn verify`
-runs the same gate in the required desktop CI checks and release verification.
+`analyze` configuration is read only. `yarn intl:analyze` rejects duplicate keys,
+empty values and different key sets with explicit error severities. `yarn check:intl`
+remains its compatibility alias. `yarn verify:code` runs this gate locally and in
+the required desktop CI and release checks.
 Before analysis, a tested file preflight derives expected locales from the same
 Nx target and rejects missing or empty catalogs, invalid JSON shapes and duplicate
 JSON members. This closes cases that the published 0.2.4 reader can skip before
@@ -50,10 +51,14 @@ committed in `.wortlaut/rule-packs/message-checks/` and `wortlaut.lock.json`.
 The existing portable catalog tests additionally enforce positional placeholder
 parity and native formatting behavior.
 
+`yarn intl:lint` applies Wortlaut's ESLint resource rules to both JSON catalogs.
+`yarn intl:references` checks complete literal `loc.resonanz.*` keys in authored
+TypeScript and templates against both catalogs. The portable catalog tests and
+typed registry also cover runtime formatting and key parity.
+
 `yarn nx run resonanz:intl:detect` previews source findings without applying them.
-`yarn nx run resonanz:intl:sort` explicitly sorts the JSON catalogs. These commands
-use the same Wortlaut owner; no AI provider is configured for catalog checks.
-Runtime imports remain the bundled JSON catalogs and their typed registry.
+`yarn intl:sort` explicitly sorts the JSON catalogs through the same Wortlaut
+target. Runtime imports remain the bundled JSON catalogs and their typed registry.
 
 Wortlaut and its transitive tooling packages are installed from GitHub Packages.
 Source contributors need a token with package-read access in `GITHUB_TOKEN`;
