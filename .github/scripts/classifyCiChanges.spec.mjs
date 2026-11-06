@@ -243,7 +243,7 @@ test('the actual Quality Gate requires successful matrix checks for code and doc
   const script = gate
     .split('        run: |\n')[1]
     .split('\n')
-    .map((line) => line.replace(/^          /u, ''))
+    .map((line) => line.replace(/^ {10}/u, ''))
     .join('\n');
   assert.ok(script.includes('case '));
 
@@ -280,10 +280,10 @@ test('documentation keeps every platform check while running only an explanation
     workflow.indexOf('\n  quality-gate:'),
   );
   const job = verify.split('    steps:')[0];
-  assert.doesNotMatch(job, /^    if:/mu);
-  assert.match(job, /^    name: Build and exercise desktop \(\$\{\{ matrix.os \}\}\)$/mu);
+  assert.doesNotMatch(job, /^ {4}if:/mu);
+  assert.match(job, /^ {4}name: Build and exercise desktop \(\$\{\{ matrix.os \}\}\)$/mu);
   assert.match(job, /os: \[macos-latest, windows-latest\]/u);
-  const runnerExpression = job.match(/^    runs-on: \$\{\{ (.+) \}\}$/mu)?.[1];
+  const runnerExpression = job.match(/^ {4}runs-on: \$\{\{ (.+) \}\}$/mu)?.[1];
   assert.ok(runnerExpression);
   const runnerFor = new Function('needs', 'matrix', `return ${runnerExpression};`);
   const decision = (documentationOnly) => ({
@@ -291,7 +291,7 @@ test('documentation keeps every platform check while running only an explanation
   });
   const steps = verify
     .split('    steps:\n')[1]
-    .split(/^      - /mu)
+    .split(/^ {6}- /mu)
     .filter((step) => step.trim());
 
   // Act / Assert: documentation spends no native runner and enables no checkout, install or test step.
@@ -301,7 +301,7 @@ test('documentation keeps every platform check while running only an explanation
   }
   let explanations = 0;
   for (const step of steps) {
-    const condition = step.match(/^        if: (.+)$/mu)?.[1];
+    const condition = step.match(/^ {8}if: (.+)$/mu)?.[1];
     assert.ok(condition, `Unguarded matrix step: ${step.split('\n')[0]}`);
     const expression = condition.replace(/^\$\{\{ (.+) \}\}$/u, '$1');
     const enabled = new Function(
@@ -320,7 +320,7 @@ test('documentation keeps every platform check while running only an explanation
       )
     ) {
       explanations++;
-      assert.match(step, /^        run: echo /mu);
+      assert.match(step, /^ {8}run: echo /mu);
       assert.doesNotMatch(step, /(?:uses:|yarn |node |corepack )/u);
       assert.equal(
         enabled(
@@ -343,9 +343,9 @@ test('release preparation requires an explicit code diff and keeps downstream pu
     workflow.indexOf('\n  configure:'),
     workflow.indexOf('\n  build:'),
   );
-  const condition = configure.match(/^    if: (.+)$/mu)?.[1];
+  const condition = configure.match(/^ {4}if: (.+)$/mu)?.[1];
   assert.ok(condition);
-  assert.match(configure, /^    needs: changes$/mu);
+  assert.match(configure, /^ {4}needs: changes$/mu);
   const shouldPrepare = new Function('github', 'needs', `return Boolean(${condition});`);
   const github = { repository_id: '1440725741', ref: 'refs/heads/main' };
   const decision = (documentationOnly) => ({
@@ -361,12 +361,12 @@ test('release preparation requires an explicit code diff and keeps downstream pu
 
   // Skipped preparation cannot reach native builds, publication or updater feeds.
   const build = workflow.slice(workflow.indexOf('\n  build:'), workflow.indexOf('\n  publish:'));
-  assert.match(build, /^    needs: configure$/mu);
+  assert.match(build, /^ {4}needs: configure$/mu);
   const publish = workflow.slice(
     workflow.indexOf('\n  publish:'),
     workflow.indexOf('\n  refresh-dependabot:'),
   );
-  assert.match(publish, /^    needs: \[configure, build\]$/mu);
+  assert.match(publish, /^ {4}needs: \[configure, build\]$/mu);
   assert.doesNotMatch(publish.split('    steps:')[0], /(?:always|!cancelled)\(\)/u);
 });
 

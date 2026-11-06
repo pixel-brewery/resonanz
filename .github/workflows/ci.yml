@@ -84,13 +84,9 @@ jobs:
         if: needs.changes.outputs.documentation_only == 'false'
         run: yarn exec install-electron --no
 
-      - name: Check formatting
+      - name: Verify source quality, provenance, behavior and builds
         if: needs.changes.outputs.documentation_only == 'false'
-        run: yarn format:check
-
-      - name: Verify provenance, types, behavior and builds
-        if: needs.changes.outputs.documentation_only == 'false'
-        run: yarn verify
+        run: yarn verify:code
 
       - name: Exercise the installed Windows speech runtime
         if: needs.changes.outputs.documentation_only == 'false' && runner.os == 'Windows'
@@ -98,7 +94,7 @@ jobs:
 
       - name: Exercise the built app with synthetic audio
         if: needs.changes.outputs.documentation_only == 'false'
-        run: yarn test:e2e
+        run: yarn e2e
 
       - name: Package the native app and installers
         if: needs.changes.outputs.documentation_only == 'false'
@@ -110,7 +106,7 @@ jobs:
 
       - name: Exercise the actual packaged executable
         if: needs.changes.outputs.documentation_only == 'false'
-        run: yarn test:e2e --packaged
+        run: yarn e2e:packaged
 
       - name: Upload bounded verification evidence
         if: always() && needs.changes.outputs.documentation_only == 'false'

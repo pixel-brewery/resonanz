@@ -443,7 +443,7 @@ async function verifyDesktopLayout() {
   const extraFixtureIds = [];
   const evidence = [];
   let fixtureId;
-  const settle = async () => {
+  const settle = async (scrollSelector) => {
     const token = randomUUID();
     await page.evaluate((token) => {
       const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
@@ -455,24 +455,38 @@ async function verifyDesktopLayout() {
     }, token);
     let previous;
     await waitFor(async () => {
-      const measured = await page.evaluate((token) => {
-        if (document.documentElement.dataset.layoutReady !== token) return null;
-        const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
-        if (splits.some((split) => split.clientWidth <= 1 || split.clientHeight <= 1)) return null;
-        const boxes = splits
-          .flatMap((split) => [
-            split,
-            ...[...split.children].filter(
-              (child) => child.slot === 'start' || child.slot === 'end',
-            ),
-          ])
-          .map((element) => element.getBoundingClientRect());
-        return [
-          innerWidth,
-          innerHeight,
-          ...boxes.flatMap((box) => [box.x, box.y, box.width, box.height]),
-        ];
-      }, token);
+      const measured = await page.evaluate(
+        ({ token, scrollSelector }) => {
+          if (document.documentElement.dataset.layoutReady !== token) return null;
+          const scroller = scrollSelector ? document.querySelector(scrollSelector) : null;
+          if (scrollSelector && (!scroller || document.fonts.status === 'loading')) return null;
+          const splits = [...document.querySelectorAll('mosaik-split[resonanzSplitLayout]')];
+          if (splits.some((split) => split.clientWidth <= 1 || split.clientHeight <= 1))
+            return null;
+          const boxes = splits
+            .flatMap((split) => [
+              split,
+              ...[...split.children].filter(
+                (child) => child.slot === 'start' || child.slot === 'end',
+              ),
+            ])
+            .map((element) => element.getBoundingClientRect());
+          return [
+            innerWidth,
+            innerHeight,
+            ...boxes.flatMap((box) => [box.x, box.y, box.width, box.height]),
+            ...(scroller
+              ? [
+                  scroller.clientWidth,
+                  scroller.clientHeight,
+                  scroller.scrollWidth,
+                  scroller.scrollHeight,
+                ]
+              : []),
+          ];
+        },
+        { token, scrollSelector },
+      );
       const stable =
         measured &&
         previous &&
@@ -592,11 +606,16 @@ async function verifyDesktopLayout() {
       element.scrollTop = element.scrollHeight;
     });
     await settle();
-    if (range.vertical > 1)
+    if (range.vertical > 1) {
+      const after = await body.evaluate((element) => ({
+        top: element.scrollTop,
+        vertical: element.scrollHeight - element.clientHeight,
+      }));
       assert(
-        await body.evaluate((element) => element.scrollTop > 0),
-        `${selector}: content scrolls`,
+        after.top > 0,
+        `${selector}: content scrolls ${JSON.stringify({ before: range, after })}`,
       );
+    }
     const afterFixed = await visibleGeometry(fixed);
     assert.equal(afterFixed.length, beforeFixed.length, `${selector}: chrome stays mounted`);
     for (let index = 0; index < beforeFixed.length; index++) {
@@ -1272,24 +1291,18 @@ async function verifyDesktopLayout() {
     }
 
     await navigate('#/onboarding', 'onboarding-view', compact);
-    for (let step = 0; step < 3; step++) {
+    const onboardingContent = '[test-id="onboarding-content"]';
+    const onboardingSteps = ['onboarding-microphone', 'setup-test-assistant', 'setup-user-name'];
+    for (const [step, marker] of onboardingSteps.entries()) {
+      // Saving may update the outgoing step's assistant status before navigation completes.
+      await control(marker).waitFor({ state: 'visible' });
+      await settle(onboardingContent);
       await assertInside(
         '.setup-main > footer, [test-id="onboarding-next"]',
         `onboarding step ${step + 1}`,
       );
-      await scrollBody(
-        '[test-id="onboarding-content"]',
-        '.setup-titlebar, .setup-main > footer',
-        false,
-      );
-      if (step < 2) {
-        const previous = await control('onboarding-content').innerText();
-        await control('onboarding-next').click();
-        await waitFor(
-          async () => (await control('onboarding-content').innerText()) !== previous,
-          `onboarding step ${step + 2}`,
-        );
-      }
+      await scrollBody(onboardingContent, '.setup-titlebar, .setup-main > footer', false);
+      if (step + 1 < onboardingSteps.length) await control('onboarding-next').click();
     }
     await navigate(`#/session/${fixtureId}?tab=ring`, 'session-ring-split', compact);
     await menuAction('delete-session');

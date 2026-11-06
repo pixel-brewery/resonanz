@@ -7,7 +7,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { ISessionSummary } from '@resonanz/contracts';
-import { FormFieldDirective, TypographyDirective } from '@pixel-brewery/mosaik-elements-angular';
+import { FormFieldDirective } from '@pixel-brewery/mosaik-elements-angular';
 import { ButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/button';
 import { ToggleButtonComponent } from '@pixel-brewery/mosaik-elements-angular/components/toggle-button';
 import { SearchBoxComponent } from '@pixel-brewery/mosaik-elements-angular/components/search-box';

@@ -193,12 +193,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Prepare the pinned Electron runtime
         run: yarn exec install-electron --no
-      - run: yarn format:check
-      - run: yarn verify
+      - run: yarn verify:code
       - name: Exercise the Windows speech runtime
         if: matrix.platform == 'win32'
         run: node tools/verify-windows-speech.mjs
-      - run: yarn test:e2e
+      - run: yarn e2e
       - name: Make native installers without platform certificates
         run: yarn make
       - name: Verify the ad-hoc macOS bundle and installer integrity
@@ -212,7 +211,7 @@ jobs:
           if grep -q 'flags=.*runtime' "$RUNNER_TEMP/resonanz-signature.txt"; then exit 1; fi
           while IFS= read -r -d '' image; do hdiutil verify "$image"; done < <(find out/make -name '*.dmg' -print0)
       - run: yarn verify:package
-      - run: yarn test:e2e --packaged
+      - run: yarn e2e:packaged
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: installer-${{ matrix.platform }}-${{ matrix.architecture }}

@@ -191,31 +191,34 @@ yarn install --immutable
 yarn start
 ```
 
-`yarn start` builds the renderer and native processes, then launches Electron.
-`yarn start:built` reuses an existing build. Pinned Mosaik and Synapse archives
-are included. Wortlaut is resolved from its public registry packages; an adjacent
-checkout is unnecessary.
+`yarn start`, `yarn dev` and `yarn start:unpackaged` build the renderer and native
+processes, then launch Electron. `yarn start:built` reuses an existing build.
+Pinned Mosaik and Synapse archives are included. Wortlaut is resolved from its
+public registry packages.
 
-Quality and packaging commands:
+Quality and packaging commands
 
 ```sh
-yarn verify            # provenance, public content, types, tests and builds
-yarn format:check      # repository formatting
-yarn test:e2e          # built desktop app with isolated synthetic media
+yarn verify            # source gates, built-app E2E, package smoke and packaged E2E
+yarn verify:code       # formatting, lint, design, localization, provenance, tests and builds
+yarn e2e               # built desktop app with isolated synthetic media
+yarn package:smoke     # build and inspect the unpacked application bundle
+yarn e2e:packaged      # exercise the packaged executable
 yarn package           # native application bundle and installers (DMG on macOS)
 yarn package:unpacked  # native application bundle only
 yarn verify:package    # compare the artifact with the current build
-yarn test:e2e --packaged
 yarn make              # compatibility alias for yarn package
 ```
 
 On Apple Silicon, `yarn run package` writes the DMG to
 `out/make/dmg/arm64/Resonanz.dmg` and the application to
 `out/Resonanz-darwin-arm64/Resonanz.app`. Other architectures use their own
-architecture directory. `RESONANZ_OUTPUT_DIR` replaces the default `out` directory.
-Controlled checks use synthetic data and isolated profiles. Real microphone capture, native speech,
-assistant-account inference, each operating system and native installation have
-separate evidence in the [verification record](docs/project/verification.md).
+architecture directory. Native verification needs a supported macOS or Windows
+host with Electron and the platform build tools. `RESONANZ_OUTPUT_DIR` selects a
+separate package directory when preserving an existing artifact. E2E uses
+synthetic media and profiles under `.codex-work/`. Real microphone capture, native
+speech, assistant-account inference and installation have separate evidence in
+the [verification record](docs/project/verification.md).
 
 Full contributor guidance is in [CONTRIBUTING.md](CONTRIBUTING.md), and
 [AGENTS.md](AGENTS.md) holds the repository rules.

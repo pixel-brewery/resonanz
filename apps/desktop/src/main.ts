@@ -18,7 +18,7 @@ import {
   type NativeImage,
 } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { mkdir, stat, copyFile, writeFile, rm } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
@@ -977,6 +977,7 @@ async function nativeRequest(method: RequestMethod, payload: unknown): Promise<u
         title: t('loc.resonanz.export.recording'),
         defaultPath: join(
           app.getPath('downloads'),
+          // eslint-disable-next-line no-control-regex -- Export names must reject C0 controls.
           `${selected.title.replace(/[<>:"/\\|?*\u0000-\u001f]/gu, '_')}.${extension}`,
         ),
         filters: [
