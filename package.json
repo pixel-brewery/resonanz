@@ -4,6 +4,22 @@
   "version": "0.1.13",
   "private": true,
   "description": "Record conversations, talk with AI and revisit sessions through your local assistants.",
+  "keywords": [
+    "electron",
+    "angular",
+    "desktop-app",
+    "audio-recording",
+    "meeting-notes",
+    "speech-to-text",
+    "text-to-speech",
+    "transcription",
+    "voice-assistant",
+    "transcript-analysis",
+    "local-first",
+    "codex",
+    "claude-code",
+    "synapse"
+  ],
   "author": "Pixel Brewery",
   "license": "MIT",
   "repository": {
