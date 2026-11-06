@@ -55,23 +55,32 @@ package resolution using a personal peer-checkout alias. Preserve complete notic
 
 Run focused checks before integrated gates and coordinate one heavy job at a time.
 
-| Command                    | Scope                                                      |
-| -------------------------- | ---------------------------------------------------------- |
-| `yarn verify:skills`       | Pinned Architecture base, derivation and reference links   |
-| `yarn verify:vendor`       | Pinned distribution hashes                                 |
-| `yarn verify:audio`        | Copied/adapted audio integrity and generated worklet       |
-| `yarn typecheck`           | Native TypeScript and Angular templates                    |
-| `yarn test`                | Behavior specifications and packaging-tool tests           |
-| `yarn build`               | Renderer and native bundles                                |
-| `yarn test:e2e`            | Built Electron, isolated profile and synthetic media       |
-| `yarn verify`              | Configured provenance/type/test/build gates                |
-| `yarn package`             | Host-specific native bundle and installers (DMG on macOS)  |
-| `yarn package:unpacked`    | Host-specific native application bundle only               |
-| `yarn verify:package`      | Actual artifact against current bundles/resources/licenses |
-| `yarn test:e2e --packaged` | The native artifact's actual executable                    |
-| `yarn make`                | Compatibility alias for `yarn package`                     |
+| Command                 | Scope                                                      |
+| ----------------------- | ---------------------------------------------------------- |
+| `yarn verify:skills`    | Pinned Architecture base, derivation and reference links   |
+| `yarn verify:vendor`    | Pinned distribution hashes                                 |
+| `yarn verify:audio`     | Copied/adapted audio integrity and generated worklet       |
+| `yarn typecheck`        | Native TypeScript and Angular templates                    |
+| `yarn test`             | Behavior specifications and packaging-tool tests           |
+| `yarn build`            | Renderer and native bundles                                |
+| `yarn format:check`     | Full repository Prettier scope                             |
+| `yarn lint`             | ESLint source and Wortlaut catalog checks                  |
+| `yarn ui:check`         | Mosaik toggle switch naming and state contracts            |
+| `yarn design:md-check`  | Current Mosaik theme projection and DESIGN.md validation   |
+| `yarn intl:analyze`     | Catalog preflight and Wortlaut analysis                    |
+| `yarn intl:lint`        | English/German catalog lint                                |
+| `yarn intl:references`  | Authored literal localization keys in both catalogs        |
+| `yarn e2e`              | Built Electron, isolated profile and synthetic media       |
+| `yarn verify:code`      | Source quality, provenance, types, tests and builds        |
+| `yarn verify`           | Code gates, both E2E runs and unpacked package smoke       |
+| `yarn package`          | Host-specific native bundle and installers (DMG on macOS)  |
+| `yarn package:unpacked` | Host-specific native application bundle only               |
+| `yarn package:smoke`    | Build and inspect the unpacked bundle                      |
+| `yarn verify:package`   | Actual artifact against current bundles/resources/licenses |
+| `yarn e2e:packaged`     | The native artifact's actual executable                    |
+| `yarn make`             | Compatibility alias for `yarn package`                     |
 
-`--speech` adds an intentional audible reading check with an installed system voice.
+`yarn e2e --speech` adds an intentional audible reading check with an installed system voice.
 `node tools/verify-windows-speech.mjs` directly compiles the supplied Windows bridge,
 synthesizes a WAV and, when a matching language is installed, transcribes it. Missing
 recognition capability is recorded explicitly.

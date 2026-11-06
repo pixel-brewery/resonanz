@@ -1,9 +1,28 @@
 # Verification and evidence
 
-Updated 2026-11-05. Resonanz uses native Codex/Claude account sign-in, system speech
+Updated 2026-11-06. Resonanz uses native Codex/Claude account sign-in, system speech
 and the provenance-verified upstream audio core. An additional API key or cloud speech provider
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
+
+## Quality command alignment on 2026-11-06
+
+Under Node 24.21.0, an immutable install and the source phase of `yarn verify`
+passed, including 528 behavior tests in 61 files, 105 tooling tests, 15 catalog
+preflight cases, both builds and 1,160 literal localization references. The
+Mosaik projection matched both generated documents and reported 0 errors and
+102 warnings, including one Avatar contrast warning.
+
+The unpackaged macOS ARM64 app passed all 15 E2E groups. Forge produced a fresh
+bundle in a separate output directory. Package verification compared 191 files
+and verified the local signature. The first packaged run sampled scroll bounds
+while onboarding was changing steps. The harness now waits for the next step's
+control and stable scroll dimensions before applying the same narrow-window
+scroll and fixed-control assertions. `yarn e2e:packaged` then passed all 15 groups
+using the same bundle.
+
+Both Electron runs used isolated profiles and synthetic media. Windows, physical
+media, personal assistant inference and installer publication have separate checks.
 
 ## Ring chapter controls: 2026-11-05
 
@@ -685,13 +704,12 @@ Use the Node 24 version pinned in `.nvmrc`:
 ```sh
 yarn install --immutable
 yarn verify
-yarn package
-yarn verify:package
-yarn test:e2e --packaged
 ```
 
-`RESONANZ_OUTPUT_DIR` selects a separate local output folder to preserve an existing
-app bundle. `--speech` adds intentional audible TTS. Controlled account-free tests
+`yarn verify:code` runs the source gates, tests and builds alone. `yarn package`
+builds installers for a separate distribution check. `RESONANZ_OUTPUT_DIR` selects
+a separate local output folder to preserve an existing app bundle.
+`yarn e2e --speech` adds intentional audible TTS. Controlled account-free tests
 never establish personal sign-in, physical recognition or real inference. See
 [desktop CI](https://github.com/pixel-brewery/resonanz/actions/workflows/ci.yml),
 [verification tooling](../../tools/) and [distribution](distribution.md).
