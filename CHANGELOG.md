@@ -1,3 +1,7 @@
+## 0.1.13 (2026-11-06)
+
+This was a version bump only, there were no code changes.
+
 ## 0.1.12 (2026-11-05)
 
 ### 🩹 Fixes
