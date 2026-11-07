@@ -13,7 +13,7 @@ export default [
       '.codex-work/**',
       '.nx/**',
       '.yarn/**',
-      '.agents/skills/architecture/**',
+      '.agents/skills/architect/**',
       '.wortlaut/rule-packs/**',
       'coverage/**',
       'dist/**',
