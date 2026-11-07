@@ -15,6 +15,8 @@ The interface supports English and German, with English as its default.
 
 ## Implementation guides
 
+- [Mosaik developer MCP](architecture/mcp.md): the local catalog, client configuration and version compatibility.
+
 - [Resonanz Architect](../.agents/skills/resonanz-architect/SKILL.md): shared
   Architecture foundations, Resonanz-specific owners and verification guidance.
 - [Architecture and source owners](architecture/README.md)
