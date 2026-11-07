@@ -4,14 +4,14 @@ description: 'Design, implement, refactor, test, document or review Resonanz eng
 # Keep the inheritance checker's two-space metadata nesting.
 # prettier-ignore
 metadata:
-  inherits: architecture
+  inherits: architect
 ---
 
 # Resonanz Architect
 
 Carry out the requested task through Resonanz's production owners. Read the
-[Architecture base](../architecture/SKILL.md), its
-[shared workflow](../architecture/references/common/workflow.md), root
+[Architecture base](../architect/SKILL.md), its
+[shared workflow](../architect/references/common/workflow.md), root
 [AGENTS.md](../../../AGENTS.md) and the [project contract](references/project.md)
 first. Apply this skill to Resonanz engineering tasks even when it was not named;
 preserve the user's requested implementation, design, explanation or review mode.
@@ -27,20 +27,20 @@ Select every relevant production foundation and its local application below befo
 editing. Add testing guidance when verifying behavior; revisit routing when the
 task crosses another boundary. Load only the references needed for the task.
 
-| Task or boundary                                                                  | Shared foundation                                                                                                                      | Resonanz application                                                                      |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Ownership, solution design, extraction, refactoring or migration                  | [Architecture](../architecture/references/common/architecture.md)                                                                      | [Architecture and source owners](references/architecture.md)                              |
-| TypeScript contracts, composition, abstractions, exports or source documentation  | [OOP and design patterns](../architecture/references/common/oop.md)                                                                    | [Project and source conventions](references/project.md)                                   |
-| Application use cases, session storage, recovery or structured analysis           | [Backend](../architecture/references/common/backend.md)                                                                                | [Sessions, contracts and evidence](references/sessions.md)                                |
-| Requests, responses, events, validation or persisted/renderer projections         | [Contracts](../architecture/references/common/backend-contracts.md)                                                                    | [Desktop transport](references/desktop.md), [Session contracts](references/sessions.md)   |
-| Electron, native processes, permissions, startup, cancellation or shutdown        | [Platform](../architecture/references/common/platform.md), [Integration safety](../architecture/references/common/backend-safety.md)   | [Desktop lifecycle](references/desktop.md)                                                |
-| Recording, transcription, speech, duplex archive, worklet or copied sources       | [Platform](../architecture/references/common/platform.md)                                                                              | [Audio and speech](references/audio.md)                                                   |
-| Assistant accounts, native CLI execution, continuations or provider dependencies  | [Platform](../architecture/references/common/platform.md), [Integration safety](../architecture/references/common/backend-safety.md)   | [Synapse integration](references/assistants.md)                                           |
-| Angular views, Mosaik, forms, presenters, routing, visualizations or localization | [Frontend](../architecture/references/common/frontend.md), [Frontend patterns](../architecture/references/common/frontend-patterns.md) | [Frontend and internationalization](references/frontend.md)                               |
-| Session instants, media offsets, deadlines, weekly grouping or date presentation  | [Date and time](../architecture/references/common/date-time.md)                                                                        | [Session time contracts](references/sessions.md), [Frontend](references/frontend.md)      |
-| Unit, integration, contract or tooling tests                                      | [Testing](../architecture/references/common/testing.md), plus the production foundation                                                | [Verification](references/testing.md)                                                     |
-| Electron UI acceptance, native packaging or real media/account evidence           | [E2E](../architecture/references/common/e2e.md), plus the production foundation                                                        | [Native acceptance and packaging](references/testing.md)                                  |
-| An actual HTTP integration, if the authorized task introduces one                 | [API URLs](../architecture/references/common/api.md), [Integration safety](../architecture/references/common/backend-safety.md)        | [Project boundaries](references/project.md); existing product transport remains typed IPC |
+| Task or boundary                                                                  | Shared foundation                                                                                                                | Resonanz application                                                                      |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Ownership, solution design, extraction, refactoring or migration                  | [Architecture](../architect/references/common/architecture.md)                                                                   | [Architecture and source owners](references/architecture.md)                              |
+| TypeScript contracts, composition, abstractions, exports or source documentation  | [OOP and design patterns](../architect/references/common/oop.md)                                                                 | [Project and source conventions](references/project.md)                                   |
+| Application use cases, session storage, recovery or structured analysis           | [Backend](../architect/references/common/backend.md)                                                                             | [Sessions, contracts and evidence](references/sessions.md)                                |
+| Requests, responses, events, validation or persisted/renderer projections         | [Contracts](../architect/references/common/backend-contracts.md)                                                                 | [Desktop transport](references/desktop.md), [Session contracts](references/sessions.md)   |
+| Electron, native processes, permissions, startup, cancellation or shutdown        | [Platform](../architect/references/common/platform.md), [Integration safety](../architect/references/common/backend-safety.md)   | [Desktop lifecycle](references/desktop.md)                                                |
+| Recording, transcription, speech, duplex archive, worklet or copied sources       | [Platform](../architect/references/common/platform.md)                                                                           | [Audio and speech](references/audio.md)                                                   |
+| Assistant accounts, native CLI execution, continuations or provider dependencies  | [Platform](../architect/references/common/platform.md), [Integration safety](../architect/references/common/backend-safety.md)   | [Synapse integration](references/assistants.md)                                           |
+| Angular views, Mosaik, forms, presenters, routing, visualizations or localization | [Frontend](../architect/references/common/frontend.md), [Frontend patterns](../architect/references/common/frontend-patterns.md) | [Frontend and internationalization](references/frontend.md)                               |
+| Session instants, media offsets, deadlines, weekly grouping or date presentation  | [Date and time](../architect/references/common/date-time.md)                                                                     | [Session time contracts](references/sessions.md), [Frontend](references/frontend.md)      |
+| Unit, integration, contract or tooling tests                                      | [Testing](../architect/references/common/testing.md), plus the production foundation                                             | [Verification](references/testing.md)                                                     |
+| Electron UI acceptance, native packaging or real media/account evidence           | [E2E](../architect/references/common/e2e.md), plus the production foundation                                                     | [Native acceptance and packaging](references/testing.md)                                  |
+| An actual HTTP integration, if the authorized task introduces one                 | [API URLs](../architect/references/common/api.md), [Integration safety](../architect/references/common/backend-safety.md)        | [Project boundaries](references/project.md); existing product transport remains typed IPC |
 
 Resonanz translates shared backend examples into framework-neutral application
 owners, Zod-validated IPC and versioned JSON/audio storage. It does not acquire

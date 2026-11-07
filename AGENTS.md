@@ -11,7 +11,7 @@ older prose.
 
 - Apply [resonanz-architect](.agents/skills/resonanz-architect/SKILL.md) for Resonanz
   engineering work, including delegated tasks. Read its project contract and the
-  inherited [Architecture base](.agents/skills/architecture/SKILL.md) with the
+  inherited [Architecture base](.agents/skills/architect/SKILL.md) with the
   shared workflow, then select the relevant production and testing references.
 - `.agents/skills/` is the canonical skill tree. The shared base comes from
   `pixel-brewery/skills`, pinned by full commit and content hash in root

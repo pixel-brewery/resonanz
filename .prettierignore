@@ -12,7 +12,8 @@ resources/icons/png
 .angular
 
 # Imported skill content is protected by skills-lock.json.
-.agents/skills/architecture/
+.agents/skills/architect/
+.claude/skills/architect/
 
 # Wortlaut pins the original shipped rule-pack bytes.
 .wortlaut/rule-packs/**
