@@ -20,3 +20,7 @@ resources/icons/png
 # The Mosaik generator owns the formatting of the theme projection.
 /docs/architecture/frontend/generated-design/DESIGN.md
 /docs/architecture/frontend/generated-design/COMPONENTS.md
+
+# Imported Designer projections retain the pinned upstream bytes.
+.agents/skills/designer/
+.claude/skills/designer/
