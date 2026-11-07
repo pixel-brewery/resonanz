@@ -18,6 +18,11 @@ older prose.
   `skills-lock.json`. Maintain Resonanz rules in the derived skill; change shared
   rules upstream and restore/update the base through the Skills CLI. Do not edit
   or reformat the imported base or duplicate its common modules locally.
+- For every UI question, new idea or interface/design decision, apply
+  [Resonanz Designer](.agents/skills/resonanz-designer/SKILL.md). It explicitly composes
+  the pinned shared [Designer](.agents/skills/designer/SKILL.md), its mandatory catalog
+  workflow and Resonanz's owner-approved warm/serif Soho theme, native product
+  boundaries and verification contract. Keep those local design sources authoritative.
 - After skill changes, run `yarn verify:skills` or
   `python3 .agents/scripts/sync_architect_core.py --check`. This validates the
   dependency, inheritance and reference links without a peer checkout or network.

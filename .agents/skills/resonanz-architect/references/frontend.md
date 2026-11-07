@@ -1,5 +1,9 @@
 # Angular, Mosaik, visualizations and language
 
+Apply [Resonanz Designer](../../resonanz-designer/SKILL.md) to every UI question, new idea
+and design decision. It composes the shared Designer and mandatory catalog workflow with
+[the local theme/runtime/product contract](../../resonanz-designer/references/project.md).
+
 Read [frontend architecture](../../../../docs/architecture/frontend/README.md),
 [component contracts](../../../../docs/architecture/frontend/components.md),
 [internationalization](../../../../docs/architecture/frontend/internationalization.md)

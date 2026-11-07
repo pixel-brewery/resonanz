@@ -145,6 +145,7 @@
     "@nx/devkit": "24.0.2",
     "@nx/js": "24.0.2",
     "@nx/workspace": "24.0.2",
+    "@pixel-brewery/mosaik-mcp": "0.1.192",
     "@pixel-brewery/wortlaut-eslint-rules": "0.2.4",
     "@pixel-brewery/wortlaut-nx-tasks": "0.2.4",
     "@schematics/angular": "22.2.5",

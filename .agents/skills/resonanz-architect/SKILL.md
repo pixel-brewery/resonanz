@@ -63,6 +63,13 @@ Examples of combined selection:
   project real session data into reusable visual components without another media
   or persistence owner.
 
+## Interface and design work
+
+For every UI question, new idea and interface/design decision, also apply
+[Resonanz Designer](../resonanz-designer/SKILL.md). Its local contract owns this product's
+actual design system and runtime; it explicitly reads the pinned shared Designer and
+mandatory catalog workflow. Engineering ownership and environment constraints stay here.
+
 ## Maintaining the derivation
 
 Maintain project rules here and shared rules upstream in `pixel-brewery/skills`.
