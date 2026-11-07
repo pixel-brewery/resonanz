@@ -1,3 +1,13 @@
+## 0.1.16 (2026-11-07)
+
+### 🩹 Fixes
+
+- **agents:** unify designer and local Mosaik MCP ([f51a507](https://github.com/pixel-brewery/resonanz/commit/f51a507))
+
+### ❤️ Thank You
+
+- RueDeRennes @RueDeRennes
+
 ## 0.1.15 (2026-11-06)
 
 This was a version bump only, there were no code changes.
