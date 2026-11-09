@@ -7804,10 +7804,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fake-indexeddb@npm:6.2.6":
-  version: 6.2.6
-  resolution: "fake-indexeddb@npm:6.2.6"
-  checksum: 10c0/d55b3155548f08da1c9d7552314eed30fd1880c1f7643654c8b0c1fdf80591682d9f88e7a5c481113f48b994cb09820d61eee0dd8b966ca4f4497fce0eb748de
+"fake-indexeddb@npm:6.2.7":
+  version: 6.2.7
+  resolution: "fake-indexeddb@npm:6.2.7"
+  checksum: 10c0/634bf90ba77ffd834a347661a6f7a6dc00d97b18ae49d49e437d454a42b9250dfe92144799605255b25428df577349b9195d0c150df3507edc003e26120f81ae
   languageName: node
   linkType: hard
 
@@ -11442,7 +11442,7 @@ __metadata:
     electron-native-speech-backend-macos: "npm:0.1.7"
     esbuild: "npm:0.28.2"
     eslint: "npm:10.14.0"
-    fake-indexeddb: "npm:6.2.6"
+    fake-indexeddb: "npm:6.2.7"
     jsdom: "npm:30.1.3"
     jsonc-parser: "npm:3.3.1"
     lit: "npm:3.3.3"
