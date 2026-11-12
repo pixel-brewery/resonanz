@@ -146,7 +146,7 @@
     "@nx/js": "24.0.5",
     "@nx/workspace": "24.0.5",
     "@pixel-brewery/mosaik-mcp": "0.1.192",
-    "@pixel-brewery/wortlaut-eslint-rules": "0.2.4",
+    "@pixel-brewery/wortlaut-eslint-rules": "0.2.5",
     "@pixel-brewery/wortlaut-nx-tasks": "0.2.4",
     "@schematics/angular": "22.2.6",
     "@tailwindcss/postcss": "4.3.3",
