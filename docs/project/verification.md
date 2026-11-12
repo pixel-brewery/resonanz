@@ -709,7 +709,9 @@ yarn verify
 `yarn verify:code` runs the source gates, tests and builds alone. `yarn package`
 builds installers for a separate distribution check. `RESONANZ_OUTPUT_DIR` selects
 a separate local output folder to preserve an existing app bundle.
-`yarn e2e --speech` adds intentional audible TTS. Controlled account-free tests
-never establish personal sign-in, physical recognition or real inference. See
+`yarn e2e` covers synthetic capture, audio byte ranges, and audio import and export.
+The Windows speech check writes its synthesis fixture to a WAV file. Controlled
+account-free tests never establish personal sign-in, physical recognition or real
+inference. See
 [desktop CI](https://github.com/pixel-brewery/resonanz/actions/workflows/ci.yml),
 [verification tooling](../../tools/) and [distribution](distribution.md).
