@@ -362,10 +362,7 @@ test('release preparation requires an explicit code diff and keeps downstream pu
   // Skipped preparation cannot reach native builds, publication or updater feeds.
   const build = workflow.slice(workflow.indexOf('\n  build:'), workflow.indexOf('\n  publish:'));
   assert.match(build, /^ {4}needs: configure$/mu);
-  const publish = workflow.slice(
-    workflow.indexOf('\n  publish:'),
-    workflow.indexOf('\n  refresh-dependabot:'),
-  );
+  const publish = workflow.slice(workflow.indexOf('\n  publish:'));
   assert.match(publish, /^ {4}needs: \[configure, build\]$/mu);
   assert.doesNotMatch(publish.split('    steps:')[0], /(?:always|!cancelled)\(\)/u);
 });
