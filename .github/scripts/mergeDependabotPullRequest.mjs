@@ -28,6 +28,7 @@ const requestFailure =
  * @returns A merged result or a skipped result with a fixed, non-sensitive reason.
  * @throws An Error with a controlled diagnostic when an API request fails or a merge is not confirmed.
  * @remarks This owner never checks out pull-request code, retries a merge, approves a request or publishes a release. The caller supplies GH_TOKEN for the built-in GitHub CLI boundary. The final REST request atomically guards the tested head SHA; GitHub's merge endpoint has no equivalent expected-base parameter, so main can still move after the final read.
+ * A declined merge is skipped only when a fresh comparison proves the same open Dependabot head is now behind main.
  *
  * @internal
  */
@@ -111,10 +112,42 @@ export async function mergeDependabotPullRequest(context, dependencies = {}) {
   if (currentMain?.name !== identity.defaultBranch || currentMain?.commit?.sha !== mainSha)
     return skipped('main-changed');
 
-  const result = await request('PUT', `${pullRequestPath}/merge`, {
-    sha: run.head_sha,
-    merge_method: 'squash',
-  });
+  let result;
+  try {
+    result = await boundary('PUT', `${pullRequestPath}/merge`, {
+      sha: run.head_sha,
+      merge_method: 'squash',
+    });
+  } catch (error) {
+    const failure = new Error(requestFailure);
+    if (error?.status !== 405) throw failure;
+
+    const latestMain = await request('GET', mainPath);
+    const latestMainSha = latestMain?.commit?.sha;
+    if (
+      latestMain?.name !== identity.defaultBranch ||
+      !shaPattern.test(latestMainSha ?? '') ||
+      latestMainSha === mainSha
+    )
+      throw failure;
+
+    const latestPullRequest = await request('GET', pullRequestPath);
+    if (!eligiblePullRequest(latestPullRequest, pullRequestNumber, run, identity)) throw failure;
+
+    const latestComparison = await request(
+      'GET',
+      `${repositoryPath}/compare/${latestMainSha}...${run.head_sha}`,
+    );
+    if (
+      !Number.isSafeInteger(latestComparison?.behind_by) ||
+      latestComparison.behind_by <= 0 ||
+      !shaPattern.test(latestComparison.merge_base_commit?.sha ?? '') ||
+      latestComparison.merge_base_commit.sha === latestMainSha
+    )
+      throw failure;
+
+    return skipped('main-changed');
+  }
 
   if (result?.merged !== true || !shaPattern.test(result?.sha ?? ''))
     throw new Error(

@@ -8,6 +8,7 @@ const prefix = 'repos/pixel-brewery/resonanz';
 const source = 'a'.repeat(40);
 const head = 'b'.repeat(40);
 const merged = 'c'.repeat(40);
+const advanced = 'd'.repeat(40);
 const context = {
   eventName: 'workflow_run',
   repository: 'pixel-brewery/resonanz',
@@ -72,8 +73,10 @@ function fixture() {
   let mainReads = 0;
   const request = async (method, endpoint, body) => {
     calls.push({ method, endpoint, body });
-    if (method === 'PUT' && endpoint === `${prefix}/pulls/7/merge`)
+    if (method === 'PUT' && endpoint === `${prefix}/pulls/7/merge`) {
+      records.onMerge?.();
       return { merged: true, sha: merged };
+    }
     if (method !== 'GET') throw new Error('Unexpected fixture write.');
     if (endpoint === 'repositories/1440725741') return structuredClone(records.repository);
     if (endpoint === `${prefix}/actions/workflows/ci.yml`) return structuredClone(records.workflow);
@@ -87,6 +90,8 @@ function fixture() {
     }
     if (endpoint === `${prefix}/compare/${source}...${head}`)
       return structuredClone(records.comparison);
+    if (endpoint === `${prefix}/compare/${advanced}...${head}`)
+      return structuredClone(records.latestComparison);
     throw new Error('Unexpected fixture read.');
   };
   return { records, calls, request };
@@ -112,6 +117,41 @@ test('merges only the verified current Dependabot head and retains its exact mer
     ],
   );
 });
+
+for (const scenario of [
+  'same open head is behind',
+  'main did not advance',
+  'pull request closed',
+  'pull request head changed',
+  'head still includes main',
+  'request was forbidden',
+]) {
+  test(`handles a failed merge PUT when ${scenario}`, async () => {
+    const dependencies = fixture();
+    const { records } = dependencies;
+    records.onMerge = () => {
+      if (scenario !== 'main did not advance')
+        records.nextMain = { name: 'main', commit: { sha: advanced } };
+      if (scenario === 'pull request closed') records.pull.state = 'closed';
+      if (scenario === 'pull request head changed') records.pull.head.sha = merged;
+      records.latestComparison =
+        scenario === 'head still includes main'
+          ? { behind_by: 0, merge_base_commit: { sha: advanced } }
+          : { behind_by: 1, merge_base_commit: { sha: source } };
+      throw Object.assign(new Error('GitHub did not accept the merge'), {
+        status: scenario === 'request was forbidden' ? 403 : 405,
+      });
+    };
+
+    const result = mergeDependabotPullRequest(context, dependencies);
+
+    if (scenario === 'same open head is behind')
+      assert.deepEqual(await result, { status: 'skipped', reason: 'main-changed' });
+    else
+      await assert.rejects(result, /Dependabot merge stopped after a GitHub API request failed/u);
+    assert.equal(dependencies.calls.filter((call) => call.method === 'PUT').length, 1);
+  });
+}
 
 for (const result of ['failure', 'skipped', 'cancelled', 'neutral']) {
   test(`keeps a dependency PR open when its Quality Gate is ${result}`, async () => {
