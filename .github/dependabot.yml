@@ -9,6 +9,19 @@ updates:
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: typescript
+      # These package versions are maintained as committed vendor archives.
+      - dependency-name: '@pixel-brewery/markdowner-core'
+      - dependency-name: '@pixel-brewery/mosaik-elements'
+      - dependency-name: '@pixel-brewery/mosaik-elements-angular'
+      - dependency-name: '@pixel-brewery/mosaik-elements-foundation'
+      - dependency-name: '@pixel-brewery/mosaik-icons'
+      - dependency-name: '@pixel-brewery/mosaik-themes'
+      - dependency-name: '@pixel-brewery/synapse-auth'
+      - dependency-name: '@pixel-brewery/synapse-core'
+      - dependency-name: '@pixel-brewery/synapse-provider-claude'
+      - dependency-name: '@pixel-brewery/synapse-provider-codex'
+      - dependency-name: '@pixel-brewery/synapse-provider-opencode'
+      - dependency-name: '@pixel-brewery/synapse-runtime'
     groups:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', '@schematics/*']
