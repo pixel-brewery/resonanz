@@ -69,6 +69,6 @@ export async function requestDependabotGitHub(method, endpoint, body) {
     });
   } catch (error) {
     if (error?.status === 405) throw error;
-    throw new Error(requestFailure);
+    throw new Error(requestFailure, { cause: error });
   }
 }
