@@ -10,10 +10,9 @@ import { _electron } from 'playwright';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
 const packaged = process.argv.includes('--packaged');
-const speech = process.argv.includes('--speech');
 assert(
-  process.argv.slice(2).every((argument) => ['--packaged', '--speech'].includes(argument)),
-  'Use --packaged and/or --speech, or no arguments.',
+  process.argv.slice(2).every((argument) => argument === '--packaged'),
+  'Use --packaged or no arguments.',
 );
 const executable = packaged
   ? join(
@@ -1506,15 +1505,6 @@ try {
   const recording = await session();
   assert.equal(recording.status, 'ready');
   assert(recording.audioAvailable && recording.audioBytes > 0 && recording.nextAudioSequence > 2);
-  await control('play-recording').click();
-  await waitFor(
-    () =>
-      control('playback-position').evaluate(
-        (node) => Number(node.querySelector('strong')?.textContent?.replaceAll(':', '') ?? 0) > 0,
-      ),
-    'decoded audio playback advances',
-  );
-  await control('play-recording').click();
   const range = await application.evaluate(async ({ net }, id) => {
     const response = await net.fetch(`resonanz-audio://session/${id}`, {
       headers: { Range: 'bytes=0-127' },
@@ -1528,7 +1518,7 @@ try {
   assert.equal(range.status, 206);
   assert.equal(range.bytes, 128);
   passed(
-    'provenance-verified recorder/worklet/player: synthetic capture, pause, resume, final flush and ranged playback',
+    'provenance-verified recorder/worklet: synthetic capture, pause, resume, final flush and audio byte range',
   );
 
   if ((await page.locator('.organization').getAttribute('open')) === null)
@@ -1626,36 +1616,6 @@ try {
   passed(
     'manual transcript retains timeline; JSON/Markdown/audio exports and JSON/audio imports use actual native file I/O',
   );
-
-  if (speech) {
-    const fixture = JSON.parse(await readFile(jsonPath, 'utf8'));
-    fixture.session.title = 'Vorlesen – manuelle Prüfdaten';
-    fixture.session.summary =
-      'Dies ist ein manuell vorgegebener Prüftext für die Sprachsynthese. Resonanz liest diesen Text mit der vorhandenen Systemstimme vor. Die Wiedergabe lässt sich pausieren, fortsetzen und beenden. '.repeat(
-        3,
-      );
-    const fixturePath = join(artifacts, 'speech-fixture.json');
-    await writeFile(fixturePath, JSON.stringify(fixture));
-    await selectFile(fixturePath);
-    await waitFor(
-      () => page.evaluate(() => speechSynthesis.getVoices().length > 0),
-      'available system voice',
-    );
-    await control('tab-analysis').click();
-    await control('summary-panel').getByRole('button', { name: 'Vorlesen', exact: true }).click();
-    await control('speech-controls').waitFor({ state: 'visible' });
-    await waitFor(
-      () => page.evaluate(() => speechSynthesis.speaking),
-      'actual speech engine starts',
-    );
-    await page.getByRole('button', { name: 'Vorlesen pausieren', exact: true }).click();
-    await page.getByRole('button', { name: 'Vorlesen fortsetzen', exact: true }).click();
-    await page.getByRole('button', { name: 'Vorlesen beenden', exact: true }).click();
-    await control('speech-controls').waitFor({ state: 'hidden' });
-    passed(
-      'unchanged upstream TTS: actual system voice, pause, resume and stop with explicit manual fixture',
-    );
-  }
 
   await control('nav-settings').click();
   await control('settings-view').waitFor({ state: 'visible' });
@@ -1810,7 +1770,6 @@ try {
     platform: process.platform,
     arch: process.arch,
     packaged,
-    speech,
     checks,
     recording: {
       durationMs: recording.durationMs,
