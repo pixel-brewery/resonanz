@@ -141,8 +141,12 @@ independent of platform signing and remains required in `release-main`.
 
 ## Dependency update boundary
 
-Ordinary npm and GitHub Actions dependency updates follow the existing trusted
-Dependabot eligibility policy. Human PRs use normal review and merge controls.
+Dependabot uses its native rebase strategy for npm and GitHub Actions updates.
+The merge workflow checks the successful classification job, both native desktop
+jobs and the aggregate Quality Gate from the triggering CI attempt. It merges
+only the verified Dependabot revision after confirming that it includes current
+`main`, then requests the normal release for the merge commit. Human PRs use
+normal review and merge controls.
 Vendored Mosaik/Synapse archives remain `file:` dependencies; their registry
 versions are not automatically refreshed by ordinary npm Dependabot. An archive
 update must retain its provenance, sanitized content, lockfile consistency and

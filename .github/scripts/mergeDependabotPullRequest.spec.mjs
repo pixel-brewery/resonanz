@@ -53,6 +53,7 @@ function fixture() {
       base: { ref: 'main', sha: source, repo: identity },
     },
     jobs: [
+      'Classify changes',
       'Build and exercise desktop (macos-latest)',
       'Build and exercise desktop (windows-latest)',
       'Quality Gate',
@@ -115,7 +116,8 @@ test('merges only the verified current Dependabot head and retains its exact mer
 for (const result of ['failure', 'skipped', 'cancelled', 'neutral']) {
   test(`keeps a dependency PR open when its Quality Gate is ${result}`, async () => {
     const dependencies = fixture();
-    dependencies.records.jobs[2].conclusion = result;
+    const gate = dependencies.records.jobs.find((job) => job.name === 'Quality Gate');
+    gate.conclusion = result;
     assert.equal(
       (await mergeDependabotPullRequest(context, dependencies)).reason,
       'incomplete-verification',
@@ -129,6 +131,7 @@ for (const result of ['failure', 'skipped', 'cancelled', 'neutral']) {
 
 test('requires both native platform jobs, the exact bot identity and current main', async () => {
   for (const kind of [
+    'missing-classification',
     'missing-platform',
     'human',
     'foreign-repository',
@@ -136,7 +139,8 @@ test('requires both native platform jobs, the exact bot identity and current mai
     'stale-head',
   ]) {
     const dependencies = fixture();
-    if (kind === 'missing-platform') dependencies.records.jobs.splice(0, 1);
+    if (kind === 'missing-classification') dependencies.records.jobs.splice(0, 1);
+    if (kind === 'missing-platform') dependencies.records.jobs.splice(1, 1);
     if (kind === 'human') dependencies.records.pull.user.login = 'human';
     if (kind === 'foreign-repository') dependencies.records.repository.id = 1;
     if (kind === 'moved-main')
