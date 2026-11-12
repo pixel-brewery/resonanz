@@ -47,9 +47,11 @@ export async function requestDependabotGitHub(method, endpoint, body) {
           killSignal: 'SIGKILL',
           windowsHide: true,
         },
-        (error, stdout) => {
+        (error, stdout, stderr) => {
           if (error) {
-            reject(new Error(requestFailure));
+            const failure = new Error(requestFailure);
+            if (/\(HTTP 405\)\s*$/u.test(stderr)) failure.status = 405;
+            reject(failure);
 
             return;
           }
@@ -65,7 +67,8 @@ export async function requestDependabotGitHub(method, endpoint, body) {
       child.stdin?.on('error', () => reject(new Error(requestFailure)));
       child.stdin?.end(body === undefined ? undefined : JSON.stringify(body));
     });
-  } catch {
+  } catch (error) {
+    if (error?.status === 405) throw error;
     throw new Error(requestFailure);
   }
 }
