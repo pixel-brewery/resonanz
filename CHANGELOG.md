@@ -1,3 +1,13 @@
+## 0.1.24 (2026-11-15)
+
+### 🚀 Features
+
+- bring Resonanz branding to the project website ([#51](https://github.com/pixel-brewery/resonanz/pull/51))
+
+### ❤️ Thank You
+
+- André Wehlert @RueDeRennes
+
 ## 0.1.23 (2026-11-15)
 
 This was a version bump only, there were no code changes.
