@@ -4795,9 +4795,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-core@npm:0.2.5":
-  version: 0.2.5
-  resolution: "@pixel-brewery/wortlaut-core@npm:0.2.5::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-core%2F0.2.5%2Fedb99c9cf462fb909bb13cc98743010152471a3f"
+"@pixel-brewery/wortlaut-core@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-core@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-core%2F0.2.7%2F0243bc266d961dc66ec2bb32885ede735fb07471"
   dependencies:
     "@pixel-brewery/utilities": "npm:0.1.187"
     cheerio: "npm:1.2.0"
@@ -4810,7 +4810,7 @@ __metadata:
     ts-morph: "npm:28.0.0"
     tslib: "npm:2.8.1"
     xml2js: "npm:0.6.2"
-  checksum: 10c0/69cd646fb72a7d41320e3588e5ec1c4998eae5530a0a53376c606ac1614b2460bf6799e650e59d8de990dd453ebacd01c9bb7350c4dff6907469140caa26b914
+  checksum: 10c0/7f79c5714bc45836064518184790b7ff402a92e1a40ecb6bbbf731fe0648192f4a3152f2d54681bbd78e7325f58c2acaae8c9d5153d03d5f6e1b321862c2902b
   languageName: node
   linkType: hard
 
@@ -4833,17 +4833,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-eslint-rules@npm:0.2.5":
-  version: 0.2.5
-  resolution: "@pixel-brewery/wortlaut-eslint-rules@npm:0.2.5::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-eslint-rules%2F0.2.5%2F7a4eccd5ad95cadb0b97ee6ad926f0319958ebf7"
+"@pixel-brewery/wortlaut-eslint-rules@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-eslint-rules@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-eslint-rules%2F0.2.7%2Fe5d73c9d8679d46e2e889560e667ce60fd46b9d8"
   dependencies:
     "@pixel-brewery/utilities": "npm:0.1.187"
-    "@pixel-brewery/wortlaut-core": "npm:0.2.5"
+    "@pixel-brewery/wortlaut-core": "npm:0.2.7"
     tslib: "npm:2.8.1"
   peerDependencies:
     eslint: ">=9.0.0"
     typescript-eslint: ">=8.0.0"
-  checksum: 10c0/38f1a428453d68dcf81a2096618988ab05c30c6b10344ede3d2c1f04974fe36423cfc713d7f627ef30018a3e703b87e07a730f2488a8b421cd895ad66afcf227
+  checksum: 10c0/e601065f8a47204b5b6d0125eaf1691d0d049a1eaa51f3f50dfd845407bab0c5e42ea0c996fe8f6276dba747d9307090e57d326fe24bbdb01e6d4d98dfcf9f5a
   languageName: node
   linkType: hard
 
@@ -11351,7 +11351,7 @@ __metadata:
     "@pixel-brewery/synapse-provider-codex": "file:./vendor/synapse/synapse-provider-codex-0.0.3.tgz"
     "@pixel-brewery/synapse-provider-opencode": "file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz"
     "@pixel-brewery/synapse-runtime": "file:./vendor/synapse/synapse-runtime-0.0.3.tgz"
-    "@pixel-brewery/wortlaut-eslint-rules": "npm:0.2.5"
+    "@pixel-brewery/wortlaut-eslint-rules": "npm:0.2.7"
     "@pixel-brewery/wortlaut-nx-tasks": "npm:0.2.4"
     "@resonanz/assistant": "workspace:*"
     "@resonanz/audio": "workspace:*"
