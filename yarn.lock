@@ -9255,12 +9255,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:18.1.2":
-  version: 18.1.2
-  resolution: "marked@npm:18.1.2"
+"marked@npm:18.2.0":
+  version: 18.2.0
+  resolution: "marked@npm:18.2.0"
   bin:
     marked: bin/marked.js
-  checksum: 10c0/0e7312138d6cf866f59a28d2d97ab332ef1b6d1d09263306375a8e9c0e5a4ee892ff1e6ecb668a4959fab0c5f1008c3ddec16c861396fe7cce8f7810521484c9
+  checksum: 10c0/7766e5564cc6dbe3e8d6ee0091f3a4656002dd993817e68c5510e2ff1fa1d6456c9bcd18af1a4a5e8ea87382832a07026c109ab333913f125d51c93f29ba9017
   languageName: node
   linkType: hard
 
@@ -11272,7 +11272,7 @@ __metadata:
     jsdom: "npm:31.0.0"
     jsonc-parser: "npm:3.3.1"
     lit: "npm:3.3.3"
-    marked: "npm:18.1.2"
+    marked: "npm:18.2.0"
     nx: "npm:24.0.5"
     playwright: "npm:1.65.0"
     prettier: "npm:3.9.10"
