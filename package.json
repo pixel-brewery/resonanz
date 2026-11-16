@@ -115,7 +115,7 @@
     "@resonanz/contracts": "workspace:*",
     "@resonanz/intl": "workspace:*",
     "@resonanz/sessions": "workspace:*",
-    "chroma-js": "3.2.0",
+    "chroma-js": "3.3.0",
     "electron-native-speech": "0.1.6",
     "electron-native-speech-backend-macos": "0.1.7",
     "lit": "3.3.3",
