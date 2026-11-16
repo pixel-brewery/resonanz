@@ -3387,7 +3387,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.32.1":
+"@modelcontextprotocol/sdk@npm:^1.32.2":
   version: 1.32.2
   resolution: "@modelcontextprotocol/sdk@npm:1.32.2"
   dependencies:
@@ -4598,16 +4598,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-mcp@npm:0.1.192":
-  version: 0.1.192
-  resolution: "@pixel-brewery/mosaik-mcp@npm:0.1.192::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-mcp%2F0.1.192%2Fcdc30210a0690c9732defffaa2b84f2d627653bf"
+"@pixel-brewery/mosaik-mcp@npm:0.1.196":
+  version: 0.1.196
+  resolution: "@pixel-brewery/mosaik-mcp@npm:0.1.196::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-mcp%2F0.1.196%2F3e7a1fa682d40674f9395fce8f12dffecb9d15a2"
   dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.32.1"
-    chroma-js: "npm:^3.2.0"
+    "@modelcontextprotocol/sdk": "npm:^1.32.2"
+    chroma-js: "npm:^3.3.0"
     zod: "npm:^4.6.7"
   bin:
     mosaik-mcp: dist/main.js
-  checksum: 10c0/213a50bba321a84451b7764afee4026686ebf301a6dfd8676cb5aa467b72f723846183eb8f56ea5ff05d3adb055aeca3519738a12dd73f13cd9f27f456579ba5
+  checksum: 10c0/58c7abacf4eedc314364599e40c93f7ae439bee2f775f709ce8e2ec768242ee1c99a5f0489f52c1b064f794c50c958ebd3389062a1dc88a60e19568403f3de01
   languageName: node
   linkType: hard
 
@@ -6393,10 +6393,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chroma-js@npm:3.2.0, chroma-js@npm:^3.2.0":
+"chroma-js@npm:3.2.0":
   version: 3.2.0
   resolution: "chroma-js@npm:3.2.0"
   checksum: 10c0/6ff6213d234e096ad3536291b1e1f11a506ea0fccfe163dd8eff69afa5f4f8a905b31a4a7ebc22b7eb722590887fed77073805ce89485f6d563edd1ea2d0a1db
+  languageName: node
+  linkType: hard
+
+"chroma-js@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "chroma-js@npm:3.3.0"
+  checksum: 10c0/b54b71b280a13b1b280f2bf102408891b28e5e14afcbd9f74f1dd9cdbce43dcc8e4537b913f7cedfad2ce06502c92cfb39815634e9191c4810ab32c48259e98a
   languageName: node
   linkType: hard
 
@@ -11343,7 +11350,7 @@ __metadata:
     "@pixel-brewery/mosaik-elements-angular": "file:./vendor/mosaik/mosaik-elements-angular-0.1.183.tgz"
     "@pixel-brewery/mosaik-elements-foundation": "file:./vendor/mosaik/mosaik-elements-foundation-0.1.183.tgz"
     "@pixel-brewery/mosaik-icons": "file:./vendor/mosaik/mosaik-icons-0.1.183.tgz"
-    "@pixel-brewery/mosaik-mcp": "npm:0.1.192"
+    "@pixel-brewery/mosaik-mcp": "npm:0.1.196"
     "@pixel-brewery/mosaik-themes": "file:./vendor/mosaik/mosaik-themes-0.1.183.tgz"
     "@pixel-brewery/synapse-auth": "file:./vendor/synapse/synapse-auth-0.0.3.tgz"
     "@pixel-brewery/synapse-core": "file:./vendor/synapse/synapse-core-0.0.3.tgz"
