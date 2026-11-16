@@ -4710,9 +4710,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-ai@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-ai@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-ai%2F0.2.4%2F8912b933854c72f9e9eebbaaf4e640addd96a5d1"
+"@pixel-brewery/wortlaut-ai@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-ai@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-ai%2F0.2.7%2Fa194e6f877b7fcec3586c590d5074526b92501fb"
   dependencies:
     "@ai-sdk/google": "npm:4.0.102"
     "@ai-sdk/openai": "npm:4.0.99"
@@ -4723,7 +4723,7 @@ __metadata:
     "@pixel-brewery/synapse-provider-opencode": "npm:0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:0.0.3"
     "@pixel-brewery/utilities": "npm:0.1.187"
-    "@pixel-brewery/wortlaut-core": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-core": "npm:0.2.7"
     "@toon-format/toon": "npm:4.4.0"
     ai: "npm:7.0.148"
     dir-glob: "npm:3.0.1"
@@ -4733,13 +4733,13 @@ __metadata:
     jsonc-parser: "npm:3.3.1"
     tslib: "npm:2.8.1"
     zod: "npm:4.6.7"
-  checksum: 10c0/f15e291fdb5fede7ad5d2630e6bbb4be42ba4bccfa1ef934e2876b77a6c2c8b98f5195b8c2639d7810d98e257c1e938fc49dbfabac7e76446fa601f01fff5f86
+  checksum: 10c0/903b81e12dcbde89c9b0818fca47b002ddab97758aab3e60ec6ff9e46e0c0067d1c6b5f884bc8b626513e2cf9655bdc04dad333a376847f67b884a6455e061fe
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-app@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-app@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-app%2F0.2.4%2Fbf6fa28043b762e90af1ab032ff50bdceaa8a40d"
+"@pixel-brewery/wortlaut-app@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-app@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-app%2F0.2.7%2Fdb196ab706342af5558a7ea3475a0e7f4f98ec31"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:0.0.3"
     "@pixel-brewery/synapse-provider-claude": "npm:0.0.3"
@@ -4747,11 +4747,11 @@ __metadata:
     "@pixel-brewery/synapse-provider-opencode": "npm:0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:0.0.3"
     "@pixel-brewery/utilities": "npm:0.1.187"
-    "@pixel-brewery/wortlaut-ai": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-contracts": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-core": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-engine": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-mcp": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-ai": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-contracts": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-core": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-engine": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-mcp": "npm:0.2.7"
     diff: "npm:9.0.0"
     dir-glob: "npm:3.0.1"
     es-toolkit: "npm:1.52.0"
@@ -4762,36 +4762,17 @@ __metadata:
   bin:
     localizator: dist/bin/wortlaut.js
     wortlaut: dist/bin/wortlaut.js
-  checksum: 10c0/43dd722682b16defdd9236f83f06d5ee7987026409257dd8097e4d87ff85434eeaefeeb717605accc7475d108b1c2ced3a950a6c40214e458dbc880e893a65f4
+  checksum: 10c0/8f05671e95dd9cd9cc555862f62bc36fbcafface2a027c9a621cca2b431bf15481cc2cb4171bea81b6418cf55aa03f19df5feaeba339e7c7905b0ca1bdf6a950
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-contracts@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-contracts@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-contracts%2F0.2.4%2Fef850f4d4b3acd56b04fd86c8318511d86921c9e"
+"@pixel-brewery/wortlaut-contracts@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-contracts@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-contracts%2F0.2.7%2Feaabf759e6d655448580909f13ab96a2957df9d2"
   dependencies:
     tslib: "npm:2.8.1"
     zod: "npm:4.6.7"
-  checksum: 10c0/5bfab61743e368578745ef8d2f28baeabfebf5ed38733a656c996f3933833d8eba7baea2dcdd422127c9210593294f43d0d56a80a2d4a53156ccfdf93724d1b4
-  languageName: node
-  linkType: hard
-
-"@pixel-brewery/wortlaut-core@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-core@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-core%2F0.2.4%2F4584e099ce1bd3b5c59d4e7d06e60691c929e82e"
-  dependencies:
-    "@pixel-brewery/utilities": "npm:0.1.187"
-    cheerio: "npm:1.2.0"
-    diff: "npm:9.0.0"
-    dir-glob: "npm:3.0.1"
-    es-toolkit: "npm:1.52.0"
-    fast-glob: "npm:3.3.3"
-    fs-extra: "npm:11.4.1"
-    jsonc-parser: "npm:3.3.1"
-    ts-morph: "npm:28.0.0"
-    tslib: "npm:2.8.1"
-    xml2js: "npm:0.6.2"
-  checksum: 10c0/b69504061d4c3345c6169fef6ede9c9287ae2aa734dd371ec266f20cedbe1007b10cee4998b9d930cb07790488218c3b9371556a8069f7c633dd218ef3acd37a
+  checksum: 10c0/be5b0be34158bca0527a607c9381422b5abf99945d6f92736e86405df0da32c85eca1f0a72b70f0b1ecd3e1ceb496cef4fadca4656f49c26b9e830aab9ec1fd3
   languageName: node
   linkType: hard
 
@@ -4814,14 +4795,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-engine@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-engine@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-engine%2F0.2.4%2F8050b34b2a22cc45c1ae8fa7d7ad3b3a1e9d54f7"
+"@pixel-brewery/wortlaut-engine@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-engine@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-engine%2F0.2.7%2F3dd3d835cbd7bf2e51760867ae9f326b99fc5585"
   dependencies:
     "@pixel-brewery/utilities": "npm:0.1.187"
-    "@pixel-brewery/wortlaut-ai": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-contracts": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-core": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-ai": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-contracts": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-core": "npm:0.2.7"
     diff: "npm:9.0.0"
     dir-glob: "npm:3.0.1"
     es-toolkit: "npm:1.52.0"
@@ -4829,7 +4810,7 @@ __metadata:
     fs-extra: "npm:11.4.1"
     jsonc-parser: "npm:3.3.1"
     tslib: "npm:2.8.1"
-  checksum: 10c0/e8ef2724a92690e8d67c15f8f1de2d0add677e1a573bd7e8f6eca32d568a25750b1a61e799e320d09508107ec5cf2ea049cb9a7939fab3af4c5956a987e15b35
+  checksum: 10c0/b664e71f4e12982ef79248fba75e295e0faa294b2f9643c33686bbdd4b54b065ea26e4c3e64e41157586164c143bee50f06ef81f52709ce5db2aed7fe4e4bff0
   languageName: node
   linkType: hard
 
@@ -4847,31 +4828,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-mcp@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-mcp@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-mcp%2F0.2.4%2Fe7d42444c04a78e7d0e3df677699aa848096dad9"
+"@pixel-brewery/wortlaut-mcp@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-mcp@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-mcp%2F0.2.7%2F5b83cb200fb6bf16b3276e0e937a14610113f796"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:1.32.1"
-    "@pixel-brewery/wortlaut-contracts": "npm:0.2.4"
-    "@pixel-brewery/wortlaut-engine": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-contracts": "npm:0.2.7"
+    "@pixel-brewery/wortlaut-engine": "npm:0.2.7"
     tslib: "npm:2.8.1"
     zod: "npm:4.6.7"
-  checksum: 10c0/93ce439e88c0803cf8df8d9884037c23308f42daa03b3b3143f7fd0349796a93bcdd150c926d2eb54911362ec9f5fe74d4bbe5270aadd823548d328c81a3160a
+  checksum: 10c0/70e40aa1dffeac2bf704aa9f634ead0697b793cb072b6efeabff7726f2b5a675a0ead4c1507eacffac2fee03d816bce73c93446a365b23155ebc1b55f6fa3892
   languageName: node
   linkType: hard
 
-"@pixel-brewery/wortlaut-nx-tasks@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@pixel-brewery/wortlaut-nx-tasks@npm:0.2.4::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-nx-tasks%2F0.2.4%2Fe50b99a0df4a3a59727f73e44b3d0c1383269d0d"
+"@pixel-brewery/wortlaut-nx-tasks@npm:0.2.7":
+  version: 0.2.7
+  resolution: "@pixel-brewery/wortlaut-nx-tasks@npm:0.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fwortlaut-nx-tasks%2F0.2.7%2Fbc960dd9ed74511c2b26b802939e84ce9039b3c5"
   dependencies:
     "@pixel-brewery/utilities": "npm:0.1.187"
-    "@pixel-brewery/wortlaut-app": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-app": "npm:0.2.7"
     dotenv: "npm:18.0.8"
     dotenv-expand: "npm:1000.0.0"
     tslib: "npm:2.8.1"
   peerDependencies:
     "@nx/devkit": ">=22.0.0"
-  checksum: 10c0/98e2733c6d00de37845813d54a3af88b8291b8c93dc768149282ee4140b8f58f89e6cb845898561ddddceeaf1b0eafb1d7fdb19b7d9757a7323b039271b1b06a
+  checksum: 10c0/cd8ddba9a88af3139b3c86316ccf82c153fb4eb4e0bd36f89a5925d36bc762725413d8819f207be5d44de88804f1100b3c6f13a724337f1cf51cd2c951784e87
   languageName: node
   linkType: hard
 
@@ -11359,7 +11340,7 @@ __metadata:
     "@pixel-brewery/synapse-provider-opencode": "file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz"
     "@pixel-brewery/synapse-runtime": "file:./vendor/synapse/synapse-runtime-0.0.3.tgz"
     "@pixel-brewery/wortlaut-eslint-rules": "npm:0.2.7"
-    "@pixel-brewery/wortlaut-nx-tasks": "npm:0.2.4"
+    "@pixel-brewery/wortlaut-nx-tasks": "npm:0.2.7"
     "@resonanz/assistant": "workspace:*"
     "@resonanz/audio": "workspace:*"
     "@resonanz/contracts": "workspace:*"
