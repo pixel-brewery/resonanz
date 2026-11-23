@@ -155,7 +155,7 @@
     "esbuild": "0.28.2",
     "eslint": "10.15.0",
     "fake-indexeddb": "6.2.8",
-    "jsdom": "31.0.0",
+    "jsdom": "31.0.1",
     "jsonc-parser": "3.3.1",
     "nx": "24.0.6",
     "playwright": "1.65.0",
