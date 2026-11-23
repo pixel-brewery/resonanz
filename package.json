@@ -151,7 +151,7 @@
     "@schematics/angular": "22.2.7",
     "@tailwindcss/postcss": "4.3.5",
     "@types/node": "26.6.6",
-    "electron": "45.3.1",
+    "electron": "45.4.1",
     "esbuild": "0.28.2",
     "eslint": "10.15.0",
     "fake-indexeddb": "6.2.8",
