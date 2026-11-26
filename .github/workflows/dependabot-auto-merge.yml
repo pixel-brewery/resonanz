@@ -117,12 +117,8 @@ jobs:
     outputs:
       merge_sha: ${{ steps.reconcile.outputs.merge_sha }}
   authorize:
-    if: |-
-      ${{ github.repository_id == '1440725741' && github.ref == 'refs/heads/main' &&
-          (github.event_name != 'workflow_run' ||
-           (github.event.workflow_run.name == 'Desktop quality' && github.event.workflow_run.event == 'pull_request' &&
-            github.event.workflow_run.conclusion == 'action_required' &&
-            github.event.workflow_run.head_repository.id == 1440725741)) }}
+    needs: reconcile
+    if: ${{ always() && github.repository_id == '1440725741' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:

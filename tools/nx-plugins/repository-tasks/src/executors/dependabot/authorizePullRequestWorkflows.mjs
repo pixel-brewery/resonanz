@@ -6,80 +6,56 @@ import { verificationPolicy } from './verificationPolicy.mjs';
 // #endregion
 
 /**
- * Routes real approval-required CI to the isolated read-only authorization job.
+ * Authorizes freshly reconciled bot heads from a bounded current inventory.
  *
- * @param context - The trusted default-branch workflow event and repository identity.
- * @param dependencies - The bounded existing-token GitHub request boundary.
+ * @param context - The trusted default-branch maintenance event and repository identity.
+ * @param dependencies - The bounded existing-token metadata boundary.
  * @returns One fixed authorization outcome per current own bot PR, at most thirty.
- * @remarks A CI event selects only its actual current native run and attempt. Scheduled recovery reads a bounded open inventory. Branch refresh, merge, diagnostics, dependency installation and publication are outside this owner.
+ * @remarks The isolated caller waits for branch reconciliation. A completed own CI or release run is only a reason to inspect current candidates; its old conclusion, PR association and attempt never authorize another run. Every candidate still passes the unchanged single-run source, actor, attempt, ref and protection proof immediately before its one approval request. No source/PR write, dependency installation, merge or publication occurs here.
  * @internal
  */
 export async function authorizePullRequestWorkflows(context, dependencies = {}) {
-  if (!['workflow_run', 'workflow_dispatch', 'schedule'].includes(context?.eventName)) return [];
-  const request = dependencies.request ?? requestDependabotGitHub;
-  const identity = await resolveDependabotRepository(context, request);
-  if (!identity) return [];
-  const numbers = new Set();
-  if (context.eventName === 'workflow_run') {
-    const runId = positive(context.runId);
-    const attempt = positive(context.runAttempt);
-    if (!runId || !attempt) return [];
-    const workflow = await request(
-      'GET',
-      `${identity.path}/actions/workflows/${verificationPolicy.workflowFile}`,
-    );
-    const run = await request('GET', `${identity.path}/actions/runs/${runId}`);
-    if (
-      workflow?.name !== verificationPolicy.workflowName ||
-      workflow.path !== verificationPolicy.workflowPath ||
-      workflow.state !== 'active' ||
-      run?.id !== runId ||
-      run.run_attempt !== attempt ||
-      run.event !== 'pull_request' ||
-      run.status !== 'completed' ||
-      run.conclusion !== 'action_required' ||
-      run.workflow_id !== workflow.id ||
-      run.name !== workflow.name ||
-      run.repository?.id !== identity.id ||
-      run.head_repository?.id !== identity.id ||
-      !Array.isArray(run.pull_requests) ||
-      run.pull_requests.length !== 1 ||
-      !positive(run.pull_requests[0]?.number)
-    )
-      return [];
-    numbers.add(run.pull_requests[0].number);
-  } else {
+    if (!['workflow_run', 'workflow_dispatch', 'schedule'].includes(context?.eventName)) return [];
+    const request = dependencies.request ?? requestDependabotGitHub;
+    const identity = await resolveDependabotRepository(context, request);
+    if (!identity) return [];
+    if (context.eventName === 'workflow_run') {
+        const runId = positive(context.runId);
+        const notifiedAttempt = positive(context.runAttempt);
+        if (!runId || !notifiedAttempt) return [];
+        const run = await request('GET', `${identity.path}/actions/runs/${runId}`);
+        const definitions = [
+            { file: verificationPolicy.workflowFile, path: verificationPolicy.workflowPath, name: verificationPolicy.workflowName },
+            { file: 'release.yml', path: '.github/workflows/release.yml', name: verificationPolicy.releaseWorkflowName },
+        ];
+        const definition = definitions.find((value) => typeof value.name === 'string' && value.name === run?.name);
+        const canonical = (repository) => repository?.id === identity.id && repository.full_name === identity.fullName;
+        if (!definition || run.id !== runId || !positive(run.run_attempt) || run.run_attempt < notifiedAttempt || run.status !== 'completed' ||
+            !canonical(run.repository) || !canonical(run.head_repository) ||
+            !(run.path === definition.path || run.path?.startsWith(`${definition.path}@`))) return [];
+        const workflow = await request('GET', `${identity.path}/actions/workflows/${definition.file}`);
+        if (!positive(workflow?.id) || workflow.id !== run.workflow_id || workflow.name !== definition.name ||
+            workflow.path !== definition.path || workflow.state !== 'active') return [];
+    }
+    const numbers = new Set();
     for (let page = 1; page <= 5; page++) {
-      const pulls = await request(
-        'GET',
-        `${identity.path}/pulls?state=open&base=${identity.defaultBranch}&per_page=100&page=${page}`,
-      );
-      if (!Array.isArray(pulls) || pulls.length > 100)
-        throw new Error('The authorization inventory is invalid.');
-      for (const pull of pulls)
-        if (
-          positive(pull?.number) &&
-          pull.user?.id === 49699333 &&
-          pull.user.login === 'dependabot[bot]' &&
-          pull.user.type === 'Bot'
-        )
-          numbers.add(pull.number);
-      if (pulls.length < 100) break;
-      if (page === 5) throw new Error('The authorization inventory exceeds its bound.');
+        const pulls = await request('GET', `${identity.path}/pulls?state=open&base=${encodeURIComponent(identity.defaultBranch)}&per_page=100&page=${page}`);
+        if (!Array.isArray(pulls) || pulls.length > 100) throw new Error('The authorization inventory is invalid.');
+        for (const pull of pulls) {
+            if (positive(pull?.number) && pull.user?.id === 49699333 && pull.user.login === 'dependabot[bot]' && pull.user.type === 'Bot') numbers.add(pull.number);
+        }
+        if (pulls.length < 100) break;
+        if (page === 5) throw new Error('The authorization inventory exceeds its bound.');
     }
-  }
-  const results = [];
-  for (const number of [...numbers].slice(0, 30)) {
-    try {
-      results.push(await authorizePullRequestWorkflow({ ...context, number }, { request }));
-    } catch {
-      results.push({ number, status: 'blocked', reason: 'approval-request-failed' });
+    const results = [];
+    for (const number of [...numbers].slice(0, 30)) {
+        try { results.push(await authorizePullRequestWorkflow({ ...context, number }, { request })); }
+        catch { results.push({ number, status: 'blocked', reason: 'approval-request-failed' }); }
     }
-  }
-  return results;
+    return results;
 }
 
 function positive(value) {
-  const number = typeof value === 'string' && /^[1-9]\d*$/u.test(value) ? Number(value) : value;
-  return Number.isSafeInteger(number) && number > 0 ? number : undefined;
+    const number = typeof value === 'string' && /^[1-9]\d*$/u.test(value) ? Number(value) : value;
+    return Number.isSafeInteger(number) && number > 0 ? number : undefined;
 }

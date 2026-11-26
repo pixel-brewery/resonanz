@@ -102,6 +102,14 @@ A missing native run remains pending. Manual diagnostic `workflow_dispatch` runs
 remain available but cannot satisfy protected PR checks or shadow a native run.
 Conflicts, real failures and rejected approvals retain the affected PR and attempt.
 
+The isolated authorization job waits for branch reconciliation before reading the
+complete bounded current open bot inventory. Every permitted maintenance trigger,
+including completed own CI and release runs, inspects those current candidates;
+the triggering run's old head, conclusion or attempt does not replace any
+candidate's source and native-attempt proof. Approval after a refresh therefore
+does not depend on another workflow notification. The hourly pass remains a
+fallback for an interrupted event or a not-yet-visible native run.
+
 For every approval and merge, M is current protected main, B the unchanged bot
 head, and C GitHub's actual `refs/pull/<number>/merge` commit. The owner checks
 unique own-repository PR association, M as ancestor of B, C's ordered parents
