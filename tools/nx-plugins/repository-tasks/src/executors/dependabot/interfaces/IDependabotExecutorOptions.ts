@@ -9,5 +9,5 @@ export interface IDependabotExecutorOptions {
    *
    * @internal
    */
-  readonly mode: 'merge' | 'reconcile' | 'continue';
+  readonly mode: 'merge' | 'reconcile' | 'continue' | 'authorize';
 }

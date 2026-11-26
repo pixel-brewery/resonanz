@@ -148,8 +148,8 @@ only the verified Dependabot revision after confirming that it includes current
 `main`, then requests the normal release for the merge commit. Human PRs use
 normal review and merge controls.
 
-Dependabot skips the exact packages backed by committed Mosaik, Markdowner and
-Synapse archives. A registry version bump would point Yarn at a local archive
-that has not been imported. Registry-backed packages such as Mosaik MCP still
-receive updates. When importing an archive, retain its provenance, sanitized
-content, lockfile consistency and public-content checks.
+Published Mosaik, Markdowner and Synapse packages are consumed from the registry
+at their declared versions and locked integrity. Their updates pass the same real
+native PR CI and protected merge gate. No archive override or dependency patch
+hides a package's installed version. See the
+[complete dependency authority contract](../repository-quality/README.md#dependency-updates-and-continuation).
