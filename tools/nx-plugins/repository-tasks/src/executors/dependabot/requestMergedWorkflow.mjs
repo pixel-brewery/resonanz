@@ -37,7 +37,7 @@ const requestFailure =
  */
 export async function requestMergedWorkflow(context, dependencies = {}) {
   if (
-    context?.eventName !== 'workflow_run' ||
+    !['workflow_run', 'workflow_dispatch', 'schedule'].includes(context?.eventName) ||
     context?.repository !== repository ||
     ![repositoryId, String(repositoryId)].includes(context?.repositoryId) ||
     typeof context?.sourceSha !== 'string' ||
@@ -102,12 +102,20 @@ export async function requestMergedWorkflow(context, dependencies = {}) {
     runs.workflow_runs.length > 100 ||
     runs.workflow_runs.length !== runs.total_count ||
     (runs.total_count > 0 && runs.workflow_runs.length === 0) ||
-    runs.workflow_runs.some((run) => !canonicalRun(run, workflow.id, sourceSha, workflowPath))
+    runs.workflow_runs.some(
+      (run) =>
+        !Number.isSafeInteger(run?.id) ||
+        run.id <= 0 ||
+        !Number.isSafeInteger(run.run_attempt) ||
+        run.run_attempt <= 0,
+    )
   )
     throw new Error(requestFailure);
 
-  if (runs.total_count > 0)
-    return { status: 'already-requested', sourceSha, runId: runs.workflow_runs[0].id };
+  const existingRun = runs.workflow_runs.find((run) =>
+    canonicalRun(run, workflow.id, sourceSha, workflowPath),
+  );
+  if (existingRun) return { status: 'already-requested', sourceSha, runId: existingRun.id };
 
   const currentMain = await request('GET', mainPath);
 

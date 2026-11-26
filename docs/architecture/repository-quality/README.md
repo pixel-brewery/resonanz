@@ -81,43 +81,64 @@ Synapse families are grouped. Their versions are declared directly as `0.1.183`
 and `0.0.3`, respectively, with registry integrity in `yarn.lock`; no file override
 can make an updated manifest keep installing an older archive.
 
-The canonical automation owner is the private `repository-tasks:dependabot` Nx
-executor under `tools/nx-plugins/repository-tasks`. Its `merge`, `reconcile` and
-`continue` modes have typed options and a schema, and external writes are never
-cached. The privileged workflow bootstraps the same owned implementation through
-native Node without installing dependencies or executing PR code/artifacts.
+The canonical owner is the private `repository-tasks:dependabot` Nx executor in
+`tools/nx-plugins/repository-tasks`. It requires all four actual `Desktop quality`
+jobs: classification, both native platforms and Quality Gate.
 
-Quality/release completion and an hourly fallback reconcile bounded sets of open
-same-repository Dependabot PRs. Repository ID, public visibility, default branch,
-bot identity and the current head are checked. A stale branch is updated with
-`expected_head_sha`; the controller waits for the replacement revision and
-explicitly requests full read-only CI with `expected_head_sha`. CI rejects a changed
-revision before classification. Conflicts block one PR while inventory continues.
-An existing failed exact-head attempt stays available for diagnosis; an
-approval-pending ordinary PR run does not suppress explicit verification.
+The privileged controller executes only the trusted default-branch Nx owner,
+without installing workspace dependencies or executing PR code or PR artifacts.
+Its `merge`, `reconcile`, `authorize` and `continue` operations are non-cacheable.
+Branch refresh and merge have Contents/PR write with Actions read. A separate
+`authorize` job has only Contents read, PR read and Actions write. It approves
+workflow execution through GitHub's native run-approval endpoint; it creates no
+PR review, status, check or branch-rule exemption.
 
-The merger accepts only the current successful attempt of `Desktop quality` with
-all four actual jobs: classification, both native platform jobs and Quality Gate.
-A manual exact-head run must map uniquely to the current open Dependabot PR with
-matching repository, branch and SHA. The owner re-reads the run, PR and current main
-before the ordinary SHA-guarded squash request; strict branch protection remains
-binding. If main advances during the merge request, a new comparison must prove
-that the unchanged bot head is behind before treating the denial as a stale-base
-skip. Other merge/API failures remain failures, with no bypass or automatic review.
+Reconciliation after verification/release completion and hourly checks bounded
+same-repository bot inventories. A stale branch uses `expected_head_sha` and waits
+for the replacement. Only real `pull_request` CI is merge proof. If it is waiting
+for execution approval, the isolated authorizer verifies the exact Dependabot or
+GitHub Actions service identity of both run actors before one approval request.
+A missing native run remains pending. Manual diagnostic `workflow_dispatch` runs
+remain available but cannot satisfy protected PR checks or shadow a native run.
+Conflicts, real failures and rejected approvals retain the affected PR and attempt.
 
-A successful native-token merge explicitly dispatches full main CI and the
-existing source-bound patch release, because `GITHUB_TOKEN` suppresses normal push
-workflows. CI uses `expected_head_sha`; the release retains `source_sha`. Both
-continuations retain existing attempts and stop when main supersedes their source.
-Release completion triggers reconciliation again after release metadata advances
-main, preventing a successful first dependency merge from stalling every next PR.
-The existing release App and publication boundary are unchanged. A fixed
-`documentation` continuation also preserves Pages' existing push paths: its workflow,
-`site/`, the project artwork and application site icon. Unrelated dependency changes
-do not deploy Pages. It keeps existing successful or failed attempts and supplies
-`expected_head_sha`; Pages checks both its selected revision and current main before
-deployment. CI and Pages share `requestMergedWorkflow` within the same Nx owner;
-no arbitrary workflow selection is accepted.
+For every approval and merge, M is current protected main, B the unchanged bot
+head, and C GitHub's actual `refs/pull/<number>/merge` commit. The owner checks
+unique own-repository PR association, M as ancestor of B, C's ordered parents
+[M, B] and C's tree equal to B. Source blobs are verified by Git object digest.
+Only the fixed reviewed read-only CI baseline in trusted-main
+`verificationPolicy.reviewedCiSha256` authorizes execution: its normalized main
+SHA-256 must match that constant, and normalized PR CI must equal normalized main.
+Normalization changes only full 40-character action pins with the same action
+owner/path and optional SemVer comments. CI logic, scopes, secrets or syntax edits
+require a conscious read-only review and explicit policy-digest update; no runtime
+or PR input learns a new baseline. This positive review proof does not rely on a
+partial YAML parser.
+
+The latest eligible native run is selected independently of diagnostics and its
+actual current `run_attempt` is reloaded. All actual jobs must succeed. Ordinary
+maintainer-triggered native CI on the bot PR is valid after the same complete
+source proof. A later reconciliation re-enters the full merger after a transient
+skip, never a reduced path. Workflow/run/PR/M/B/C/protection are re-read immediately
+before the ordinary SHA-guarded squash request. GitHub's strict required checks
+remain the final merge authority; the actual closed, merged PR is then confirmed.
+
+Confirmed merge outputs from either reconciliation or the CI event reach a
+separate continuation job. Recovery resolves the current main commit association
+and reads the full PR with `merged: true`; missing confirmation starts nothing.
+Main verification receives `expected_head_sha`, and the existing patch release
+retains `source_sha`. Existing exact-source main `push` or `workflow_dispatch` runs
+are retained in every state, including queued, failed and cancelled. Diagnostic
+branch runs do not suppress them. Every new request rechecks current main; a
+superseding revision stops it. Interrupted requests can therefore be retried
+without merging twice or preparing a duplicate release. Failed releases retain
+their original source and artifact instead of receiving a blind new dispatch.
+
+The documentation continuation keeps Pages' original workflow/site/artwork/icon
+push paths, includes renamed previous paths, and supplies `expected_head_sha`.
+Unrelated dependency changes do not deploy Pages. Both selected and current-main
+revisions are checked before deployment. The release App/environment and existing
+publication owner remain unchanged.
 
 Runtime, declarations, licenses and parsed manifests of all twelve migrated
 packages match the former distributions. Synapse manifests differ only in JSON
