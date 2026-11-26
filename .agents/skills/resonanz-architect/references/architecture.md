@@ -24,9 +24,9 @@ and native assistant execution. Transport validation and correlation are enforce
 at actual boundaries, including returned responses and events.
 
 Use public `@pixel-brewery/*` Mosaik/Synapse package imports and public
-`@resonanz/*` workspace exports. Keep archives, provenance, root dependencies,
-resolutions and Yarn lock coherent. A personal peer-checkout alias is not an
-integration seam. Native dependencies and preload bundle formats follow
+`@resonanz/*` workspace exports. Consume published dependency versions and keep
+the immutable Yarn lock coherent. Do not add local dependency patches, file
+overrides or personal peer-checkout aliases. Native dependencies and preload bundle formats follow
 [desktop architecture](../../../../docs/architecture/desktop/README.md).
 
 Shared NestJS/Prisma/HTTP examples translate to existing application owners and

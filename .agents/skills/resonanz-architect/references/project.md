@@ -24,8 +24,9 @@ authorize new chats, extra checkouts, external writes or a broader product chang
 Reference checkouts of Symphony, Synapse and Mosaik remain read-only unless
 a coordinated change is explicitly authorized. Use them to inspect an established
 pattern; normal installation/runtime and ordinary skill use must work without
-them. Read the relevant provenance before touching copied material or vendor
-archives and preserve [complete notices](../../../../THIRD_PARTY_NOTICES.md).
+them. Read the relevant provenance before touching copied material, consume
+published dependencies without local patches and preserve
+[complete notices](../../../../THIRD_PARTY_NOTICES.md).
 
 ## Source conventions
 

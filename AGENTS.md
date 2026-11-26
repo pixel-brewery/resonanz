@@ -92,7 +92,7 @@ Use strict TypeScript, explicit interface contracts, `I`-prefixed interfaces,
 `_`-prefixed private fields and focused constructor injection. Keep public
 exports explicit and colocate meaningful specs with their production owners.
 
-## Copied sources and vendored dependencies
+## Copied sources and published dependencies
 
 - The files in `libs/audio/provenance.json` retain their original upstream hashes.
   All remain byte-identical except the explicitly documented PCM worklet processor
@@ -101,9 +101,10 @@ exports explicit and colocate meaningful specs with their production owners.
   adaptations in host-owned files outside that file set.
 - A deliberate upstream audio update changes the revision, copied paths, hashes
   and relevant tests together. Preserve all supplied notices.
-- Import Synapse and Mosaik by their public package names. Keep vendor archives,
-  root dependencies/resolutions, lockfile and provenance coherent. Never use a
-  personal peer-checkout source alias to bypass package resolution.
+- Consume published Synapse and Mosaik versions through their public package names.
+  Keep declared versions and the immutable Yarn lock coherent; do not add local
+  dependency patches, file overrides or peer-checkout source aliases. The packaging
+  allowlist excludes dependency documentation tools from distributed applications.
 - Read `THIRD_PARTY_NOTICES.md` before changing copied material or font assets.
   Keep the complete upstream license/attribution text in shipped artifacts.
 
@@ -116,7 +117,6 @@ heavy install/build/typecheck/test job at a time across agents.
 ```sh
 yarn install --immutable
 yarn verify:skills
-yarn verify:vendor
 yarn verify:audio
 yarn typecheck
 yarn test

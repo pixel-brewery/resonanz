@@ -4237,20 +4237,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/markdowner-core@file:./vendor/mosaik/markdowner-core-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/markdowner-core@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/markdowner-core@file:./vendor/mosaik/markdowner-core-0.1.183.tgz#./vendor/mosaik/markdowner-core-0.1.183.tgz::hash=91ac28&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/markdowner-core@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmarkdowner-core%2F0.1.183%2F2a80f5da39a45202cb0b36acc84cfd780fd291c9"
   dependencies:
     tslib: "npm:2.8.1"
   peerDependencies:
     marked: ">=18.0.0"
-  checksum: 10c0/a59a51fd3a36f09bf3352935265c2664d8e3487606c9e6d579a6e3b342e00bace0bb8913364a6337cd6dc716e579ce6e3b503091b7f733d63d665843ca8bfb98
+  checksum: 10c0/9ecfa62a6183ec6dad249dbbced9555b381bdede720295c402bcf135c1a3f64f305286f35e7fee827289ee1556290b4d8993b0f13acae64fe118035e6875581e
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-elements-angular@file:./vendor/mosaik/mosaik-elements-angular-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/mosaik-elements-angular@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-elements-angular@file:./vendor/mosaik/mosaik-elements-angular-0.1.183.tgz#./vendor/mosaik/mosaik-elements-angular-0.1.183.tgz::hash=f22df9&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-elements-angular@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-elements-angular%2F0.1.183%2Fd60eafb540e0e728c25784a16cbfd5f87fb51aba"
   dependencies:
     "@pixel-brewery/mosaik-elements": "npm:0.1.183"
     "@pixel-brewery/mosaik-elements-foundation": "npm:0.1.183"
@@ -4311,110 +4311,13 @@ __metadata:
     prettier: ">=3.0.0"
     rxjs: ">=7.0.0"
     signature_pad: ">=5.0.0"
-  peerDependenciesMeta:
-    "@codemirror/autocomplete":
-      optional: true
-    "@codemirror/commands":
-      optional: true
-    "@codemirror/lang-angular":
-      optional: true
-    "@codemirror/lang-css":
-      optional: true
-    "@codemirror/lang-html":
-      optional: true
-    "@codemirror/lang-javascript":
-      optional: true
-    "@codemirror/lang-json":
-      optional: true
-    "@codemirror/lang-sass":
-      optional: true
-    "@codemirror/lang-vue":
-      optional: true
-    "@codemirror/lang-xml":
-      optional: true
-    "@codemirror/lang-yaml":
-      optional: true
-    "@codemirror/language":
-      optional: true
-    "@codemirror/lint":
-      optional: true
-    "@codemirror/search":
-      optional: true
-    "@codemirror/state":
-      optional: true
-    "@codemirror/view":
-      optional: true
-    "@lezer/highlight":
-      optional: true
-    "@replit/codemirror-lang-svelte":
-      optional: true
-    "@splinetool/runtime":
-      optional: true
-    "@tiptap/core":
-      optional: true
-    "@tiptap/extension-blockquote":
-      optional: true
-    "@tiptap/extension-bold":
-      optional: true
-    "@tiptap/extension-code":
-      optional: true
-    "@tiptap/extension-code-block":
-      optional: true
-    "@tiptap/extension-document":
-      optional: true
-    "@tiptap/extension-emoji":
-      optional: true
-    "@tiptap/extension-hard-break":
-      optional: true
-    "@tiptap/extension-heading":
-      optional: true
-    "@tiptap/extension-highlight":
-      optional: true
-    "@tiptap/extension-image":
-      optional: true
-    "@tiptap/extension-italic":
-      optional: true
-    "@tiptap/extension-link":
-      optional: true
-    "@tiptap/extension-list":
-      optional: true
-    "@tiptap/extension-mention":
-      optional: true
-    "@tiptap/extension-paragraph":
-      optional: true
-    "@tiptap/extension-placeholder":
-      optional: true
-    "@tiptap/extension-strike":
-      optional: true
-    "@tiptap/extension-subscript":
-      optional: true
-    "@tiptap/extension-superscript":
-      optional: true
-    "@tiptap/extension-text":
-      optional: true
-    "@tiptap/extension-text-align":
-      optional: true
-    "@tiptap/extension-underline":
-      optional: true
-    "@tiptap/extensions":
-      optional: true
-    "@tiptap/pm":
-      optional: true
-    "@tiptap/suggestion":
-      optional: true
-    apexcharts:
-      optional: true
-    prettier:
-      optional: true
-    signature_pad:
-      optional: true
-  checksum: 10c0/76934164360f0246b6b7215e07c0fbb09f1cfedd6034e650b16b35220f08628000eb8a033e1443f04fbcf6cadcccb389abd2bb8bb26437c72772845ee25aab3a
+  checksum: 10c0/c775de92a163057871dfbb6a9919dd3767b88d930c626b12365d7ec02b8c24af64174275c438dc1c3c242a851adeff9a5c9761f3c2200ec741d72b2e94d925df
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-elements-foundation@file:./vendor/mosaik/mosaik-elements-foundation-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/mosaik-elements-foundation@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-elements-foundation@file:./vendor/mosaik/mosaik-elements-foundation-0.1.183.tgz#./vendor/mosaik/mosaik-elements-foundation-0.1.183.tgz::hash=e0f323&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-elements-foundation@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-elements-foundation%2F0.1.183%2Fe9c588c4d611974247ada6c5574321ebb7e4f181"
   dependencies:
     "@dagrejs/dagre": "npm:3.1.1"
     "@pixel-brewery/mosaik-elements": "npm:0.1.183"
@@ -4481,130 +4384,25 @@ __metadata:
     qr-creator: ">=1.0.0"
     rxjs: ">=7.0.0"
     signature_pad: ">=5.0.0"
-  peerDependenciesMeta:
-    "@codemirror/autocomplete":
-      optional: true
-    "@codemirror/commands":
-      optional: true
-    "@codemirror/lang-angular":
-      optional: true
-    "@codemirror/lang-css":
-      optional: true
-    "@codemirror/lang-html":
-      optional: true
-    "@codemirror/lang-javascript":
-      optional: true
-    "@codemirror/lang-json":
-      optional: true
-    "@codemirror/lang-sass":
-      optional: true
-    "@codemirror/lang-vue":
-      optional: true
-    "@codemirror/lang-xml":
-      optional: true
-    "@codemirror/lang-yaml":
-      optional: true
-    "@codemirror/language":
-      optional: true
-    "@codemirror/lint":
-      optional: true
-    "@codemirror/search":
-      optional: true
-    "@codemirror/state":
-      optional: true
-    "@codemirror/view":
-      optional: true
-    "@lezer/highlight":
-      optional: true
-    "@lit-labs/virtualizer":
-      optional: true
-    "@replit/codemirror-lang-svelte":
-      optional: true
-    "@splinetool/runtime":
-      optional: true
-    "@tiptap/core":
-      optional: true
-    "@tiptap/extension-blockquote":
-      optional: true
-    "@tiptap/extension-bold":
-      optional: true
-    "@tiptap/extension-code":
-      optional: true
-    "@tiptap/extension-code-block":
-      optional: true
-    "@tiptap/extension-document":
-      optional: true
-    "@tiptap/extension-emoji":
-      optional: true
-    "@tiptap/extension-hard-break":
-      optional: true
-    "@tiptap/extension-heading":
-      optional: true
-    "@tiptap/extension-highlight":
-      optional: true
-    "@tiptap/extension-image":
-      optional: true
-    "@tiptap/extension-italic":
-      optional: true
-    "@tiptap/extension-link":
-      optional: true
-    "@tiptap/extension-list":
-      optional: true
-    "@tiptap/extension-mention":
-      optional: true
-    "@tiptap/extension-paragraph":
-      optional: true
-    "@tiptap/extension-placeholder":
-      optional: true
-    "@tiptap/extension-strike":
-      optional: true
-    "@tiptap/extension-subscript":
-      optional: true
-    "@tiptap/extension-superscript":
-      optional: true
-    "@tiptap/extension-text":
-      optional: true
-    "@tiptap/extension-text-align":
-      optional: true
-    "@tiptap/extension-underline":
-      optional: true
-    "@tiptap/extensions":
-      optional: true
-    "@tiptap/pm":
-      optional: true
-    "@tiptap/suggestion":
-      optional: true
-    apexcharts:
-      optional: true
-    maplibre-gl:
-      optional: true
-    prettier:
-      optional: true
-    qr-creator:
-      optional: true
-    rxjs:
-      optional: true
-    signature_pad:
-      optional: true
-  checksum: 10c0/4a174dfc9fad64e243b9dcb62ca9723dad6f52baf3bb7c7388698c22d5d38a1e84a34befbe06eef56ac7651ae21babec655ed4a8d12e10f7667ab78ea0d0b679
+  checksum: 10c0/e0e2b3f82bf3c95eb72f7e08750c0dfe906be5eb114d1b23f9933d6b8418f9064d8a51f6e5eb0f2e9ce5ef1c10141f49547cbb868330ebe6ac3193439c10a24e
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-elements@file:./vendor/mosaik/mosaik-elements-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/mosaik-elements@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-elements@file:./vendor/mosaik/mosaik-elements-0.1.183.tgz#./vendor/mosaik/mosaik-elements-0.1.183.tgz::hash=9a4be4&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-elements@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-elements%2F0.1.183%2F2ef5246a1ff3b6696a7eed963271127163a5f67c"
   dependencies:
     tslib: "npm:2.8.1"
-  checksum: 10c0/19f87f17eb79ddd3ce69d66ebe7da335f1a85bc404e98a18227d2d737c4bf3045b2c363f479e6fe918a6a41704bdad466ab36a586507f92cfbd602e955252380
+  checksum: 10c0/35e93c9b331d846c37caae8cb57de805f0341caf1da1bd360bbe057cf41c21f34e9d3f194540c7ad8ab0e1986fc57375d95458a8153ff2c5c559384dcd44d34f
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-icons@file:./vendor/mosaik/mosaik-icons-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/mosaik-icons@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-icons@file:./vendor/mosaik/mosaik-icons-0.1.183.tgz#./vendor/mosaik/mosaik-icons-0.1.183.tgz::hash=f75967&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-icons@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-icons%2F0.1.183%2F1ef8b379910707ee42cfaa8aa8aabb9491a05652"
   dependencies:
     tslib: "npm:2.8.1"
-  checksum: 10c0/e1e87d3e4c9ce0f155c81d9b6010ec2eac606e38895c4d783c336713d91e889890f1f50d6d5babc220a2f61ce1129e9d2e25e8406221fafdba1d62ab590ff135
+  checksum: 10c0/e42d71081a1a340711ce6d7d6b287d39ce318dd0a9553af1b797695dccf8f8e05dcb012f6b453bafb3495e52f8cd192a1c4e71d772afb17b9718a4216420a1e9
   languageName: node
   linkType: hard
 
@@ -4621,9 +4419,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pixel-brewery/mosaik-themes@file:./vendor/mosaik/mosaik-themes-0.1.183.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/mosaik-themes@npm:0.1.183":
   version: 0.1.183
-  resolution: "@pixel-brewery/mosaik-themes@file:./vendor/mosaik/mosaik-themes-0.1.183.tgz#./vendor/mosaik/mosaik-themes-0.1.183.tgz::hash=740c1e&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/mosaik-themes@npm:0.1.183::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fmosaik-themes%2F0.1.183%2F6abd996d703baf010a0853a0ea1f33dba62140a5"
   dependencies:
     "@pixel-brewery/mosaik-elements": "npm:0.1.183"
     tslib: "npm:2.8.1"
@@ -4631,73 +4429,68 @@ __metadata:
     "@google/design.md": ">=0.4.0"
     chroma-js: ">=3.0.0"
     typescript: ">=5.0.0"
-  peerDependenciesMeta:
-    "@google/design.md":
-      optional: true
-    typescript:
-      optional: true
   bin:
-    mosaik-design-md: ./bin/design-md.mjs
-  checksum: 10c0/241d9e11dc3419e41fd6d3c51d083d02cad48f8fe5b60af13ddf05a68839e828d02171bf28a887ad69c86bcba23a800d2e92748bb512b23770f7647e53a5b561
+    mosaik-design-md: bin/design-md.mjs
+  checksum: 10c0/7cb751d4056dd655efcf23a5e8be890706373605a78229c0db0253a30231232892afc23a6649a6c0d0c5ed0a437ccc3564fbbffa1a316f5ef256085e7f89ee72
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-auth@file:./vendor/synapse/synapse-auth-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-auth@npm:0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-auth@file:./vendor/synapse/synapse-auth-0.0.3.tgz#./vendor/synapse/synapse-auth-0.0.3.tgz::hash=64f1d1&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/synapse-auth@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-auth%2F0.0.3%2F82142309f251159587bf4b66fad6c060cd4a3e7f"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:^0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:^0.0.3"
-  checksum: 10c0/7b136985830764ebaefdea1afdffbd6a45a2edad3125ce3e6378555d5ee97fbe2332c50bae19bf83592adb9502b7d8848349441425146eae4c2df8add261d55d
+  checksum: 10c0/5ca79d5307e514d5e3302f980100b036240ac25f7da60da85e28d3e62bb434952049a4db533ffdce4f583b8f4a60f466d6224dfb2281a16d68e8e0a56cc4d9a4
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-core@file:./vendor/synapse/synapse-core-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-core@npm:0.0.3, @pixel-brewery/synapse-core@npm:^0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-core@file:./vendor/synapse/synapse-core-0.0.3.tgz#./vendor/synapse/synapse-core-0.0.3.tgz::hash=812667&locator=resonanz%40workspace%3A."
-  checksum: 10c0/07a4270c3044e2adc57543bf34d1d222d23735dc0d3f60f2753cae4c9e2d7947aef3ddf16c7e277cd46787c58617459b29e70d57f96e9c030c5c0ae341b5b2f3
+  resolution: "@pixel-brewery/synapse-core@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-core%2F0.0.3%2Ff395a8dc7dd571101003af9c5a11038e7bd56889"
+  checksum: 10c0/564fa9be0e16a8ba2625f6d125835acf8792ebe736429df00cc49e300cb0b5d5df72ef7e23206d3348a34c1b6b0a4695a53bd2af7f638d6d545f229584f042c6
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-provider-claude@file:./vendor/synapse/synapse-provider-claude-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-provider-claude@npm:0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-provider-claude@file:./vendor/synapse/synapse-provider-claude-0.0.3.tgz#./vendor/synapse/synapse-provider-claude-0.0.3.tgz::hash=17fd2e&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/synapse-provider-claude@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-provider-claude%2F0.0.3%2F530a5004d1ff68b12f3828650ee77536e73e5181"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:^0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:^0.0.3"
-  checksum: 10c0/303e110092984178bad3788f88cced2f7a363be2e5837193b9899a7848b57702443104ec33765689f9a1143789f83180ee9b6ea3228ae888d945c33d98176648
+  checksum: 10c0/8bc733e80c0947769af3a14ae12b7b5d8aeb99ce3a0b072de4158370e27a781244330f4b6bbf9af78e1610a97f1132495d81b0c64097c0070685c3ba7bf980c2
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-provider-codex@file:./vendor/synapse/synapse-provider-codex-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-provider-codex@npm:0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-provider-codex@file:./vendor/synapse/synapse-provider-codex-0.0.3.tgz#./vendor/synapse/synapse-provider-codex-0.0.3.tgz::hash=d27946&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/synapse-provider-codex@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-provider-codex%2F0.0.3%2F8adc33bb7218be529caa231ae9801011dc967e9b"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:^0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:^0.0.3"
     smol-toml: "npm:1.9.1"
-  checksum: 10c0/629498975827c13ff0e0f24e57ebe40931f8e72da6d4e46189436934eeb280611e896df4c1e062c7d8d3013150613e15428a7f3e9877c52efb4c1d04867f2794
+  checksum: 10c0/4d95be30df414e61aacc5b35323106521df82707dcddf0822747c021ad6faf1616b84bf3836a3d6ca7dff19bad5cd805767f697810c0d4f9405adedf950303cc
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-provider-opencode@file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-provider-opencode@npm:0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-provider-opencode@file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz#./vendor/synapse/synapse-provider-opencode-0.0.3.tgz::hash=abfa9c&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/synapse-provider-opencode@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-provider-opencode%2F0.0.3%2Ffb2042de695bea9226d1ef91b0e515d92a26dbec"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:^0.0.3"
     "@pixel-brewery/synapse-runtime": "npm:^0.0.3"
-  checksum: 10c0/9a1b1f22272a10e79d887e6b3c3f0e3409e9b013b739fa2a14f2e09b2202add559f345a2727957d9b2df60a7c1915204908db33becf29b701ecc4452bc670c7d
+  checksum: 10c0/02114b111ede05e18f5f58582f3ca49dc6ab625a894bcbe86f025cb3357390002f4ef7caed44d2168193f92443b7f657ada0d2831977084f289d7534e454766c
   languageName: node
   linkType: hard
 
-"@pixel-brewery/synapse-runtime@file:./vendor/synapse/synapse-runtime-0.0.3.tgz::locator=resonanz%40workspace%3A.":
+"@pixel-brewery/synapse-runtime@npm:0.0.3, @pixel-brewery/synapse-runtime@npm:^0.0.3":
   version: 0.0.3
-  resolution: "@pixel-brewery/synapse-runtime@file:./vendor/synapse/synapse-runtime-0.0.3.tgz#./vendor/synapse/synapse-runtime-0.0.3.tgz::hash=c3deee&locator=resonanz%40workspace%3A."
+  resolution: "@pixel-brewery/synapse-runtime@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-runtime%2F0.0.3%2F3d3e8f4ec43c77e14d287459c52f2d0795c980e6"
   dependencies:
     "@pixel-brewery/synapse-core": "npm:^0.0.3"
     ajv: "npm:8.20.0"
     cross-spawn: "npm:7.0.6"
-  checksum: 10c0/a2cee5ea0db01bd2ce4fc3aeaa052885c555cbd5646ba038f84fac4c88daa1343d621e402691ff26cc39dda679ab64c50fbf44fddb99d519edcb6416be93e0be
+  checksum: 10c0/962e767538c12a47f5d81c822c2967ed68058304b3f697e52bf132e17bd6e4077d42f3486d15b85672700410f4a23d9f4b68d6225b856a1eb600d18c920c9b37
   languageName: node
   linkType: hard
 
@@ -4900,6 +4693,12 @@ __metadata:
 "@resonanz/intl@workspace:*, @resonanz/intl@workspace:libs/intl":
   version: 0.0.0-use.local
   resolution: "@resonanz/intl@workspace:libs/intl"
+  languageName: unknown
+  linkType: soft
+
+"@resonanz/repository-tasks@workspace:*, @resonanz/repository-tasks@workspace:tools/nx-plugins/repository-tasks":
+  version: 0.0.0-use.local
+  resolution: "@resonanz/repository-tasks@workspace:tools/nx-plugins/repository-tasks"
   languageName: unknown
   linkType: soft
 
@@ -11253,25 +11052,26 @@ __metadata:
     "@nx/devkit": "npm:24.0.6"
     "@nx/js": "npm:24.0.6"
     "@nx/workspace": "npm:24.0.6"
-    "@pixel-brewery/markdowner-core": "file:./vendor/mosaik/markdowner-core-0.1.183.tgz"
-    "@pixel-brewery/mosaik-elements": "file:./vendor/mosaik/mosaik-elements-0.1.183.tgz"
-    "@pixel-brewery/mosaik-elements-angular": "file:./vendor/mosaik/mosaik-elements-angular-0.1.183.tgz"
-    "@pixel-brewery/mosaik-elements-foundation": "file:./vendor/mosaik/mosaik-elements-foundation-0.1.183.tgz"
-    "@pixel-brewery/mosaik-icons": "file:./vendor/mosaik/mosaik-icons-0.1.183.tgz"
+    "@pixel-brewery/markdowner-core": "npm:0.1.183"
+    "@pixel-brewery/mosaik-elements": "npm:0.1.183"
+    "@pixel-brewery/mosaik-elements-angular": "npm:0.1.183"
+    "@pixel-brewery/mosaik-elements-foundation": "npm:0.1.183"
+    "@pixel-brewery/mosaik-icons": "npm:0.1.183"
     "@pixel-brewery/mosaik-mcp": "npm:0.1.213"
-    "@pixel-brewery/mosaik-themes": "file:./vendor/mosaik/mosaik-themes-0.1.183.tgz"
-    "@pixel-brewery/synapse-auth": "file:./vendor/synapse/synapse-auth-0.0.3.tgz"
-    "@pixel-brewery/synapse-core": "file:./vendor/synapse/synapse-core-0.0.3.tgz"
-    "@pixel-brewery/synapse-provider-claude": "file:./vendor/synapse/synapse-provider-claude-0.0.3.tgz"
-    "@pixel-brewery/synapse-provider-codex": "file:./vendor/synapse/synapse-provider-codex-0.0.3.tgz"
-    "@pixel-brewery/synapse-provider-opencode": "file:./vendor/synapse/synapse-provider-opencode-0.0.3.tgz"
-    "@pixel-brewery/synapse-runtime": "file:./vendor/synapse/synapse-runtime-0.0.3.tgz"
+    "@pixel-brewery/mosaik-themes": "npm:0.1.183"
+    "@pixel-brewery/synapse-auth": "npm:0.0.3"
+    "@pixel-brewery/synapse-core": "npm:0.0.3"
+    "@pixel-brewery/synapse-provider-claude": "npm:0.0.3"
+    "@pixel-brewery/synapse-provider-codex": "npm:0.0.3"
+    "@pixel-brewery/synapse-provider-opencode": "npm:0.0.3"
+    "@pixel-brewery/synapse-runtime": "npm:0.0.3"
     "@pixel-brewery/wortlaut-eslint-rules": "npm:0.2.7"
     "@pixel-brewery/wortlaut-nx-tasks": "npm:0.2.7"
     "@resonanz/assistant": "workspace:*"
     "@resonanz/audio": "workspace:*"
     "@resonanz/contracts": "workspace:*"
     "@resonanz/intl": "workspace:*"
+    "@resonanz/repository-tasks": "workspace:*"
     "@resonanz/sessions": "workspace:*"
     "@schematics/angular": "npm:22.2.7"
     "@tailwindcss/postcss": "npm:4.3.5"

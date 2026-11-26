@@ -18,7 +18,7 @@ Updated 2026-11-01. Current code and verified behavior take precedence over olde
 | Evidence           | Actual transcript segment IDs and bounds; invalid/unknown model references remain unverified     |
 | Library threads    | Validated per-session topic evidence grouped by stable keys; exact tags for legacy analyses      |
 | Mini recorder      | Passive native floating window; bounded projection and actions, one workspace capture owner      |
-| Packaging          | Pinned distributable archives, complete attribution and host-specific native verification        |
+| Packaging          | Published locked dependencies, complete attribution and host-specific native verification        |
 | Distribution trust | Permanent certificate-free macOS ad-hoc sealing and unsigned Windows installers; no notarization |
 | Source visibility  | Public GitHub repository, MIT; workspace stays private for package publication                   |
 

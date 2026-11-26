@@ -84,7 +84,7 @@ export default {
     sanitizePackageJson: [(manifest) => manifest],
     // fs-extra rejects copying the checkout into its own descendant directory.
     tmpdir: resolve(root, '../.resonanz-package-staging'),
-    // The source manifest uses workspaces and local archives; runtime pruning must
+    // The source manifest uses private workspaces; runtime pruning must
     // follow the complete bundle/native allowlist instead of traversing that graph.
     prune: false,
     appBundleId: 'de.pixelbrewery.resonanz',

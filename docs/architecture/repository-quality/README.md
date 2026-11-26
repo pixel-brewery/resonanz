@@ -73,6 +73,62 @@ successful named jobs; failure, cancellation, missing decisions or skipped matri
 The stable names preserve compatibility with the current remote ruleset. Successful execution of
 this workflow revision on GitHub remains separate acceptance evidence from these local changes.
 
+## Dependency updates and continuation
+
+All npm and GitHub Actions update types, including majors and TypeScript, use the
+complete existing verification and protected merge rules. Published Mosaik and
+Synapse families are grouped. Their versions are declared directly as `0.1.183`
+and `0.0.3`, respectively, with registry integrity in `yarn.lock`; no file override
+can make an updated manifest keep installing an older archive.
+
+The canonical automation owner is the private `repository-tasks:dependabot` Nx
+executor under `tools/nx-plugins/repository-tasks`. Its `merge`, `reconcile` and
+`continue` modes have typed options and a schema, and external writes are never
+cached. The privileged workflow bootstraps the same owned implementation through
+native Node without installing dependencies or executing PR code/artifacts.
+
+Quality/release completion and an hourly fallback reconcile bounded sets of open
+same-repository Dependabot PRs. Repository ID, public visibility, default branch,
+bot identity and the current head are checked. A stale branch is updated with
+`expected_head_sha`; the controller waits for the replacement revision and
+explicitly requests full read-only CI with `expected_head_sha`. CI rejects a changed
+revision before classification. Conflicts block one PR while inventory continues.
+An existing failed exact-head attempt stays available for diagnosis; an
+approval-pending ordinary PR run does not suppress explicit verification.
+
+The merger accepts only the current successful attempt of `Desktop quality` with
+all four actual jobs: classification, both native platform jobs and Quality Gate.
+A manual exact-head run must map uniquely to the current open Dependabot PR with
+matching repository, branch and SHA. The owner re-reads the run, PR and current main
+before the ordinary SHA-guarded squash request; strict branch protection remains
+binding. If main advances during the merge request, a new comparison must prove
+that the unchanged bot head is behind before treating the denial as a stale-base
+skip. Other merge/API failures remain failures, with no bypass or automatic review.
+
+A successful native-token merge explicitly dispatches full main CI and the
+existing source-bound patch release, because `GITHUB_TOKEN` suppresses normal push
+workflows. CI uses `expected_head_sha`; the release retains `source_sha`. Both
+continuations retain existing attempts and stop when main supersedes their source.
+Release completion triggers reconciliation again after release metadata advances
+main, preventing a successful first dependency merge from stalling every next PR.
+The existing release App and publication boundary are unchanged. A fixed
+`documentation` continuation also preserves Pages' existing push paths: its workflow,
+`site/`, the project artwork and application site icon. Unrelated dependency changes
+do not deploy Pages. It keeps existing successful or failed attempts and supplies
+`expected_head_sha`; Pages checks both its selected revision and current main before
+deployment. CI and Pages share `requestMergedWorkflow` within the same Nx owner;
+no arbitrary workflow selection is accepted.
+
+Runtime, declarations, licenses and parsed manifests of all twelve migrated
+packages match the former distributions. Synapse manifests differ only in JSON
+formatting; one themes development-generator comment differs. The documentation
+generator is not copied to public source or application packages: Forge's closed
+runtime allowlist retains only the three native speech packages, while Mosaik and
+Synapse runtime code is bundled. Package verification checks that allowlist and
+compares emitted bundles/resources with the actual current build. Registry
+metadata changes peer-optionality warnings; it does not introduce a runtime
+version upgrade or local dependency patch.
+
 ## Public-content contract
 
 `yarn verify:public-content` rejects the excluded private project identifier,
@@ -87,11 +143,14 @@ The check runs within `yarn verify`; adjacent Node behavior tests cover source
 discovery, compressed content, text encodings and command failure. A failure
 identifies the affected file without repeating private source content.
 
-Copied source and vendored-package adaptations retain their original commit or
-archive digest, an explicit modification description and the current digest.
-License text remains intact. Updating an archive also requires refreshing the
-Yarn lockfile with the declared package manager and verifying an immutable
-installation. The source check does not rewrite Git history or old local output.
+Copied audio source retains its original commit, explicit processor-identifier
+adaptation and current digests in its dedicated provenance manifest. Published
+dependencies use the declared registry versions and immutable Yarn integrity;
+complete supplied license text remains intact. Local dependency patches and file
+overrides are not part of the installation contract. The source guard still
+checks any tracked archive and does not scan ignored installed dependencies,
+rewrite Git history or clean unrelated old local output. Distribution privacy is
+also enforced by the closed packaged-runtime allowlist.
 
 ## Remote activation and acceptance
 
