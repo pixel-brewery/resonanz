@@ -7,7 +7,7 @@ export const verificationPolicy = Object.freeze({
   workflowFile: 'ci.yml',
   workflowPath: '.github/workflows/ci.yml',
   workflowName: 'Desktop quality',
-    releaseWorkflowName: "Continuous Desktop Release",
+  releaseWorkflowName: 'Continuous Desktop Release',
   requiredJobs: [
     'Classify changes',
     'Build and exercise desktop (macos-latest)',
