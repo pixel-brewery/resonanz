@@ -193,8 +193,9 @@ yarn start
 
 `yarn start`, `yarn dev` and `yarn start:unpackaged` build the renderer and native
 processes, then launch Electron. `yarn start:built` reuses an existing build.
-Pinned Mosaik and Synapse archives are included. Wortlaut is resolved from its
-public registry packages.
+Mosaik, Synapse and Wortlaut use their published GitHub Packages versions with
+the immutable Yarn lockfile. No local archive override hides installed versions
+from dependency automation.
 
 Quality and packaging commands
 
@@ -251,5 +252,5 @@ contracts. The [project plan](docs/project-plan.md) and
 
 ## License
 
-[MIT](LICENSE). Copied sources, archives and Inter fonts retain their additional
+[MIT](LICENSE). Copied sources, bundled packages and Inter fonts retain their additional
 notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

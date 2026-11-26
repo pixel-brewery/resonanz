@@ -1,9 +1,26 @@
 # Verification and evidence
 
-Updated 2026-11-06. Resonanz uses native Codex/Claude account sign-in, system speech
+Updated 2026-11-26. Resonanz uses native Codex/Claude account sign-in, system speech
 and the provenance-verified upstream audio core. An additional API key or cloud speech provider
 is outside the product. Evidence below separates earlier real integration checks,
 controlled redesign checks and requirements that remain unverified.
+
+## Published dependency migration on 2026-11-26
+
+The same twelve Mosaik and Synapse versions now install from the public registry.
+The comparison covered 17,573 installed files. Runtime, declarations and supplied
+license content match the earlier archives; dependency versions were retained.
+
+Under Node 24.21.0, `yarn verify:code`, the built-app E2E suite, a fresh packaging
+smoke check and the actual packaged-app E2E suite all passed. The package checker
+compared 191 files and verified the local macOS ARM64 signature. The packaged
+archive and its 82 external resources also passed the existing public-content
+privacy predicate; development-only package tooling is excluded by the runtime
+allowlist.
+
+Both app runs used isolated profiles and synthetic media. These checks do not
+establish physical microphone, personal assistant sign-in or Windows behavior.
+The protected desktop workflow owns the additional platform checks before merge.
 
 ## Quality command alignment on 2026-11-06
 

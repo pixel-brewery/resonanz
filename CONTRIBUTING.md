@@ -13,8 +13,9 @@ Scratch work belongs in the ignored `.codex-work/` directory. Reference reposito
 remain read-only unless a coordinated change is explicitly authorized.
 
 Use Node **24 LTS**, at least `24.15.0`, and Yarn **4.10.3** from package.json.
-Pinned vendor archives avoid an additional private registry login; they do not
-replace native assistant installation or account sign-in.
+Published Pixel Brewery packages come from GitHub Packages. Set `GITHUB_TOKEN`
+with package-read access for installation; this is separate from native assistant
+installation and account sign-in.
 
 ```sh
 yarn install --immutable
@@ -47,9 +48,10 @@ German catalog entries, intentional test speech and user content keep their lang
 The provenance manifest records one intentional PCM processor identifier rename
 with separate upstream/downstream hashes. Do not edit copied upstream files for
 product changes. An intentional upstream update
-must update revision, paths, hashes and relevant tests together. Update vendor
-archives, manifests, dependencies/resolutions and lockfile coherently. Never bypass
-package resolution using a personal peer-checkout alias. Preserve complete notices.
+must update revision, paths, hashes and relevant tests together. Consume published
+dependency versions directly and keep the immutable lockfile coherent. Do not add
+local dependency patches, file overrides or personal peer-checkout aliases. Preserve
+complete notices; the package allowlist excludes dependency documentation tools.
 
 ## Verification
 
@@ -58,7 +60,6 @@ Run focused checks before integrated gates and coordinate one heavy job at a tim
 | Command                 | Scope                                                      |
 | ----------------------- | ---------------------------------------------------------- |
 | `yarn verify:skills`    | Pinned Architecture base, derivation and reference links   |
-| `yarn verify:vendor`    | Pinned distribution hashes                                 |
 | `yarn verify:audio`     | Copied/adapted audio integrity and generated worklet       |
 | `yarn typecheck`        | Native TypeScript and Angular templates                    |
 | `yarn test`             | Behavior specifications and packaging-tool tests           |

@@ -2,9 +2,10 @@
 
 This document preserves the supplied notices for the source and package material
 reused by Resonanz. Resonanz's original source is MIT licensed; see [LICENSE](LICENSE).
-Unmodified distribution archives keep their own complete `LICENSE` files, except
-where an upstream archive did not supply one as noted below. Other installed
-third-party dependencies retain their respective package notices.
+Published distributions retain their own complete `LICENSE` files, except where
+an upstream package did not supply one as noted below. The versions and integrity
+are recorded in the root manifest and `yarn.lock`. Other installed third-party
+dependencies retain their respective package notices.
 
 ## Copied private-upstream audio source
 
@@ -79,9 +80,8 @@ SOFTWARE.
 
 Packages: `@pixel-brewery/synapse-core` and `@pixel-brewery/synapse-auth`, version
 `0.0.3`. Source: [pixel-brewery/synapse](https://github.com/pixel-brewery/synapse),
-revision `050ec502133aa0e0311dec8bc96023457d3f52aa`. Unmodified archives and their
-hashes are recorded in [the Synapse provenance manifest](vendor/synapse/provenance.json).
-Both archives supply this notice:
+revision `050ec502133aa0e0311dec8bc96023457d3f52aa`. The root manifest and Yarn
+lock consume the published packages directly. Both packages supply this notice:
 
 ```text
 MIT License
@@ -145,14 +145,13 @@ Packages, version `0.1.183`: `@pixel-brewery/mosaik-elements`,
 `@pixel-brewery/mosaik-elements-angular`,
 `@pixel-brewery/mosaik-elements-foundation`, `@pixel-brewery/mosaik-icons`,
 `@pixel-brewery/mosaik-themes` and `@pixel-brewery/markdowner-core`.
-[The Mosaik provenance manifest](vendor/mosaik/provenance.json) records original
-registry-cache digests and current archive integrity. The themes archive has one
-explicit privacy adaptation in a documentation-generator comment; its original
-archive digest and original/current member hashes are recorded. All executable
-behavior and complete license notices are unchanged.
+The root manifest and Yarn lock record the published versions and integrity.
+Runtime files, parsed manifests and complete supplied notices match the former
+local distributions. The themes documentation generator is a development tool;
+its files are excluded from application packages by the closed runtime allowlist.
 
-The supplied Mosaik/Markdowner archives include the following notice. The icons
-archive declares `MIT` and Pixel Brewery as author in `package.json`, but omits a
+The supplied Mosaik/Markdowner packages include the following notice. The icons
+package declares `MIT` and Pixel Brewery as author in `package.json`, but omits a
 standalone `LICENSE`; the same retained Mosaik family notice is reproduced here.
 
 ```text

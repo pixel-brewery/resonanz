@@ -18,7 +18,6 @@ export default [
       'coverage/**',
       'dist/**',
       'out/**',
-      'vendor/**',
       'libs/audio/src/audio/**',
       'apps/renderer/public/audio/pcm-audio.worklet.js',
     ],

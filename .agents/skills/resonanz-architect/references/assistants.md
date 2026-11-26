@@ -50,9 +50,10 @@ a process was merely discovered or an abort signal was sent.
 
 ## Dependencies and evidence
 
-Keep [Synapse provenance](../../../../vendor/synapse/provenance.json), vendor
-archives, public imports, dependencies/resolutions and Yarn lock coherent. A peer
-source reference is read-only and not a runtime dependency.
+Consume the published Synapse versions declared in the root manifest and locked
+by Yarn. Keep public imports and installed versions coherent without local
+archive overrides or dependency patches. A peer source reference is read-only
+and not a runtime dependency.
 
 Account-free tests may inject deterministic native boundaries while exercising
 the real Synapse runtime/auth adapter. They establish only those contracts. Codex

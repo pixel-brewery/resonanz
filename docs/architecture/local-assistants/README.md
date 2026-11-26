@@ -26,9 +26,11 @@ hidden mock response or automatic fallback to a different account/provider.
 | Symphony `resolveAllowedCommand` and `codexApplicationCandidates`         | Filesystem discovery follows explicit command names, GUI PATH fallbacks and known Codex application bundle layouts. No shell command interpolation is used.                                                                        |
 | Synapse independent meeting-notes consumer                                | Establishes that transcript analysis is a normal read-only text request with no Git repository requirement.                                                                                                                        |
 
-Source packages are pinned through the portable [distribution manifest](../../../vendor/synapse/provenance.json).
-The package-consumer archives are unmodified; [artifact verification](../../../vendor/synapse/README.md)
-describes their integrity and installation route.
+The root manifest consumes published Synapse `0.0.3` packages directly from GitHub
+Packages, with integrity recorded in `yarn.lock`. Runtime, declarations, complete
+licenses and parsed manifests match the former local distributions. Dependency
+updates now change the actual installed version; no file-resolution override masks
+the declared version. Installation requires the existing package-read token.
 
 ## Native executable and account lifecycle
 
