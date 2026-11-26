@@ -1,3 +1,13 @@
+## 0.1.41 (2026-11-26)
+
+### 🩹 Fixes
+
+- **ci:** authorize current native dependency checks ([#78](https://github.com/pixel-brewery/resonanz/pull/78))
+
+### ❤️ Thank You
+
+- André Wehlert @RueDeRennes
+
 ## 0.1.40 (2026-11-26)
 
 This was a version bump only, there were no code changes.
