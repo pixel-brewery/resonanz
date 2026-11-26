@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@pixel-brewery/synapse-auth": "0.0.3",
-    "@pixel-brewery/synapse-core": "0.0.3",
+    "@pixel-brewery/synapse-core": "0.0.20",
     "@pixel-brewery/synapse-provider-claude": "0.0.3",
     "@pixel-brewery/synapse-provider-codex": "0.0.3",
     "@pixel-brewery/synapse-provider-opencode": "0.0.3",

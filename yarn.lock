@@ -4445,6 +4445,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pixel-brewery/synapse-core@npm:0.0.20":
+  version: 0.0.20
+  resolution: "@pixel-brewery/synapse-core@npm:0.0.20::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-core%2F0.0.20%2F5e9aae271fdf04c7516d1f8ccc1b9b5a1eb3ec4d"
+  checksum: 10c0/3959ed7579649f7a780f0781ca916d7451022ce2840705cb1435455132b3b7f8b41940c5a60aa78cc2452d93efed931afe114e707f41d938073e87868e635a0b
+  languageName: node
+  linkType: hard
+
 "@pixel-brewery/synapse-core@npm:0.0.3, @pixel-brewery/synapse-core@npm:^0.0.3":
   version: 0.0.3
   resolution: "@pixel-brewery/synapse-core@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40pixel-brewery%2Fsynapse-core%2F0.0.3%2Ff395a8dc7dd571101003af9c5a11038e7bd56889"
@@ -4664,7 +4671,7 @@ __metadata:
   resolution: "@resonanz/assistant@workspace:libs/assistant"
   dependencies:
     "@pixel-brewery/synapse-auth": "npm:0.0.3"
-    "@pixel-brewery/synapse-core": "npm:0.0.3"
+    "@pixel-brewery/synapse-core": "npm:0.0.20"
     "@pixel-brewery/synapse-provider-claude": "npm:0.0.3"
     "@pixel-brewery/synapse-provider-codex": "npm:0.0.3"
     "@pixel-brewery/synapse-provider-opencode": "npm:0.0.3"
@@ -11060,7 +11067,7 @@ __metadata:
     "@pixel-brewery/mosaik-mcp": "npm:0.1.213"
     "@pixel-brewery/mosaik-themes": "npm:0.1.183"
     "@pixel-brewery/synapse-auth": "npm:0.0.3"
-    "@pixel-brewery/synapse-core": "npm:0.0.3"
+    "@pixel-brewery/synapse-core": "npm:0.0.20"
     "@pixel-brewery/synapse-provider-claude": "npm:0.0.3"
     "@pixel-brewery/synapse-provider-codex": "npm:0.0.3"
     "@pixel-brewery/synapse-provider-opencode": "npm:0.0.3"
