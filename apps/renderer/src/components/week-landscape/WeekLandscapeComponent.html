@@ -12,8 +12,9 @@
   @for (day of days(); track day.date.getTime()) {
     <div class="day" [class.today]="day.today">
       <div class="day-label">
-        <strong>{{ day.date | date: 'EEEE' : undefined : intl.locale() }}</strong
-        ><span>{{ day.date | date: 'dd. MMM' : undefined : intl.locale() }}</span>
+        <strong>{{ day.date | date: 'EEEE' : undefined : intl.locale() }}</strong><span>{{
+          day.date | date: 'dd. MMM' : undefined : intl.locale()
+        }}</span>
       </div>
       <div class="track">
         @for (hour of hours; track hour) {

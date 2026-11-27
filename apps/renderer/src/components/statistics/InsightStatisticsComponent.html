@@ -1,10 +1,10 @@
 <div class="decisions">
-  <strong>{{ decisions() }}</strong
-  ><span><resonanz-marker kind="decision" />{{ 'loc.resonanz.marker.decisions' | translate }}</span>
+  <strong>{{ decisions() }}</strong><span
+    ><resonanz-marker kind="decision" />{{ 'loc.resonanz.marker.decisions' | translate }}</span
+  >
 </div>
 <div class="tasks">
-  <strong>{{ tasks() }}</strong
-  ><span
+  <strong>{{ tasks() }}</strong><span
     ><resonanz-marker kind="task" />{{
       assignedTasks() === null
         ? ('loc.resonanz.marker.tasks' | translate)
@@ -13,8 +13,7 @@
   >
 </div>
 <div class="questions">
-  <strong>{{ questions() }}</strong
-  ><span
+  <strong>{{ questions() }}</strong><span
     ><resonanz-marker kind="question" />{{ 'loc.resonanz.marker.questionsLower' | translate }}</span
   >
 </div>

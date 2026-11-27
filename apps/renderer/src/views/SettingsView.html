@@ -84,8 +84,10 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span
-                ><span class="caption">{{ 'loc.resonanz.error.systemCapture' | translate }}</span>
+                <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span><span
+                  class="caption"
+                  >{{ 'loc.resonanz.error.systemCapture' | translate }}</span
+                >
               </div>
               <mosaik-toggle-switch
                 [disabled]="true"
@@ -110,8 +112,9 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.settings.mini' | translate }}</span
-                ><span class="caption">{{ 'loc.resonanz.settings.miniHint' | translate }}</span>
+                <span>{{ 'loc.resonanz.settings.mini' | translate }}</span><span class="caption">{{
+                  'loc.resonanz.settings.miniHint' | translate
+                }}</span>
               </div>
               <mosaik-toggle-switch
                 [formField]="presenter.form.showMiniRecorder"
@@ -121,8 +124,10 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.settings.silenceReminder' | translate }}</span
-                ><span class="caption">{{ 'loc.resonanz.settings.silenceHint' | translate }}</span>
+                <span>{{ 'loc.resonanz.settings.silenceReminder' | translate }}</span><span
+                  class="caption"
+                  >{{ 'loc.resonanz.settings.silenceHint' | translate }}</span
+                >
               </div>
               <mosaik-toggle-switch
                 test-id="silence-reminder"
@@ -209,8 +214,7 @@
               />
             </div>
             <div class="setting">
-              <span>{{ 'loc.resonanz.settings.context' | translate }}</span
-              ><mosaik-segment
+              <span>{{ 'loc.resonanz.settings.context' | translate }}</span><mosaik-segment
                 appearance="soft"
                 [attr.aria-label]="'loc.resonanz.settings.contextLabel' | translate"
                 ><mosaik-segment-item
@@ -234,10 +238,10 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.settings.autoAnalysis' | translate }}</span
-                ><span class="caption">{{
-                  'loc.resonanz.settings.manualAnalysis' | translate
-                }}</span>
+                <span>{{ 'loc.resonanz.settings.autoAnalysis' | translate }}</span><span
+                  class="caption"
+                  >{{ 'loc.resonanz.settings.manualAnalysis' | translate }}</span
+                >
               </div>
               <mosaik-toggle-switch
                 [formField]="presenter.form.autoAnalyze"
@@ -363,10 +367,10 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.settings.autoTranscribe' | translate }}</span
-                ><span class="caption">{{
-                  'loc.resonanz.settings.afterRecording' | translate
-                }}</span>
+                <span>{{ 'loc.resonanz.settings.autoTranscribe' | translate }}</span><span
+                  class="caption"
+                  >{{ 'loc.resonanz.settings.afterRecording' | translate }}</span
+                >
               </div>
               <mosaik-toggle-switch
                 test-id="auto-transcribe"
@@ -377,8 +381,10 @@
             </div>
             <div class="setting toggle-setting">
               <div>
-                <span>{{ 'loc.resonanz.settings.markPauses' | translate }}</span
-                ><span class="caption">{{ 'loc.resonanz.settings.pauseHint' | translate }}</span>
+                <span>{{ 'loc.resonanz.settings.markPauses' | translate }}</span><span
+                  class="caption"
+                  >{{ 'loc.resonanz.settings.pauseHint' | translate }}</span
+                >
               </div>
               <mosaik-toggle-switch
                 test-id="mark-pauses"
@@ -428,8 +434,8 @@
           <div class="settings-card">
             <div class="setting recognition">
               <div>
-                <span>{{ 'loc.resonanz.settings.recognition' | translate }}</span
-                ><span class="caption"
+                <span>{{ 'loc.resonanz.settings.recognition' | translate }}</span><span
+                  class="caption"
                   >{{
                     presenter.library.capabilities()?.platform === 'darwin'
                       ? 'macOS'
@@ -464,8 +470,7 @@
               </mosaik-select>
             </div>
             <div class="setting">
-              <span>{{ 'loc.resonanz.settings.speechRate' | translate }}</span
-              ><mosaik-slider
+              <span>{{ 'loc.resonanz.settings.speechRate' | translate }}</span><mosaik-slider
                 [min]="0"
                 [max]="4"
                 test-id="speech-rate"
@@ -575,8 +580,10 @@
           <div class="settings-card shortcut-grid">
             @for (shortcut of shortcuts(); track shortcut.id) {
               <div>
-                <span>{{ shortcut.label | message }}</span
-                ><mosaik-kbd [value]="shortcut.keys" [isCompact]="true" />
+                <span>{{ shortcut.label | message }}</span><mosaik-kbd
+                  [value]="shortcut.keys"
+                  [isCompact]="true"
+                />
               </div>
             }
           </div>

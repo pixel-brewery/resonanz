@@ -104,8 +104,7 @@
   }
   @if (presenter.confirmCollectionDeletion()) {
     <div class="collection-tools">
-      <span>{{ 'loc.resonanz.nav.confirmCollection' | translate }}</span
-      ><mosaik-button
+      <span>{{ 'loc.resonanz.nav.confirmCollection' | translate }}</span><mosaik-button
         test-id="confirm-delete-collection"
         [label]="'loc.resonanz.common.remove' | translate"
         variant="danger"
@@ -221,8 +220,7 @@
                             [count]="36"
                           />
                           <span class="row-text">
-                            <strong>{{ session.title }}</strong
-                            ><span class="caption"
+                            <strong>{{ session.title }}</strong><span class="caption"
                               >{{ session.createdAt | date: 'HH:mm' : undefined : intl.locale() }} ·
                               {{
                                 session.kind === 'conversation'

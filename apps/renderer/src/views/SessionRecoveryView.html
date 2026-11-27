@@ -38,8 +38,7 @@
               <div>
                 <span class="status-circle" [class.success]="status()?.installed">{{
                   status()?.installed ? '✓' : '!'
-                }}</span
-                ><span>{{ intl.t('loc.resonanz.recovery.installation', assistant()) }}</span
+                }}</span><span>{{ intl.t('loc.resonanz.recovery.installation', assistant()) }}</span
                 ><small>{{
                   status()?.executable ?? ('loc.resonanz.nav.notChecked' | translate)
                 }}</small>
@@ -47,8 +46,7 @@
               <div>
                 <span class="status-circle" [class.success]="status()?.authenticated">{{
                   status()?.authenticated ? '✓' : '!'
-                }}</span
-                ><span>{{ 'loc.resonanz.recovery.account' | translate }}</span
+                }}</span><span>{{ 'loc.resonanz.recovery.account' | translate }}</span
                 ><small>{{ loginLabel() }}</small>
               </div>
               <div>
@@ -89,8 +87,7 @@
             <div class="account-action" test-id="processing-account-action">
               <span>{{ 'loc.resonanz.recovery.signInHint' | translate }}</span>
               <div>
-                <span>{{ assistant() }}</span
-                ><mosaik-button
+                <span>{{ assistant() }}</span><mosaik-button
                   icon="copy"
                   appearance="plain"
                   [attr.aria-label]="'loc.resonanz.recovery.copyDiagnostics' | translate"
