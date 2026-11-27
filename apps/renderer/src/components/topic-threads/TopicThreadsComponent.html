@@ -30,8 +30,7 @@
     <div class="story-points">
       @for (point of thread.points; track point.itemId + ':' + point.atMs; let last = $last) {
         <button class="story-card" (click)="pointSelected.emit(point)">
-          <span class="caption">{{ point.when }}</span
-          ><strong>{{ point.title }}</strong>
+          <span class="caption">{{ point.when }}</span><strong>{{ point.title }}</strong>
           <blockquote>„{{ point.quote }}“</blockquote>
           <span class="point-meta"
             ><resonanz-marker [kind]="point.kind" />{{

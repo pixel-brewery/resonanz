@@ -103,8 +103,7 @@
             {{ presenter.digestPlaying() ? 'Ⅱ' : '▶' }}
           </button>
           <div>
-            <strong>{{ 'loc.resonanz.session.digestTitle' | translate }}</strong
-            ><span
+            <strong>{{ 'loc.resonanz.session.digestTitle' | translate }}</strong><span
               >{{ intl.t('loc.resonanz.session.sourceClips', presenter.digestClips().length) }} ·
               {{ presenter.digestDurationMs() | duration }}
               @if (presenter.digestIndex() >= 0) {

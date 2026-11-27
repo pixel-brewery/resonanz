@@ -27,8 +27,8 @@
         [title]="passage.title"
         (click)="relatedSelected.emit(passage)"
       >
-        <span>{{ passage.title }}</span
-        ><span aria-hidden="true">·</span><time>{{ passage.atMs | duration }}</time>
+        <span>{{ passage.title }}</span><span aria-hidden="true">·</span
+        ><time>{{ passage.atMs | duration }}</time>
       </button>
     </div>
   }

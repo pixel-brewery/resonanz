@@ -25,8 +25,7 @@
                 : capture.mode() === 'conversation'
                   ? ('loc.resonanz.capture.liveConversation' | translate)
                   : ('loc.resonanz.capture.running' | translate)
-            }}</strong
-            ><span class="caption">{{
+            }}</strong><span class="caption">{{
               capture.mode() === 'conversation'
                 ? ('loc.resonanz.voice.system' | translate)
                 : ('loc.resonanz.capture.microphone' | translate)
@@ -49,18 +48,17 @@
         <div class="time-block">
           <span class="recording-time" aria-live="off">{{
             capture.durationMs() | duration: 'clock'
-          }}</span
-          ><resonanz-level-meter [level]="level()" [paused]="capture.state() === 'paused'" /><span
-            class="caption"
-            >{{
-              (capture.state() === 'paused'
-                ? shell.library.settings().markPausesInTranscript
-                  ? 'loc.resonanz.capture.pauseNoted'
-                  : 'loc.resonanz.capture.pauseExcluded'
-                : 'loc.resonanz.capture.windowSafe'
-              ) | translate
-            }}</span
-          >
+          }}</span><resonanz-level-meter
+            [level]="level()"
+            [paused]="capture.state() === 'paused'"
+          /><span class="caption">{{
+            (capture.state() === 'paused'
+              ? shell.library.settings().markPausesInTranscript
+                ? 'loc.resonanz.capture.pauseNoted'
+                : 'loc.resonanz.capture.pauseExcluded'
+              : 'loc.resonanz.capture.windowSafe'
+            ) | translate
+          }}</span>
         </div>
         @if (capture.silenceReminder()) {
           <resonanz-silence-reminder
@@ -75,8 +73,7 @@
           />
         }
         <div class="section-heading">
-          <strong>{{ 'loc.resonanz.capture.mark' | translate }}</strong
-          ><span class="caption"
+          <strong>{{ 'loc.resonanz.capture.mark' | translate }}</strong><span class="caption"
             >{{ 'loc.resonanz.voice.withoutLooking' | translate }}
             <kbd>{{ shortcuts.mark }}</kbd></span
           >
@@ -141,8 +138,9 @@
       <div class="capture-body">
         <header class="saved-header">
           <div>
-            <strong>{{ saved.title }}</strong
-            ><span class="caption">{{ savedTitle() | translate }}</span>
+            <strong>{{ saved.title }}</strong><span class="caption">{{
+              savedTitle() | translate
+            }}</span>
           </div>
           <mosaik-button
             icon="close"
@@ -239,8 +237,10 @@
           </div>
           <div class="system-audio">
             <div>
-              <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span
-              ><span class="caption">{{ 'loc.resonanz.error.systemAudio' | translate }}</span>
+              <span>{{ 'loc.resonanz.capture.includeSystem' | translate }}</span><span
+                class="caption"
+                >{{ 'loc.resonanz.error.systemAudio' | translate }}</span
+              >
             </div>
             <mosaik-toggle-switch
               [attr.aria-label]="'loc.resonanz.capture.systemUnavailable' | translate"
@@ -248,8 +248,9 @@
             />
           </div>
           <div class="level-row">
-            <span class="caption">{{ 'loc.resonanz.common.level' | translate }}</span
-            ><resonanz-level-meter [level]="0" [paused]="true" [count]="30" />
+            <span class="caption">{{
+              'loc.resonanz.common.level' | translate
+            }}</span><resonanz-level-meter [level]="0" [paused]="true" [count]="30" />
           </div>
         </div>
         <mosaik-button
