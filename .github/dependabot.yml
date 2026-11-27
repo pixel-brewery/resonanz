@@ -1,3 +1,4 @@
+# Green Dependabot pull requests merge automatically: .github/workflows/dependabot-merge.yml
 version: 2
 updates:
   - package-ecosystem: npm
@@ -7,6 +8,9 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
     groups:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', '@schematics/*']
@@ -31,6 +35,8 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(ci)
     groups:
-      github-actions:
+      github-actions-updates:
         patterns: ['*']
