@@ -10,8 +10,8 @@ it is recorded. A project link does not imply automatic intake of future issues.
 
 Active GitHub rulesets protect `main` against deletion and force pushes, require
 pull requests with resolved review conversations, and require the current macOS
-and Windows desktop checks plus `Quality Gate` from GitHub Actions. Branches must
-include the current base revision before merging. No human or administrator bypass was added.
+and Windows desktop checks plus `Quality Gate` from GitHub Actions. Branches do not
+have to include the current base revision before merging. No human or administrator bypass was added.
 Independent approval is not mandatory for this owner-maintained repository.
 The dedicated release App alone may bypass the PR/check rule to publish verified
 metadata commits and tags. History protection retains no bypass.
@@ -81,72 +81,12 @@ Synapse families are grouped. Their versions are declared directly as `0.1.183`
 and `0.0.3`, respectively, with registry integrity in `yarn.lock`; no file override
 can make an updated manifest keep installing an older archive.
 
-The canonical owner is the private `repository-tasks:dependabot` Nx executor in
-`tools/nx-plugins/repository-tasks`. It requires all four actual `Desktop quality`
-jobs: classification, both native platforms and Quality Gate.
-
-The privileged controller executes only the trusted default-branch Nx owner,
-without installing workspace dependencies or executing PR code or PR artifacts.
-Its `merge`, `reconcile`, `authorize` and `continue` operations are non-cacheable.
-Branch refresh and merge have Contents/PR write with Actions read. A separate
-`authorize` job has only Contents read, PR read and Actions write. It approves
-workflow execution through GitHub's native run-approval endpoint; it creates no
-PR review, status, check or branch-rule exemption.
-
-Reconciliation after verification/release completion and hourly checks bounded
-same-repository bot inventories. A stale branch uses `expected_head_sha` and waits
-for the replacement. Only real `pull_request` CI is merge proof. If it is waiting
-for execution approval, the isolated authorizer verifies the exact Dependabot or
-GitHub Actions service identity of both run actors before one approval request.
-A missing native run remains pending. Manual diagnostic `workflow_dispatch` runs
-remain available but cannot satisfy protected PR checks or shadow a native run.
-Conflicts, real failures and rejected approvals retain the affected PR and attempt.
-
-The isolated authorization job waits for branch reconciliation before reading the
-complete bounded current open bot inventory. Every permitted maintenance trigger,
-including completed own CI and release runs, inspects those current candidates;
-the triggering run's old head, conclusion or attempt does not replace any
-candidate's source and native-attempt proof. Approval after a refresh therefore
-does not depend on another workflow notification. The hourly pass remains a
-fallback for an interrupted event or a not-yet-visible native run.
-
-For every approval and merge, M is current protected main, B the unchanged bot
-head, and C GitHub's actual `refs/pull/<number>/merge` commit. The owner checks
-unique own-repository PR association, M as ancestor of B, C's ordered parents
-[M, B] and C's tree equal to B. Source blobs are verified by Git object digest.
-Only the fixed reviewed read-only CI baseline in trusted-main
-`verificationPolicy.reviewedCiSha256` authorizes execution: its normalized main
-SHA-256 must match that constant, and normalized PR CI must equal normalized main.
-Normalization changes only full 40-character action pins with the same action
-owner/path and optional SemVer comments. CI logic, scopes, secrets or syntax edits
-require a conscious read-only review and explicit policy-digest update; no runtime
-or PR input learns a new baseline. This positive review proof does not rely on a
-partial YAML parser.
-
-The latest eligible native run is selected independently of diagnostics and its
-actual current `run_attempt` is reloaded. All actual jobs must succeed. Ordinary
-maintainer-triggered native CI on the bot PR is valid after the same complete
-source proof. A later reconciliation re-enters the full merger after a transient
-skip, never a reduced path. Workflow/run/PR/M/B/C/protection are re-read immediately
-before the ordinary SHA-guarded squash request. GitHub's strict required checks
-remain the final merge authority; the actual closed, merged PR is then confirmed.
-
-Confirmed merge outputs from either reconciliation or the CI event reach a
-separate continuation job. Recovery resolves the current main commit association
-and reads the full PR with `merged: true`; missing confirmation starts nothing.
-Main verification receives `expected_head_sha`, and the existing patch release
-retains `source_sha`. Existing exact-source main `push` or `workflow_dispatch` runs
-are retained in every state, including queued, failed and cancelled. Diagnostic
-branch runs do not suppress them. Every new request rechecks current main; a
-superseding revision stops it. Interrupted requests can therefore be retried
-without merging twice or preparing a duplicate release. Failed releases retain
-their original source and artifact instead of receiving a blind new dispatch.
-
-The documentation continuation keeps Pages' original workflow/site/artwork/icon
-push paths, includes renamed previous paths, and supplies `expected_head_sha`.
-Unrelated dependency changes do not deploy Pages. Both selected and current-main
-revisions are checked before deployment. The release App/environment and existing
-publication owner remain unchanged.
+Once the required checks of a Dependabot pull request are green,
+[`dependabot-merge.yml`](../../../.github/workflows/dependabot-merge.yml) squash-merges
+it with `GITHUB_TOKEN`; the `main` ruleset remains the merge authority. Because
+that merge starts no `push` workflows, the workflow then dispatches `Desktop quality`
+(`expected_head_sha`) and the release (`source_sha`) with the merge commit, and
+Pages only when the merged files match its push paths.
 
 Runtime, declarations, licenses and parsed manifests of all twelve migrated
 packages match the former distributions. Synapse manifests differ only in JSON

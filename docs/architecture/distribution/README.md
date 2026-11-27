@@ -4,7 +4,7 @@
 
 Resonanz follows the same repository policy as Symphony, Archipel and Synapse:
 complete verification before an eligible dependency PR merges; a main-branch
-release after a human code merge; an explicit, separately retryable release request
+release after a human code merge; a release dispatched with the merge commit
 after a native-token Dependabot merge. Native installers and their update feeds
 replace library package publication for this product.
 
@@ -36,8 +36,8 @@ require the pinned Node 24 toolchain and do not publish a release.
 
 `.github/workflows/release.yml` accepts a push to `main` or a manual semantic
 increment (`patch`, `minor`, `major`, default `patch`). An optional `source_sha`
-must equal the workflow's source commit when supplied by automatic merge
-continuation. Release execution is serialized and does not cancel an older run.
+must equal the workflow's source commit when `dependabot-merge.yml` supplies it
+after a Dependabot merge. Release execution is serialized and does not cancel an older run.
 Only the canonical public repository `pixel-brewery/resonanz`, immutable ID
 `1440725741`, and its main branch may publish.
 
@@ -48,8 +48,7 @@ candidate, native verification/builds, installer publication and update feeds. M
 run the full pipeline. Unknown or empty comparisons require verification; an unreadable comparison
 fails classification. Configure consumes a successful explicit full-verification decision; native
 builds depend on configure and publication depends on both, so a skipped candidate cannot publish.
-The dependency-refresh continuation also remains tied to durable publication. No release or updater
-runtime behavior changes for code releases.
+No release or updater runtime behavior changes for code releases.
 
 The configure job resolves the numeric version, metadata commit and annotated
 `v<version>` tag exactly once through the configured fixed Nx desktop release
@@ -102,13 +101,10 @@ public feeds are read back and verified. A newer unrelated main commit supersede
 an older candidate. Existing failed runs are recovered in their original run
 rather than by silently calculating a second release.
 
-The separate dependency-release request retains the successful merge SHA. A
-request retry checks current main and existing release attempts for that exact
-source, returning requested, already-requested or superseded. A final source-SHA
-check in the release workflow closes the race between reading main and dispatch.
-This preserves automatic release triggering despite native-token push-event
-suppression. Refreshing remaining dependency PRs follows durable metadata
-publication even if a later artifact publication step fails.
+A Dependabot merge made with `GITHUB_TOKEN` starts no push workflows, so
+`dependabot-merge.yml` dispatches this workflow with the merge commit as
+`source_sha`. The configure and publish jobs require that commit to remain the
+workflow source and the head of `main`; a newer main commit supersedes it.
 
 The existing organization App `5547670` has metadata read and contents write
 access, explicitly restricted to these four repositories. The repository variable
@@ -142,11 +138,10 @@ independent of platform signing and remains required in `release-main`.
 ## Dependency update boundary
 
 Dependabot uses its native rebase strategy for npm and GitHub Actions updates.
-The merge workflow checks the successful classification job, both native desktop
-jobs and the aggregate Quality Gate from the triggering CI attempt. It merges
-only the verified Dependabot revision after confirming that it includes current
-`main`, then requests the normal release for the merge commit. Human PRs use
-normal review and merge controls.
+Once the required `Desktop quality` checks of a Dependabot PR are green,
+`.github/workflows/dependabot-merge.yml` squash-merges it and dispatches the push
+workflows, including this release, with the merge commit. Human PRs use normal
+review and merge controls.
 
 Published Mosaik, Markdowner and Synapse packages are consumed from the registry
 at their declared versions and locked integrity. Their updates pass the same real

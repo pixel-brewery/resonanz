@@ -2,6 +2,5 @@
   "name": "@resonanz/repository-tasks",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "executors": "./executors.json"
+  "type": "module"
 }
