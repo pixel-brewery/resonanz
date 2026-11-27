@@ -11252,7 +11252,7 @@ __metadata:
     rxjs: "npm:7.8.2"
     sass: "npm:1.108.2"
     sharp: "npm:0.35.5"
-    signature_pad: "npm:5.1.4"
+    signature_pad: "npm:5.1.6"
     tailwindcss: "npm:4.3.5"
     tslib: "npm:2.9.1"
     typescript: "npm:6.0.3"
@@ -11990,10 +11990,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"signature_pad@npm:5.1.4":
-  version: 5.1.4
-  resolution: "signature_pad@npm:5.1.4"
-  checksum: 10c0/814942a0ee0fa83e416ef84a1f66ee10772b80cbaa2b757e787c86adbda0c34d8f902bab8f120138b979410806faa4dddd22fdc7887bdd79ab74f9248d762338
+"signature_pad@npm:5.1.6":
+  version: 5.1.6
+  resolution: "signature_pad@npm:5.1.6"
+  checksum: 10c0/adff349190b99dcd927ff55c3e0e6e692ce7e6c37fbbe5a9cabdc2834981a4b6b8af65ed709754e7811551496c914a3dc6e8785880be5b39bdf86a5601208255
   languageName: node
   linkType: hard
 
