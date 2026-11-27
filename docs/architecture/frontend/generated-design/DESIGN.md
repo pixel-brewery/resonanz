@@ -462,10 +462,10 @@ to compare the generated regions and validate their schema.
 
 | Layer | Count | Source |
 |---|---|---|
-| Global tokens (compiled) | 507 | `@pixel-brewery/mosaik-themes@0.1.183` |
+| Global tokens (compiled) | 507 | `@pixel-brewery/mosaik-themes@0.1.213` |
 | Runtime custom properties (light) | 654 | base theme plus the overrides of this product |
-| Components with a token file | 378 | `design/soho/model.json` |
-| Component tokens (mixins expanded) | 11128 | `design/soho/model.json` |
+| Components with a token file | 397 | `design/soho/model.json` |
+| Component tokens (mixins expanded) | 11839 | `design/soho/model.json` |
 | Component tokens that do not resolve | 2 | [Known gaps](#known-gaps) |
 <!-- /design-md:stats -->
 
@@ -637,6 +637,7 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [bannerGroup](COMPONENTS.md#banner-group) | `mosaik-banner-group` | 31 |
 | [bannerHeader](COMPONENTS.md#banner-header) | `mosaik-banner-header` | 24 |
 | [bannerSubHeader](COMPONENTS.md#banner-sub-header) | `mosaik-banner-sub-header` | 24 |
+| [barcode](COMPONENTS.md#barcode) | `mosaik-barcode` | 19 |
 | [box](COMPONENTS.md#box) | `mosaik-box` | 30 |
 | [breadcrumb](COMPONENTS.md#breadcrumb) | `mosaik-breadcrumb` | 22 |
 | [breadcrumbItem](COMPONENTS.md#breadcrumb-item) | `mosaik-breadcrumb-item` | 25 |
@@ -664,8 +665,9 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [carouselItem](COMPONENTS.md#carousel-item) | `mosaik-carousel-item` | 22 |
 | [cell](COMPONENTS.md#cell) | `mosaik-cell` | 30 |
 | [cellGroup](COMPONENTS.md#cell-group) | `mosaik-cell-group` | 28 |
-| [chart](COMPONENTS.md#chart) | `mosaik-chart` | 24 |
-| [chartToolbox](COMPONENTS.md#chart-toolbox) | `mosaik-chart-toolbox` | 23 |
+| [chart](COMPONENTS.md#chart) | `mosaik-chart` | 60 |
+| [chartLegend](COMPONENTS.md#chart-legend) | `mosaik-chart-legend` | 18 |
+| [chartTooltip](COMPONENTS.md#chart-tooltip) | `mosaik-chart-tooltip` | 22 |
 | [chat](COMPONENTS.md#chat) | `mosaik-chat` | 30 |
 | [chatHeader](COMPONENTS.md#chat-header) | `mosaik-chat-header` | 23 |
 | [chatMarker](COMPONENTS.md#chat-marker) | `mosaik-chat-marker` | 28 |
@@ -705,12 +707,18 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [comboItemGroup](COMPONENTS.md#combo-item-group) | `mosaik-combo-item-group` | 39 |
 | [comboItemVisual](COMPONENTS.md#combo-item-visual) | `mosaik-combo-item-visual` | 22 |
 | [comment](COMPONENTS.md#comment) | `mosaik-comment` | 25 |
+| [compound](COMPONENTS.md#compound) | `mosaik-compound` | 17 |
 | [compoundButton](COMPONENTS.md#compound-button) | `mosaik-compound-button` | 41 |
+| [compoundItem](COMPONENTS.md#compound-item) | `mosaik-compound-item` | 16 |
+| [conditionGroup](COMPONENTS.md#condition-group) | `mosaik-condition-group` | 24 |
 | [content](COMPONENTS.md#content) | `mosaik-content` | 22 |
 | [cookiesConsent](COMPONENTS.md#cookie-consent) | `mosaik-cookie-consent` | 22 |
+| [cursor](COMPONENTS.md#cursor) | `mosaik-cursor` | 98 |
 | [cursorEffect](COMPONENTS.md#cursor-effect) | `mosaik-cursor-effect` | 21 |
+| [dataBox](COMPONENTS.md#databox) | `mosaik-databox` | 41 |
 | [dataList](COMPONENTS.md#data-list) | `mosaik-data-list` | 22 |
 | [dataTable](COMPONENTS.md#data-table) | `mosaik-data-table` | 24 |
+| [dataTree](COMPONENTS.md#data-tree) | `mosaik-data-tree` | 22 |
 | [dateBox](COMPONENTS.md#datebox) | `mosaik-datebox` | 41 |
 | [dateTimeBox](COMPONENTS.md#datetimebox) | `mosaik-datetimebox` | 41 |
 | [designer](COMPONENTS.md#designer) | `mosaik-designer` | 22 |
@@ -744,9 +752,10 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [dropZone](COMPONENTS.md#drop-zone) | `mosaik-drop-zone` | 27 |
 | [dropdown](COMPONENTS.md#dropdown) | `mosaik-dropdown` | 42 |
 | [durationBox](COMPONENTS.md#durationbox) | `mosaik-durationbox` | 41 |
+| [dynamicForm](COMPONENTS.md#dynamic-form) | `mosaik-dynamic-form` | 21 |
 | [elevation](COMPONENTS.md#elevation) | `mosaik-elevation` | 22 |
 | [emoji](COMPONENTS.md#emoji) | `mosaik-emoji` | 23 |
-| [emptyState](COMPONENTS.md#empty-state) | `mosaik-empty-state` | 30 |
+| [emptyState](COMPONENTS.md#empty-state) | `mosaik-empty-state` | 31 |
 | [epg](COMPONENTS.md#epg) | `mosaik-epg` | 28 |
 | [epgChannel](COMPONENTS.md#epg-channel) | `mosaik-epg-channel` | 28 |
 | [epgMinimap](COMPONENTS.md#epg-minimap) | `mosaik-epg-minimap` | 28 |
@@ -760,10 +769,13 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [expanderGroup](COMPONENTS.md#expander-group) | `mosaik-expander-group` | 28 |
 | [expanderHeader](COMPONENTS.md#expander-header) | `mosaik-expander-header` | 25 |
 | [expanderSubHeader](COMPONENTS.md#expander-sub-header) | `mosaik-expander-sub-header` | 25 |
+| [file](COMPONENTS.md#file) | `mosaik-file` | 34 |
 | [fileBox](COMPONENTS.md#filebox) | `mosaik-filebox` | 41 |
 | [filePicker](COMPONENTS.md#file-picker) | `mosaik-file-picker` | 28 |
+| [fileSource](COMPONENTS.md#file-source) | `mosaik-file-source` | 23 |
 | [fileUpload](COMPONENTS.md#file-upload) | `mosaik-file-upload` | 37 |
 | [fileUploadItem](COMPONENTS.md#file-upload-item) | `mosaik-file-upload-item` | 28 |
+| [files](COMPONENTS.md#files) | `mosaik-files` | 26 |
 | [flip](COMPONENTS.md#flip) | `mosaik-flip` | 22 |
 | [floating](COMPONENTS.md#floating) | `mosaik-floating` | 31 |
 | [floatingActionButton](COMPONENTS.md#fab) | `mosaik-fab` | 39 |
@@ -771,11 +783,13 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [floatingTrigger](COMPONENTS.md#floating-trigger) | `mosaik-floating-trigger` | 22 |
 | [flow](COMPONENTS.md#flow) | `mosaik-flow` | 33 |
 | [flowBoard](COMPONENTS.md#flow-board) | `mosaik-flow-board` | 24 |
-| [flowBoardColumn](COMPONENTS.md#flow-board-column) | `mosaik-flow-board-column` | 44 |
+| [flowBoardColumn](COMPONENTS.md#flow-board-column) | `mosaik-flow-board-column` | 45 |
 | [flowBoardColumnComposer](COMPONENTS.md#flow-board-column-composer) | `mosaik-flow-board-column-composer` | 30 |
+| [flowBoardColumnGroup](COMPONENTS.md#flow-board-column-group) | `mosaik-flow-board-column-group` | 32 |
 | [flowBoardColumnItem](COMPONENTS.md#flow-board-column-item) | `mosaik-flow-board-column-item` | 37 |
 | [flowBoardColumnItemComposer](COMPONENTS.md#flow-board-column-item-composer) | `mosaik-flow-board-column-item-composer` | 30 |
 | [flowBoardColumnItemGroup](COMPONENTS.md#flow-board-column-item-group) | `mosaik-flow-board-column-item-group` | 36 |
+| [flowBoardSwimlane](COMPONENTS.md#flow-board-swimlane) | `mosaik-flow-board-swimlane` | 33 |
 | [flowControls](COMPONENTS.md#flow-controls) | `mosaik-flow-controls` | 37 |
 | [flowEdge](COMPONENTS.md#flow-edge) | `mosaik-flow-edge` | 39 |
 | [flowMinimap](COMPONENTS.md#flow-minimap) | `mosaik-flow-minimap` | 42 |
@@ -804,9 +818,10 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [gaugeValue](COMPONENTS.md#gauge-value) | `mosaik-gauge-value` | 26 |
 | [gaugeZones](COMPONENTS.md#gauge-zones) | `mosaik-gauge-zones` | 25 |
 | [ghost](COMPONENTS.md#ghost) | `mosaik-ghost` | 27 |
-| [globe](COMPONENTS.md#globe) | `mosaik-globe` | 24 |
+| [globe](COMPONENTS.md#globe) | `mosaik-globe` | 28 |
 | [grid](COMPONENTS.md#grid) | `mosaik-grid` | 22 |
 | [gridItem](COMPONENTS.md#grid-item) | `mosaik-grid-item` | 22 |
+| [helix](COMPONENTS.md#helix) | `mosaik-helix` | 24 |
 | [helmet](COMPONENTS.md#helmet) | `mosaik-helmet` | 22 |
 | [hint](COMPONENTS.md#hint) | `mosaik-hint` | 28 |
 | [icon](COMPONENTS.md#icon) | `mosaik-icon` | 28 |
@@ -820,7 +835,7 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [kbdShortcut](COMPONENTS.md#kbd-shortcut) | `mosaik-kbd-shortcut` | 22 |
 | [knob](COMPONENTS.md#knob) | `mosaik-knob` | 41 |
 | [lightChain](COMPONENTS.md#light-chain) | `mosaik-light-chain` | 22 |
-| [list](COMPONENTS.md#list) | `mosaik-list` | 29 |
+| [list](COMPONENTS.md#list) | `mosaik-list` | 30 |
 | [listItem](COMPONENTS.md#list-item) | `mosaik-list-item` | 34 |
 | [listItemGroup](COMPONENTS.md#list-item-group) | `mosaik-list-item-group` | 39 |
 | [listing](COMPONENTS.md#listing) | `mosaik-listing` | 24 |
@@ -835,7 +850,7 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [menuItemGroup](COMPONENTS.md#menu-item-group) | `mosaik-menu-item-group` | 39 |
 | [message](COMPONENTS.md#message) | `mosaik-message` | 28 |
 | [messageBox](COMPONENTS.md#message-box) | `mosaik-message-box` | 45 |
-| [meterBar](COMPONENTS.md#meter-bar) | `mosaik-meter-bar` | 26 |
+| [meterBar](COMPONENTS.md#meter-bar) | `mosaik-meter-bar` | 28 |
 | [meterRing](COMPONENTS.md#meter-ring) | `mosaik-meter-ring` | 36 |
 | [number](COMPONENTS.md#number) | `mosaik-number` | 24 |
 | [numberBox](COMPONENTS.md#numberbox) | `mosaik-numberbox` | 41 |
@@ -851,8 +866,11 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [paginator](COMPONENTS.md#paginator) | `mosaik-paginator` | 23 |
 | [parallax](COMPONENTS.md#parallax) | `mosaik-parallax` | 16 |
 | [passwordBox](COMPONENTS.md#passwordbox) | `mosaik-passwordbox` | 41 |
+| [passwordStrengthMeter](COMPONENTS.md#password-strength-meter) | `mosaik-password-strength-meter` | 33 |
+| [passwordStrengthRule](COMPONENTS.md#password-strength-rule) | `mosaik-password-strength-rule` | 20 |
 | [pattern](COMPONENTS.md#pattern) | `mosaik-pattern` | 23 |
-| [persona](COMPONENTS.md#persona) | `mosaik-persona` | 28 |
+| [pendulum](COMPONENTS.md#pendulum) | `mosaik-pendulum` | 29 |
+| [persona](COMPONENTS.md#persona) | `mosaik-persona` | 30 |
 | [perspective](COMPONENTS.md#perspective) | `mosaik-perspective` | 22 |
 | [pinBox](COMPONENTS.md#pinbox) | `mosaik-pinbox` | 34 |
 | [pip](COMPONENTS.md#pip) | `mosaik-pip` | 34 |
@@ -889,15 +907,15 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [routerLink](COMPONENTS.md#router-link) | `mosaik-router-link` | 22 |
 | [routerOutlet](COMPONENTS.md#router-outlet) | `mosaik-router-outlet` | 22 |
 | [scale](COMPONENTS.md#scale) | `mosaik-scale` | 22 |
-| [scheduler](COMPONENTS.md#scheduler) | `mosaik-scheduler` | 73 |
+| [scheduler](COMPONENTS.md#scheduler) | `mosaik-scheduler` | 127 |
 | [schedulerAgendaView](COMPONENTS.md#scheduler-agenda-view) | `mosaik-scheduler-agenda-view` | 40 |
 | [schedulerDatescale](COMPONENTS.md#scheduler-datescale) | `mosaik-scheduler-datescale` | 41 |
-| [schedulerEvent](COMPONENTS.md#scheduler-event) | `mosaik-scheduler-event` | 54 |
-| [schedulerMonthView](COMPONENTS.md#scheduler-month-view) | `mosaik-scheduler-month-view` | 58 |
-| [schedulerNowIndicator](COMPONENTS.md#scheduler-now-indicator) | `mosaik-scheduler-now-indicator` | 25 |
-| [schedulerTimeGridView](COMPONENTS.md#scheduler-time-grid-view) | `mosaik-scheduler-time-grid-view` | 67 |
+| [schedulerEvent](COMPONENTS.md#scheduler-event) | `mosaik-scheduler-event` | 58 |
+| [schedulerMonthView](COMPONENTS.md#scheduler-month-view) | `mosaik-scheduler-month-view` | 80 |
+| [schedulerNowIndicator](COMPONENTS.md#scheduler-now-indicator) | `mosaik-scheduler-now-indicator` | 27 |
+| [schedulerTimeGridView](COMPONENTS.md#scheduler-time-grid-view) | `mosaik-scheduler-time-grid-view` | 89 |
 | [schedulerTimelineView](COMPONENTS.md#scheduler-timeline-view) | `mosaik-scheduler-timeline-view` | 66 |
-| [schedulerTimescale](COMPONENTS.md#scheduler-timescale) | `mosaik-scheduler-timescale` | 34 |
+| [schedulerTimescale](COMPONENTS.md#scheduler-timescale) | `mosaik-scheduler-timescale` | 35 |
 | [scroll](COMPONENTS.md#scroll) | `mosaik-scroll` | 24 |
 | [scrubSlider](COMPONENTS.md#scrub-slider) | `mosaik-scrub-slider` | 64 |
 | [searchBox](COMPONENTS.md#searchbox) | `mosaik-searchbox` | 34 |
@@ -938,6 +956,7 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [tabItem](COMPONENTS.md#tab-item) | `mosaik-tab-item` | 25 |
 | [tabPanel](COMPONENTS.md#tab-panel) | `mosaik-tab-panel` | 23 |
 | [tabStrip](COMPONENTS.md#tab-strip) | `mosaik-tab-strip` | 28 |
+| [tabStripGroupItem](COMPONENTS.md#tab-strip-group-item) | `mosaik-tab-strip-group-item` | 24 |
 | [tabStripItem](COMPONENTS.md#tab-strip-item) | `mosaik-tab-strip-item` | 36 |
 | [table](COMPONENTS.md#table) | `mosaik-table` | 38 |
 | [tableBody](COMPONENTS.md#table-body) | `mosaik-table-body` | 28 |
@@ -977,7 +996,7 @@ A page with a `Theme2` / `provideTheme()` provider carries 654 custom properties
 | [toggleButtonGroup](COMPONENTS.md#toggle-button-group) | `mosaik-toggle-button-group` | 28 |
 | [toggleSwitch](COMPONENTS.md#toggle-switch) | `mosaik-toggle-switch` | 27 |
 | [toggletip](COMPONENTS.md#toggletip) | `mosaik-toggletip` | 24 |
-| [toolbar](COMPONENTS.md#toolbar) | `mosaik-toolbar` | 30 |
+| [toolbar](COMPONENTS.md#toolbar) | `mosaik-toolbar` | 36 |
 | [tooltip](COMPONENTS.md#tooltip) | `mosaik-tooltip` | 29 |
 | [tour](COMPONENTS.md#tour) | `mosaik-tour` | 30 |
 | [tourAnchor](COMPONENTS.md#tour-anchor) | `mosaik-tour-anchor` | 24 |
