@@ -52,6 +52,13 @@ async function waitFor(condition, description) {
 }
 
 const control = (id) => page.locator(`[test-id="${id}"]`);
+// Since Mosaik 0.1.205, select items carry their default `option` role only in ElementInternals,
+// which Playwright's role queries cannot read. The select popup also has no listbox, so Chromium
+// exposes no options at all (https://github.com/RueDeRennes/mosaik/issues/1408). Choose an item the
+// way a sighted user does: by its visible label inside the select that was opened.
+const selectItems = (select) => select.locator('mosaik-select-item');
+const selectItem = (select, label) =>
+  selectItems(select).filter({ has: page.getByText(label, { exact: true }) });
 const request = (method, payload = {}) =>
   page.evaluate(({ method, payload }) => window.resonanz.request(method, payload), {
     method,
@@ -1183,21 +1190,19 @@ async function verifyDesktopLayout() {
     const toggleLabel = await picker.evaluate((element) => element.intl.toggleLabel);
     await picker.getByRole('button', { name: toggleLabel, exact: true }).click();
     assert.equal(
-      await page.getByRole('option').count(),
+      await selectItems(picker).filter({ visible: true }).count(),
       denseChapters.length,
-      'Dense picker exposes every chapter',
+      'Dense picker lists every chapter',
     );
     const denseLast = denseChapters.at(-1);
-    await page
-      .getByRole('option', { name: `${denseChapters.length}. ${denseLast.title}`, exact: true })
-      .click();
+    await selectItem(picker, `${denseChapters.length}. ${denseLast.title}`).click();
     await waitFor(
       async () =>
         (await page.locator('.ring-stage .chapter-title').textContent()) === denseLast.title,
       'Dense picker selects the complete last chapter and its context',
     );
     assert.equal(await picker.evaluate((element) => element.value), denseLast.id);
-    await page.getByRole('option').first().waitFor({ state: 'hidden' });
+    await selectItems(picker).first().waitFor({ state: 'hidden' });
     await picker.hover();
     const pickerTooltip = control('ring-chapter-picker-tooltip-content');
     await pickerTooltip.waitFor({ state: 'visible' });
@@ -1476,7 +1481,7 @@ try {
   await control('nav-settings').click();
   await control('settings-view').waitFor({ state: 'visible' });
   await control('ui-language').getByRole('button', { name: 'Toggle options' }).click();
-  await page.getByRole('option', { name: 'Deutsch', exact: true }).click();
+  await selectItem(control('ui-language'), 'Deutsch').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.uiLanguage === 'de',
     'German UI preference',
@@ -1537,7 +1542,7 @@ try {
   await control('session-collection-select')
     .getByRole('button', { name: 'Toggle options' })
     .click();
-  await page.getByRole('option', { name: 'Projektstart', exact: true }).click();
+  await selectItem(control('session-collection-select'), 'Projektstart').click();
   await control('save-session-metadata').click();
   await waitFor(async () => (await session()).collectionId === collection.id, 'metadata save');
   await menuAction('toggle-favorite');
@@ -1620,7 +1625,7 @@ try {
   await control('nav-settings').click();
   await control('settings-view').waitFor({ state: 'visible' });
   await control('ui-language').getByRole('button', { name: 'Toggle options' }).click();
-  await page.getByRole('option', { name: 'English', exact: true }).click();
+  await selectItem(control('ui-language'), 'English').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.uiLanguage === 'en',
     'English UI preference',
@@ -1681,13 +1686,13 @@ try {
     'native rate slider keyboard pacing',
   );
   await control('audio-retention').getByRole('button', { name: 'Toggle options' }).click();
-  await page.getByRole('option', { name: 'After 90 days', exact: true }).click();
+  await selectItem(control('audio-retention'), 'After 90 days').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.audioRetentionDays === 90,
     'native recording retention policy',
   );
   await control('audio-retention').getByRole('button', { name: 'Toggle options' }).click();
-  await page.getByRole('option', { name: 'Never', exact: true }).click();
+  await selectItem(control('audio-retention'), 'Never').click();
   await waitFor(
     async () => (await request('bootstrap.get')).settings.audioRetentionDays === 'never',
     'retention opt-out',
